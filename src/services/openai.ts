@@ -91,6 +91,29 @@ const secureAIRequest = async <T>(
   }
 };
 
+// Helper function to extract JSON from AI response
+const extractJSON = (content: string): string => {
+  // First, trim whitespace
+  content = content.trim();
+  
+  // Check if it's wrapped in markdown code block
+  const codeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+  if (codeBlockMatch) {
+    return codeBlockMatch[1].trim();
+  }
+  
+  // Look for JSON object boundaries
+  const firstBrace = content.indexOf('{');
+  const lastBrace = content.lastIndexOf('}');
+  
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    return content.substring(firstBrace, lastBrace + 1);
+  }
+  
+  // If no clear JSON boundaries found, return original content
+  return content;
+};
+
 // Helper function to sanitize JSON content
 const sanitizeJSONContent = (content: string): string => {
   // Replace unescaped newlines with escaped newlines
@@ -260,7 +283,7 @@ Focus on different aspects or related but distinct concepts.
 EXAMPLE QUALITY LEVEL:
 "Natalie wants mobile devices that connect to her network to be inspected for updated virus signatures and kept isolated until the most recent signatures can be downloaded. Which Network Access Control (NAC) remediation mode should Natalie enable and how should the MOST recent signatures file be downloaded?"
 
-IMPORTANT: Ensure all text in the JSON response is properly escaped. Do not include literal newlines, tabs, or other control characters in string values.
+CRITICAL: You must respond with ONLY valid JSON. Do not include any explanatory text, markdown formatting, or code blocks. Ensure the JSON is complete and properly formatted.
 
 Format as JSON:
 {
@@ -284,7 +307,7 @@ Requirements:
 - Assign to the most relevant CISSP domain
 - Include relevant tags for categorization
 
-IMPORTANT: Ensure all text in the JSON response is properly escaped. Do not include literal newlines, tabs, or other control characters in string values.
+CRITICAL: You must respond with ONLY valid JSON. Do not include any explanatory text, markdown formatting, or code blocks. Ensure the JSON is complete and properly formatted.
 
 Format your response as JSON with this structure:
 {
@@ -303,14 +326,14 @@ Format your response as JSON with this structure:
         messages: [
           {
             role: "system",
-            content: "You are an expert CISSP question writer with deep knowledge of cybersecurity. Create high-quality, exam-realistic questions that test practical understanding and real-world application of security concepts. Your explanations must be comprehensive, breaking down why the correct answer is right and why each incorrect option is wrong, including common misconceptions. Always respond with valid JSON only. CRITICAL: Ensure all string values in your JSON response are properly escaped - use \\n for line breaks, \\t for tabs, and escape any quotes or backslashes."
+            content: "You are an expert CISSP question writer with deep knowledge of cybersecurity. Create high-quality, exam-realistic questions that test practical understanding and real-world application of security concepts. Your explanations must be comprehensive, breaking down why the correct answer is right and why each incorrect option is wrong, including common misconceptions. CRITICAL: You must respond with ONLY valid JSON. Do not include any explanatory text, markdown formatting, or code blocks around the JSON. Ensure all string values in your JSON response are properly escaped - use \\n for line breaks, \\t for tabs, and escape any quotes or backslashes. The response must be complete and not truncated."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        max_tokens: 1500,
+        max_tokens: 2000, // Increased from 1500 to prevent truncation
         temperature: 0.8
       });
 
@@ -321,14 +344,32 @@ Format your response as JSON with this structure:
       }
 
       try {
+        // Extract JSON from the response
+        const extractedJSON = extractJSON(content);
+        
         // Sanitize the content before parsing
-        const sanitizedContent = sanitizeJSONContent(content);
+        const sanitizedContent = sanitizeJSONContent(extractedJSON);
+        
         const questionData = JSON.parse(sanitizedContent);
+        
+        // Validate the parsed data has required fields
+        if (!questionData.domain || !questionData.difficulty || !questionData.question || 
+            !questionData.options || !Array.isArray(questionData.options) || 
+            questionData.correctAnswer === undefined || !questionData.explanation) {
+          throw new Error('Generated question is missing required fields');
+        }
+        
         return { question: questionData };
       } catch (parseError) {
         console.error('Failed to parse AI question response:', parseError);
         console.error('Original content:', content);
-        return { error: 'Failed to generate properly formatted question' };
+        console.error('Extracted JSON:', extractJSON(content));
+        
+        // Provide more detailed error information
+        const errorDetails = parseError instanceof Error ? parseError.message : 'Unknown parsing error';
+        return { 
+          error: `Failed to generate properly formatted question: ${errorDetails}. The AI response may have been truncated or contained invalid JSON.` 
+        };
       }
     }, 'question_generation', isBulkRequest);
 
