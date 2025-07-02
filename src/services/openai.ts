@@ -369,7 +369,7 @@ Format your response as valid JSON:
             content: prompt
           }
         ],
-        max_tokens: 2500, // Increased to prevent truncation
+        max_tokens: 4000, // Increased from 2500 to prevent truncation
         temperature: 0.8
       });
 
