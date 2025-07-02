@@ -36,70 +36,6 @@ export interface AIGenerationOptions {
   focusArea: string;
 }
 
-// Enhanced JSON extraction and cleaning functions
-const extractJSON = (content: string): string => {
-  // First, trim whitespace
-  content = content.trim();
-  
-  // Remove any markdown code block wrappers
-  const codeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
-  if (codeBlockMatch) {
-    return codeBlockMatch[1].trim();
-  }
-  
-  // Look for JSON object boundaries
-  const firstBrace = content.indexOf('{');
-  const lastBrace = content.lastIndexOf('}');
-  
-  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-    return content.substring(firstBrace, lastBrace + 1);
-  }
-  
-  // If no clear JSON boundaries found, return original content
-  return content;
-};
-
-const cleanJSONString = (jsonStr: string): string => {
-  // Fix common JSON issues that can occur in AI responses
-  return jsonStr
-    // Fix unescaped quotes in strings
-    .replace(/"([^"]*)"([^"]*)"([^"]*)"/g, (match, p1, p2, p3) => {
-      // Only fix if this appears to be inside a string value
-      if (p2.includes(':') || p2.includes(',') || p2.includes('{') || p2.includes('}')) {
-        return match; // Don't modify if it looks like proper JSON structure
-      }
-      return `"${p1}\\"${p2}\\"${p3}"`;
-    })
-    // Fix unescaped newlines in strings
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t')
-    // Fix trailing commas
-    .replace(/,(\s*[}\]])/g, '$1')
-    // Fix missing commas between properties
-    .replace(/"\s*\n\s*"/g, '",\n"')
-    // Remove any non-printable characters
-    .replace(/[\x00-\x1F\x7F]/g, '');
-};
-
-const validateQuestionData = (data: any): boolean => {
-  return (
-    data &&
-    typeof data === 'object' &&
-    typeof data.domain === 'string' &&
-    typeof data.difficulty === 'string' &&
-    typeof data.question === 'string' &&
-    Array.isArray(data.options) &&
-    data.options.length === 4 &&
-    data.options.every((opt: any) => typeof opt === 'string') &&
-    typeof data.correctAnswer === 'number' &&
-    data.correctAnswer >= 0 &&
-    data.correctAnswer < 4 &&
-    typeof data.explanation === 'string' &&
-    Array.isArray(data.tags)
-  );
-};
-
 // Enhanced security wrapper for AI requests
 const secureAIRequest = async <T>(
   requestFn: () => Promise<T>,
@@ -309,21 +245,17 @@ Avoid using these concepts/terms that are already covered in existing questions:
 Focus on different aspects or related but distinct concepts.
 ` : ''}
 
-CRITICAL FORMATTING REQUIREMENTS:
-- You MUST respond with ONLY valid JSON
-- Do NOT include any explanatory text, markdown formatting, or code blocks
-- Ensure all string values are properly escaped
-- Use \\n for line breaks in explanations
-- The response must be complete and not truncated
+EXAMPLE QUALITY LEVEL:
+"Natalie wants mobile devices that connect to her network to be inspected for updated virus signatures and kept isolated until the most recent signatures can be downloaded. Which Network Access Control (NAC) remediation mode should Natalie enable and how should the MOST recent signatures file be downloaded?"
 
-Format as valid JSON:
+Format as JSON:
 {
   "domain": "${options.domain}",
   "difficulty": "${options.difficulty}",
   "question": "Your detailed question here",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": 0,
-  "explanation": "Provide a comprehensive explanation. Use \\n\\n for paragraph breaks. Structure as: Correct Answer: Explain why this option is correct. \\n\\nIncorrect Answers: \\n- Option A: Explain why wrong. \\n- Option B: Explain why wrong. \\n- Option C: Explain why wrong. \\n\\nKey Takeaway: Summarize the main learning point.",
+  "explanation": "Provide a comprehensive explanation structured as follows:\\n\\nCorrect Answer: Explain in detail why the chosen option is the correct answer, referencing key CISSP concepts, industry standards, and real-world applications.\\n\\nIncorrect Answers:\\n- Option A: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n- Option B: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n- Option C: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n\\nKey Takeaway: Summarize the main learning point or principle tested by this question and how it applies to real-world security scenarios.",
   "tags": ["relevant", "tags", "here"]
 }`;
       } else {
@@ -338,21 +270,14 @@ Requirements:
 - Assign to the most relevant CISSP domain
 - Include relevant tags for categorization
 
-CRITICAL FORMATTING REQUIREMENTS:
-- You MUST respond with ONLY valid JSON
-- Do NOT include any explanatory text, markdown formatting, or code blocks
-- Ensure all string values are properly escaped
-- Use \\n for line breaks in explanations
-- The response must be complete and not truncated
-
-Format your response as valid JSON:
+Format your response as JSON with this structure:
 {
   "domain": "Security and Risk Management",
   "difficulty": "Medium",
   "question": "Your question here?",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": 0,
-  "explanation": "Provide a comprehensive explanation. Use \\n\\n for paragraph breaks. Structure as: Correct Answer: Explain why this option is correct. \\n\\nIncorrect Answers: \\n- Option A: Explain why wrong. \\n- Option B: Explain why wrong. \\n- Option C: Explain why wrong. \\n\\nKey Takeaway: Summarize the main learning point.",
+  "explanation": "Provide a comprehensive explanation structured as follows:\\n\\nCorrect Answer: Explain in detail why the chosen option is the correct answer, referencing key CISSP concepts, industry standards, and real-world applications.\\n\\nIncorrect Answers:\\n- Option A: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n- Option B: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n- Option C: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n\\nKey Takeaway: Summarize the main learning point or principle tested by this question and how it applies to real-world security scenarios.",
   "tags": ["tag1", "tag2", "tag3"]
 }`;
       }
@@ -362,14 +287,14 @@ Format your response as valid JSON:
         messages: [
           {
             role: "system",
-            content: "You are an expert CISSP question writer with deep knowledge of cybersecurity. Create high-quality, exam-realistic questions that test practical understanding and real-world application of security concepts. Your explanations must be comprehensive, breaking down why the correct answer is right and why each incorrect option is wrong, including common misconceptions. CRITICAL: You must respond with ONLY valid JSON. Do not include any explanatory text, markdown formatting, or code blocks around the JSON. Ensure all string values in your JSON response are properly escaped - use \\n for line breaks, \\t for tabs, and escape any quotes or backslashes. The response must be complete and not truncated."
+            content: "You are an expert CISSP question writer with deep knowledge of cybersecurity. Create high-quality, exam-realistic questions that test practical understanding and real-world application of security concepts. Your explanations must be comprehensive, breaking down why the correct answer is right and why each incorrect option is wrong, including common misconceptions. Always respond with valid JSON only."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        max_tokens: 4000, // Increased from 2500 to prevent truncation
+        max_tokens: 1500,
         temperature: 0.8
       });
 
@@ -380,30 +305,11 @@ Format your response as valid JSON:
       }
 
       try {
-        // Extract and clean JSON from the response
-        const extractedJSON = extractJSON(content);
-        const cleanedJSON = cleanJSONString(extractedJSON);
-        
-        // Parse the JSON
-        const questionData = JSON.parse(cleanedJSON);
-        
-        // Validate the parsed data
-        if (!validateQuestionData(questionData)) {
-          throw new Error('Generated question is missing required fields or has invalid structure');
-        }
-        
+        const questionData = JSON.parse(content);
         return { question: questionData };
       } catch (parseError) {
         console.error('Failed to parse AI question response:', parseError);
-        console.error('Original content:', content);
-        console.error('Extracted JSON:', extractJSON(content));
-        console.error('Cleaned JSON:', cleanJSONString(extractJSON(content)));
-        
-        // Provide more detailed error information
-        const errorDetails = parseError instanceof Error ? parseError.message : 'Unknown parsing error';
-        return { 
-          error: `Failed to generate properly formatted question: ${errorDetails}. The AI response may have been truncated or contained invalid JSON.` 
-        };
+        return { error: 'Failed to generate properly formatted question' };
       }
     }, 'question_generation', isBulkRequest);
 

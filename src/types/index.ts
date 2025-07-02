@@ -9,8 +9,6 @@ export interface User {
   questionsContributed: number;
   achievements: Achievement[];
   avatar_url?: string;
-  studyProgress?: StudyProgress;
-  questionLists?: QuestionList[];
 }
 
 export interface Achievement {
@@ -19,38 +17,6 @@ export interface Achievement {
   description: string;
   earned: boolean;
   earnedDate?: Date;
-}
-
-export interface StudyProgress {
-  totalQuestionsAnswered: number;
-  correctAnswers: number;
-  streakCount: number;
-  longestStreak: number;
-  domainProgress: Record<string, {
-    questionsAnswered: number;
-    correctAnswers: number;
-    lastStudied: Date;
-  }>;
-  difficultyProgress: Record<string, {
-    questionsAnswered: number;
-    correctAnswers: number;
-  }>;
-  weeklyGoal: number;
-  weeklyProgress: number;
-  lastStudySession: Date;
-  studyDays: number;
-}
-
-export interface QuestionList {
-  id: string;
-  name: string;
-  description?: string;
-  questionIds: string[];
-  isPrivate: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  tags: string[];
-  color?: string;
 }
 
 export interface StudySession {
