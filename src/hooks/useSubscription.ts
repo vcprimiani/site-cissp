@@ -1,0 +1,80 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from './useAuth';
+import { getProductByPriceId } from '../stripe-config';
+
+interface SubscriptionData {
+  customer_id: string | null;
+  subscription_id: string | null;
+  subscription_status: string | null;
+  price_id: string | null;
+  current_period_start: number | null;
+  current_period_end: number | null;
+  cancel_at_period_end: boolean | null;
+  payment_method_brand: string | null;
+  payment_method_last4: string | null;
+}
+
+interface UseSubscriptionReturn {
+  subscription: SubscriptionData | null;
+  loading: boolean;
+  error: string | null;
+  isActive: boolean;
+  productName: string | null;
+  refreshSubscription: () => Promise<void>;
+}
+
+export const useSubscription = (): UseSubscriptionReturn => {
+  const { user } = useAuth();
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchSubscription = async () => {
+    if (!user) {
+      setSubscription(null);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error: fetchError } = await supabase
+        .from('stripe_user_subscriptions')
+        .select('*')
+        .maybeSingle();
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      setSubscription(data);
+    } catch (err: any) {
+      console.error('Error fetching subscription:', err);
+      setError(err.message || 'Failed to fetch subscription');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubscription();
+  }, [user]);
+
+  const isActive = subscription?.subscription_status === 'active' || subscription?.subscription_status === 'trialing';
+  
+  const productName = subscription?.price_id 
+    ? getProductByPriceId(subscription.price_id)?.name || null
+    : null;
+
+  return {
+    subscription,
+    loading,
+    error,
+    isActive,
+    productName,
+    refreshSubscription: fetchSubscription
+  };
+};
