@@ -1,14 +1,12 @@
 import React from 'react';
 import { Question } from '../../types';
-import { Star, StarOff, ChevronDown, ChevronUp, Brain } from 'lucide-react';
+import { ChevronDown, ChevronUp, Brain } from 'lucide-react';
 import { getDomainColor, getDifficultyColor, getStatusColor, generateColorClasses, categoryIcons } from '../../utils/colorSystem';
 
 interface QuestionCardProps {
   question: Question;
   isExpanded?: boolean;
-  isInPracticeSet?: boolean;
   onToggleExpanded?: () => void;
-  onTogglePracticeSet?: () => void;
   onDelete?: () => void;
   showActions?: boolean;
   className?: string;
@@ -17,16 +15,13 @@ interface QuestionCardProps {
 export const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
   isExpanded = false,
-  isInPracticeSet = false,
   onToggleExpanded,
-  onTogglePracticeSet,
   onDelete,
   showActions = true,
   className = ''
 }) => {
   const domainColor = getDomainColor(question.domain);
   const difficultyColor = getDifficultyColor(question.difficulty);
-  const practiceColor = getStatusColor('practice');
   const aiColor = getStatusColor('ai-generated');
 
   return (
@@ -69,36 +64,19 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                 <span>{question.difficulty}</span>
               </div>
 
-              {/* Status Indicators */}
-              <div className="flex items-center space-x-2">
-                {/* Practice Set Indicator */}
-                {isInPracticeSet && (
-                  <div 
-                    className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs"
-                    style={{
-                      backgroundColor: practiceColor.primary,
-                      color: 'white'
-                    }}
-                  >
-                    <Star className="w-3 h-3 fill-current" />
-                    <span className="hidden sm:inline">Practice</span>
-                  </div>
-                )}
-
-                {/* AI Generated Indicator */}
-                {question.tags.includes('ai-generated') && (
-                  <div 
-                    className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs"
-                    style={{
-                      backgroundColor: aiColor.primary,
-                      color: 'white'
-                    }}
-                  >
-                    <Brain className="w-3 h-3" />
-                    <span className="hidden sm:inline">AI</span>
-                  </div>
-                )}
-              </div>
+              {/* AI Generated Indicator */}
+              {question.tags.includes('ai-generated') && (
+                <div 
+                  className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs"
+                  style={{
+                    backgroundColor: aiColor.primary,
+                    color: 'white'
+                  }}
+                >
+                  <Brain className="w-3 h-3" />
+                  <span className="hidden sm:inline">AI</span>
+                </div>
+              )}
             </div>
 
             {/* Question Text */}
@@ -142,30 +120,6 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
             )}
           </div>
         </div>
-
-        {/* Action Buttons */}
-        {showActions && onTogglePracticeSet && (
-          <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={onTogglePracticeSet}
-              className={`flex items-center space-x-1 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
-                isInPracticeSet 
-                  ? 'bg-cyan-600 text-white shadow-sm' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
-              }`}
-              title={isInPracticeSet ? 'Remove from practice set' : 'Add to practice set'}
-            >
-              {isInPracticeSet ? (
-                <Star className="w-3 h-3 fill-current" />
-              ) : (
-                <StarOff className="w-3 h-3" />
-              )}
-              <span className="hidden sm:inline">
-                {isInPracticeSet ? 'In Practice' : 'Add to Practice'}
-              </span>
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Expanded Content */}

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Question } from '../../types';
-import { Database, Plus, Search, Filter, BookOpen, Loader } from 'lucide-react';
+import { Database, Plus, Search, Filter, BookOpen, Loader, TrendingUp, Target, Award, Calendar } from 'lucide-react';
 import { QuestionCard } from '../UI/QuestionCard';
 import { ColorKey } from '../UI/ColorKey';
+import { ProgressDashboard } from './ProgressDashboard';
+import { QuestionListManager } from './QuestionListManager';
 
 interface QuestionBankProps {
   questions: Question[];
@@ -21,12 +23,12 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   onUpdateQuestion,
   onDeleteQuestion
 }) => {
+  const [activeTab, setActiveTab] = useState<'questions' | 'progress' | 'lists'>('questions');
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDomain, setFilterDomain] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('');
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
-  const [practiceQuestions, setPracticeQuestions] = useState<Set<string>>(new Set());
   const [showColorKey, setShowColorKey] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -110,15 +112,26 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
     setExpandedQuestions(newExpanded);
   };
 
-  const togglePracticeQuestion = (questionId: string) => {
-    const newPractice = new Set(practiceQuestions);
-    if (newPractice.has(questionId)) {
-      newPractice.delete(questionId);
-    } else {
-      newPractice.add(questionId);
+  const tabs = [
+    { 
+      id: 'questions', 
+      label: 'Questions', 
+      icon: Database,
+      description: 'Browse and manage your question collection'
+    },
+    { 
+      id: 'progress', 
+      label: 'Progress', 
+      icon: TrendingUp,
+      description: 'Track your study progress and achievements'
+    },
+    { 
+      id: 'lists', 
+      label: 'Lists', 
+      icon: BookOpen,
+      description: 'Create and manage private question lists'
     }
-    setPracticeQuestions(newPractice);
-  };
+  ];
 
   if (loading) {
     return (
@@ -132,170 +145,193 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
-          <div className="flex items-center space-x-3">
-            <Database className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-            <div>
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Question Bank</h2>
-              <p className="text-xs sm:text-sm text-gray-600">
-                Manage and organize your CISSP practice questions (newest first)
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => setShowColorKey(!showColorKey)}
-              className="flex items-center justify-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium"
-            >
-              <span>🎨</span>
-              <span>Color Key</span>
-            </button>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="flex items-center justify-center space-x-2 px-4 py-2 bg-[#F8D380] text-gray-900 rounded-lg hover:bg-[#F6C95C] transition-all duration-200 font-medium"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Question</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Question Bank Statistics */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-blue-600">{totalQuestions}</div>
-              <div className="text-sm text-gray-600">Total Questions</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-green-600">{activeQuestions}</div>
-              <div className="text-sm text-gray-600">Active Questions</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-purple-600">{aiGeneratedQuestions}</div>
-              <div className="text-sm text-gray-600">AI Generated</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-orange-600">{manualQuestions}</div>
-              <div className="text-sm text-gray-600">Manual Added</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Practice Questions Summary */}
-        {practiceQuestions.size > 0 && (
-          <div className="mb-6 p-4 bg-cyan-50 border border-cyan-200 rounded-lg">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-              <div className="flex items-center space-x-2">
-                <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600" />
-                <span className="text-sm font-medium text-cyan-800">
-                  Practice Question Set: {practiceQuestions.size} questions selected
-                </span>
-              </div>
+      {/* Tab Navigation */}
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200">
+        <div className="flex border-b border-gray-200 overflow-x-auto">
+          {tabs.map(tab => {
+            const Icon = tab.icon;
+            return (
               <button
-                onClick={() => setPracticeQuestions(new Set())}
-                className="text-sm text-cyan-700 hover:text-cyan-800 font-medium"
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium transition-colors relative group whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                title={tab.description}
               >
-                Clear All
+                <Icon className="w-4 h-4" />
+                <span>{tab.label}</span>
+                
+                {/* Tooltip */}
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                  {tab.description}
+                </div>
               </button>
-            </div>
-            <p className="text-xs text-cyan-700 mt-1">
-              These questions are highlighted and ready for interactive quiz mode.
-            </p>
-          </div>
-        )}
-
-        {/* Filters */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search questions..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-            />
-          </div>
-          
-          <select
-            value={filterDomain}
-            onChange={(e) => setFilterDomain(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-          >
-            <option value="">All Domains</option>
-            {domains.map(domain => (
-              <option key={domain} value={domain}>{domain}</option>
-            ))}
-          </select>
-          
-          <select
-            value={filterDifficulty}
-            onChange={(e) => setFilterDifficulty(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-          >
-            <option value="">All Difficulties</option>
-            <option value="Easy">Easy</option>
-            <option value="Medium">Medium</option>
-            <option value="Hard">Hard</option>
-          </select>
-          
-          <div className="text-sm text-gray-600 flex items-center">
-            <Filter className="w-4 h-4 mr-2" />
-            {filteredQuestions.length} of {totalQuestions} questions
-          </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Color Key */}
-      {showColorKey && (
-        <ColorKey className="mb-6" />
-      )}
+      {/* Tab Content */}
+      {activeTab === 'questions' && (
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
+              <div className="flex items-center space-x-3">
+                <Database className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                <div>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Question Bank</h2>
+                  <p className="text-xs sm:text-sm text-gray-600">
+                    Manage and organize your CISSP practice questions (newest first)
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => setShowColorKey(!showColorKey)}
+                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium"
+                >
+                  <span>🎨</span>
+                  <span>Color Key</span>
+                </button>
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-[#F8D380] text-gray-900 rounded-lg hover:bg-[#F6C95C] transition-all duration-200 font-medium"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Question</span>
+                </button>
+              </div>
+            </div>
 
-      {/* Questions List */}
-      <div className="space-y-4">
-        {filteredQuestions.length > 0 ? (
-          filteredQuestions.map(question => (
-            <QuestionCard
-              key={question.id}
-              question={question}
-              isExpanded={expandedQuestions.has(question.id)}
-              isInPracticeSet={practiceQuestions.has(question.id)}
-              onToggleExpanded={() => toggleQuestionExpanded(question.id)}
-              onTogglePracticeSet={() => togglePracticeQuestion(question.id)}
-              showActions={true}
-            />
-          ))
-        ) : (
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-            <Database className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {totalQuestions === 0 ? 'No Questions Yet' : 'No Questions Match Your Filters'}
-            </h3>
-            <p className="text-gray-600 mb-4 text-sm">
-              {totalQuestions === 0 
-                ? 'Start building your question bank by adding questions manually or using the AI Generator.'
-                : 'Try adjusting your search or filter criteria.'
-              }
-            </p>
-            {totalQuestions === 0 && (
-              <div className="bg-blue-50 rounded-lg p-4 text-left max-w-md mx-auto">
-                <h4 className="font-medium text-blue-900 mb-2">💡 Getting Started:</h4>
-                <ul className="text-blue-800 text-sm space-y-1">
-                  <li>• Use the AI Generator tab to create questions automatically</li>
-                  <li>• Add questions manually using the "Add Question" button</li>
-                  <li>• Click questions to expand and view details</li>
-                  <li>• Add questions to your practice set for easy access</li>
-                  <li>• Use the color key to understand the visual organization</li>
-                  <li>• Questions are automatically saved to your secure database</li>
-                </ul>
+            {/* Question Bank Statistics */}
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">{totalQuestions}</div>
+                  <div className="text-sm text-gray-600">Total Questions</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-green-600">{activeQuestions}</div>
+                  <div className="text-sm text-gray-600">Active Questions</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-purple-600">{aiGeneratedQuestions}</div>
+                  <div className="text-sm text-gray-600">AI Generated</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-orange-600">{manualQuestions}</div>
+                  <div className="text-sm text-gray-600">Manual Added</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search questions..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </div>
+              
+              <select
+                value={filterDomain}
+                onChange={(e) => setFilterDomain(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              >
+                <option value="">All Domains</option>
+                {domains.map(domain => (
+                  <option key={domain} value={domain}>{domain}</option>
+                ))}
+              </select>
+              
+              <select
+                value={filterDifficulty}
+                onChange={(e) => setFilterDifficulty(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              >
+                <option value="">All Difficulties</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+              
+              <div className="text-sm text-gray-600 flex items-center">
+                <Filter className="w-4 h-4 mr-2" />
+                {filteredQuestions.length} of {totalQuestions} questions
+              </div>
+            </div>
+          </div>
+
+          {/* Color Key */}
+          {showColorKey && (
+            <ColorKey className="mb-6" />
+          )}
+
+          {/* Questions List */}
+          <div className="space-y-4">
+            {filteredQuestions.length > 0 ? (
+              filteredQuestions.map(question => (
+                <QuestionCard
+                  key={question.id}
+                  question={question}
+                  isExpanded={expandedQuestions.has(question.id)}
+                  onToggleExpanded={() => toggleQuestionExpanded(question.id)}
+                  showActions={false}
+                />
+              ))
+            ) : (
+              <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+                <Database className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {totalQuestions === 0 ? 'No Questions Yet' : 'No Questions Match Your Filters'}
+                </h3>
+                <p className="text-gray-600 mb-4 text-sm">
+                  {totalQuestions === 0 
+                    ? 'Start building your question bank by adding questions manually or using the AI Generator.'
+                    : 'Try adjusting your search or filter criteria.'
+                  }
+                </p>
+                {totalQuestions === 0 && (
+                  <div className="bg-blue-50 rounded-lg p-4 text-left max-w-md mx-auto">
+                    <h4 className="font-medium text-blue-900 mb-2">💡 Getting Started:</h4>
+                    <ul className="text-blue-800 text-sm space-y-1">
+                      <li>• Use the AI Generator tab to create questions automatically</li>
+                      <li>• Add questions manually using the "Add Question" button</li>
+                      <li>• Click questions to expand and view details</li>
+                      <li>• Track your progress in the Progress tab</li>
+                      <li>• Create private question lists for focused study</li>
+                      <li>• Questions are automatically saved to your secure database</li>
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {activeTab === 'progress' && (
+        <ProgressDashboard 
+          currentUser={currentUser}
+          questions={questions}
+        />
+      )}
+
+      {activeTab === 'lists' && (
+        <QuestionListManager 
+          currentUser={currentUser}
+          questions={questions}
+        />
+      )}
 
       {/* Add Question Modal */}
       {showAddForm && (
