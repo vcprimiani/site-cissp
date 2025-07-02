@@ -1,6 +1,7 @@
 // AI Security and Rate Limiting Service
 export interface RateLimitConfig {
   maxRequestsPerMinute: number;
+  maxRequestsPerMinuteSingle: number; // New: separate limit for single requests
   maxRequestsPerHour: number;
   maxRequestsPerDay: number;
   cooldownPeriod: number; // in milliseconds
@@ -30,13 +31,14 @@ class AISecurityManager {
   private readonly STORAGE_KEY = 'ai-security-data';
   private readonly VIOLATIONS_KEY = 'ai-security-violations';
   
-  // Rate limiting configuration
+  // Updated rate limiting configuration for better UX
   private readonly rateLimits: RateLimitConfig = {
-    maxRequestsPerMinute: 15,    // Increased for bulk generation
-    maxRequestsPerHour: 50,     // Increased hourly limit
-    maxRequestsPerDay: 200,     // Increased daily limit
-    cooldownPeriod: 20000,      // 20 second cooldown between single requests
-    bulkGenerationCooldown: 1000 // 1 second cooldown for bulk generation
+    maxRequestsPerMinute: 30,        // Increased for bulk generation
+    maxRequestsPerMinuteSingle: 10,  // New: more generous limit for single requests
+    maxRequestsPerHour: 200,         // Increased from 50
+    maxRequestsPerDay: 1000,         // Increased from 200
+    cooldownPeriod: 5000,            // Reduced from 20 seconds to 5 seconds
+    bulkGenerationCooldown: 1000     // 1 second cooldown for bulk generation
   };
 
   // Get current usage stats
@@ -174,8 +176,11 @@ class AISecurityManager {
       };
     }
 
-    // More lenient limits during bulk generation
-    const minuteLimit = stats.isBulkGeneration ? this.rateLimits.maxRequestsPerMinute : Math.min(this.rateLimits.maxRequestsPerMinute, 5);
+    // Use appropriate minute limit based on request type
+    const minuteLimit = stats.isBulkGeneration || isBulkRequest 
+      ? this.rateLimits.maxRequestsPerMinute 
+      : this.rateLimits.maxRequestsPerMinuteSingle;
+    
     const hourlyLimit = this.rateLimits.maxRequestsPerHour;
     const dailyLimit = this.rateLimits.maxRequestsPerDay;
 
@@ -242,10 +247,10 @@ class AISecurityManager {
     return { allowed: true };
   }
 
-  // Detect suspicious usage patterns
+  // Detect suspicious usage patterns (updated thresholds)
   private detectSuspiciousPattern(stats: UsageStats, now: number): { reason: string; waitTime: number } | null {
     // Check for rapid consecutive requests (only for non-bulk operations)
-    if (stats.consecutiveRequests >= 10) {
+    if (stats.consecutiveRequests >= 15) { // Increased from 10
       const timeSinceLastRequest = now - stats.lastRequestTime;
       if (timeSinceLastRequest < 2000) { // Less than 2 seconds between requests
         this.logViolation({
@@ -262,8 +267,8 @@ class AISecurityManager {
       }
     }
 
-    // Check for unusual burst activity (more lenient)
-    if (stats.requestsThisMinute >= 8 && stats.requestsThisHour >= 30) {
+    // Check for unusual burst activity (more lenient thresholds)
+    if (stats.requestsThisMinute >= 12 && stats.requestsThisHour >= 50) { // Increased thresholds
       this.logViolation({
         type: 'suspicious_pattern',
         timestamp: now,
@@ -306,7 +311,7 @@ class AISecurityManager {
     this.saveUsageStats(stats);
   }
 
-  // Get current usage information for display
+  // Get current usage information for display (updated to use new limits)
   public getUsageInfo(): {
     daily: { used: number; limit: number; percentage: number };
     hourly: { used: number; limit: number; percentage: number };
@@ -321,7 +326,10 @@ class AISecurityManager {
       : this.rateLimits.cooldownPeriod;
     const nextRequestAllowed = Math.max(0, cooldownPeriod - (now - stats.lastRequestTime));
     
-    const minuteLimit = stats.isBulkGeneration ? this.rateLimits.maxRequestsPerMinute : Math.min(this.rateLimits.maxRequestsPerMinute, 5);
+    // Use appropriate minute limit for display
+    const minuteLimit = stats.isBulkGeneration 
+      ? this.rateLimits.maxRequestsPerMinute 
+      : this.rateLimits.maxRequestsPerMinuteSingle;
     
     return {
       daily: {
@@ -361,15 +369,15 @@ class AISecurityManager {
     }
   }
 
-  // Check if user is currently in a penalty period
+  // Check if user is currently in a penalty period (updated thresholds)
   public isInPenaltyPeriod(): { inPenalty: boolean; reason?: string; remainingTime?: number } {
     const violations = this.getViolations();
     const now = Date.now();
     const recentViolations = violations.filter(v => now - v.timestamp < 3600000); // Last hour
     
-    // If user has multiple high-severity violations in the last hour
+    // If user has multiple high-severity violations in the last hour (increased threshold)
     const highSeverityViolations = recentViolations.filter(v => v.severity === 'high');
-    if (highSeverityViolations.length >= 5) { // Increased threshold
+    if (highSeverityViolations.length >= 8) { // Increased from 5
       const lastViolation = highSeverityViolations[highSeverityViolations.length - 1];
       const penaltyEnd = lastViolation.timestamp + 3600000; // 1 hour penalty
       
