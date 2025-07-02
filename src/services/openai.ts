@@ -91,6 +91,18 @@ const secureAIRequest = async <T>(
   }
 };
 
+// Helper function to sanitize JSON content
+const sanitizeJSONContent = (content: string): string => {
+  // Replace unescaped newlines with escaped newlines
+  // This handles cases where the AI response contains literal newlines in string values
+  return content
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t')
+    .replace(/\f/g, '\\f')
+    .replace(/\b/g, '\\b');
+};
+
 export const generateAIResponse = async (prompt: string, context?: string): Promise<AIResponse> => {
   try {
     const result = await secureAIRequest(async () => {
@@ -248,6 +260,8 @@ Focus on different aspects or related but distinct concepts.
 EXAMPLE QUALITY LEVEL:
 "Natalie wants mobile devices that connect to her network to be inspected for updated virus signatures and kept isolated until the most recent signatures can be downloaded. Which Network Access Control (NAC) remediation mode should Natalie enable and how should the MOST recent signatures file be downloaded?"
 
+IMPORTANT: Ensure all text in the JSON response is properly escaped. Do not include literal newlines, tabs, or other control characters in string values.
+
 Format as JSON:
 {
   "domain": "${options.domain}",
@@ -255,7 +269,7 @@ Format as JSON:
   "question": "Your detailed question here",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": 0,
-  "explanation": "Provide a comprehensive explanation structured as follows:\\n\\nCorrect Answer: Explain in detail why the chosen option is the correct answer, referencing key CISSP concepts, industry standards, and real-world applications.\\n\\nIncorrect Answers:\\n- Option A: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n- Option B: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n- Option C: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n\\nKey Takeaway: Summarize the main learning point or principle tested by this question and how it applies to real-world security scenarios.",
+  "explanation": "Provide a comprehensive explanation. Use \\n\\n for paragraph breaks and \\n for line breaks. Structure as follows: Correct Answer: Explain in detail why the chosen option is correct. \\n\\nIncorrect Answers: \\n- Option A: Explain why wrong. \\n- Option B: Explain why wrong. \\n- Option C: Explain why wrong. \\n\\nKey Takeaway: Summarize the main learning point.",
   "tags": ["relevant", "tags", "here"]
 }`;
       } else {
@@ -270,6 +284,8 @@ Requirements:
 - Assign to the most relevant CISSP domain
 - Include relevant tags for categorization
 
+IMPORTANT: Ensure all text in the JSON response is properly escaped. Do not include literal newlines, tabs, or other control characters in string values.
+
 Format your response as JSON with this structure:
 {
   "domain": "Security and Risk Management",
@@ -277,7 +293,7 @@ Format your response as JSON with this structure:
   "question": "Your question here?",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": 0,
-  "explanation": "Provide a comprehensive explanation structured as follows:\\n\\nCorrect Answer: Explain in detail why the chosen option is the correct answer, referencing key CISSP concepts, industry standards, and real-world applications.\\n\\nIncorrect Answers:\\n- Option A: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n- Option B: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n- Option C: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n\\nKey Takeaway: Summarize the main learning point or principle tested by this question and how it applies to real-world security scenarios.",
+  "explanation": "Provide a comprehensive explanation. Use \\n\\n for paragraph breaks and \\n for line breaks. Structure as follows: Correct Answer: Explain in detail why the chosen option is correct. \\n\\nIncorrect Answers: \\n- Option A: Explain why wrong. \\n- Option B: Explain why wrong. \\n- Option C: Explain why wrong. \\n\\nKey Takeaway: Summarize the main learning point.",
   "tags": ["tag1", "tag2", "tag3"]
 }`;
       }
@@ -287,7 +303,7 @@ Format your response as JSON with this structure:
         messages: [
           {
             role: "system",
-            content: "You are an expert CISSP question writer with deep knowledge of cybersecurity. Create high-quality, exam-realistic questions that test practical understanding and real-world application of security concepts. Your explanations must be comprehensive, breaking down why the correct answer is right and why each incorrect option is wrong, including common misconceptions. Always respond with valid JSON only."
+            content: "You are an expert CISSP question writer with deep knowledge of cybersecurity. Create high-quality, exam-realistic questions that test practical understanding and real-world application of security concepts. Your explanations must be comprehensive, breaking down why the correct answer is right and why each incorrect option is wrong, including common misconceptions. Always respond with valid JSON only. CRITICAL: Ensure all string values in your JSON response are properly escaped - use \\n for line breaks, \\t for tabs, and escape any quotes or backslashes."
           },
           {
             role: "user",
@@ -305,10 +321,13 @@ Format your response as JSON with this structure:
       }
 
       try {
-        const questionData = JSON.parse(content);
+        // Sanitize the content before parsing
+        const sanitizedContent = sanitizeJSONContent(content);
+        const questionData = JSON.parse(sanitizedContent);
         return { question: questionData };
       } catch (parseError) {
         console.error('Failed to parse AI question response:', parseError);
+        console.error('Original content:', content);
         return { error: 'Failed to generate properly formatted question' };
       }
     }, 'question_generation', isBulkRequest);
