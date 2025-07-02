@@ -36,6 +36,70 @@ export interface AIGenerationOptions {
   focusArea: string;
 }
 
+// Enhanced JSON extraction and cleaning functions
+const extractJSON = (content: string): string => {
+  // First, trim whitespace
+  content = content.trim();
+  
+  // Remove any markdown code block wrappers
+  const codeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+  if (codeBlockMatch) {
+    return codeBlockMatch[1].trim();
+  }
+  
+  // Look for JSON object boundaries
+  const firstBrace = content.indexOf('{');
+  const lastBrace = content.lastIndexOf('}');
+  
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    return content.substring(firstBrace, lastBrace + 1);
+  }
+  
+  // If no clear JSON boundaries found, return original content
+  return content;
+};
+
+const cleanJSONString = (jsonStr: string): string => {
+  // Fix common JSON issues that can occur in AI responses
+  return jsonStr
+    // Fix unescaped quotes in strings
+    .replace(/"([^"]*)"([^"]*)"([^"]*)"/g, (match, p1, p2, p3) => {
+      // Only fix if this appears to be inside a string value
+      if (p2.includes(':') || p2.includes(',') || p2.includes('{') || p2.includes('}')) {
+        return match; // Don't modify if it looks like proper JSON structure
+      }
+      return `"${p1}\\"${p2}\\"${p3}"`;
+    })
+    // Fix unescaped newlines in strings
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t')
+    // Fix trailing commas
+    .replace(/,(\s*[}\]])/g, '$1')
+    // Fix missing commas between properties
+    .replace(/"\s*\n\s*"/g, '",\n"')
+    // Remove any non-printable characters
+    .replace(/[\x00-\x1F\x7F]/g, '');
+};
+
+const validateQuestionData = (data: any): boolean => {
+  return (
+    data &&
+    typeof data === 'object' &&
+    typeof data.domain === 'string' &&
+    typeof data.difficulty === 'string' &&
+    typeof data.question === 'string' &&
+    Array.isArray(data.options) &&
+    data.options.length === 4 &&
+    data.options.every((opt: any) => typeof opt === 'string') &&
+    typeof data.correctAnswer === 'number' &&
+    data.correctAnswer >= 0 &&
+    data.correctAnswer < 4 &&
+    typeof data.explanation === 'string' &&
+    Array.isArray(data.tags)
+  );
+};
+
 // Enhanced security wrapper for AI requests
 const secureAIRequest = async <T>(
   requestFn: () => Promise<T>,
@@ -89,41 +153,6 @@ const secureAIRequest = async <T>(
     // Re-throw other errors
     throw error;
   }
-};
-
-// Helper function to extract JSON from AI response
-const extractJSON = (content: string): string => {
-  // First, trim whitespace
-  content = content.trim();
-  
-  // Check if it's wrapped in markdown code block
-  const codeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
-  if (codeBlockMatch) {
-    return codeBlockMatch[1].trim();
-  }
-  
-  // Look for JSON object boundaries
-  const firstBrace = content.indexOf('{');
-  const lastBrace = content.lastIndexOf('}');
-  
-  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-    return content.substring(firstBrace, lastBrace + 1);
-  }
-  
-  // If no clear JSON boundaries found, return original content
-  return content;
-};
-
-// Helper function to sanitize JSON content
-const sanitizeJSONContent = (content: string): string => {
-  // Replace unescaped newlines with escaped newlines
-  // This handles cases where the AI response contains literal newlines in string values
-  return content
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t')
-    .replace(/\f/g, '\\f')
-    .replace(/\b/g, '\\b');
 };
 
 export const generateAIResponse = async (prompt: string, context?: string): Promise<AIResponse> => {
@@ -280,19 +309,21 @@ Avoid using these concepts/terms that are already covered in existing questions:
 Focus on different aspects or related but distinct concepts.
 ` : ''}
 
-EXAMPLE QUALITY LEVEL:
-"Natalie wants mobile devices that connect to her network to be inspected for updated virus signatures and kept isolated until the most recent signatures can be downloaded. Which Network Access Control (NAC) remediation mode should Natalie enable and how should the MOST recent signatures file be downloaded?"
+CRITICAL FORMATTING REQUIREMENTS:
+- You MUST respond with ONLY valid JSON
+- Do NOT include any explanatory text, markdown formatting, or code blocks
+- Ensure all string values are properly escaped
+- Use \\n for line breaks in explanations
+- The response must be complete and not truncated
 
-CRITICAL: You must respond with ONLY valid JSON. Do not include any explanatory text, markdown formatting, or code blocks. Ensure the JSON is complete and properly formatted.
-
-Format as JSON:
+Format as valid JSON:
 {
   "domain": "${options.domain}",
   "difficulty": "${options.difficulty}",
   "question": "Your detailed question here",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": 0,
-  "explanation": "Provide a comprehensive explanation. Use \\n\\n for paragraph breaks and \\n for line breaks. Structure as follows: Correct Answer: Explain in detail why the chosen option is correct. \\n\\nIncorrect Answers: \\n- Option A: Explain why wrong. \\n- Option B: Explain why wrong. \\n- Option C: Explain why wrong. \\n\\nKey Takeaway: Summarize the main learning point.",
+  "explanation": "Provide a comprehensive explanation. Use \\n\\n for paragraph breaks. Structure as: Correct Answer: Explain why this option is correct. \\n\\nIncorrect Answers: \\n- Option A: Explain why wrong. \\n- Option B: Explain why wrong. \\n- Option C: Explain why wrong. \\n\\nKey Takeaway: Summarize the main learning point.",
   "tags": ["relevant", "tags", "here"]
 }`;
       } else {
@@ -307,16 +338,21 @@ Requirements:
 - Assign to the most relevant CISSP domain
 - Include relevant tags for categorization
 
-CRITICAL: You must respond with ONLY valid JSON. Do not include any explanatory text, markdown formatting, or code blocks. Ensure the JSON is complete and properly formatted.
+CRITICAL FORMATTING REQUIREMENTS:
+- You MUST respond with ONLY valid JSON
+- Do NOT include any explanatory text, markdown formatting, or code blocks
+- Ensure all string values are properly escaped
+- Use \\n for line breaks in explanations
+- The response must be complete and not truncated
 
-Format your response as JSON with this structure:
+Format your response as valid JSON:
 {
   "domain": "Security and Risk Management",
   "difficulty": "Medium",
   "question": "Your question here?",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": 0,
-  "explanation": "Provide a comprehensive explanation. Use \\n\\n for paragraph breaks and \\n for line breaks. Structure as follows: Correct Answer: Explain in detail why the chosen option is correct. \\n\\nIncorrect Answers: \\n- Option A: Explain why wrong. \\n- Option B: Explain why wrong. \\n- Option C: Explain why wrong. \\n\\nKey Takeaway: Summarize the main learning point.",
+  "explanation": "Provide a comprehensive explanation. Use \\n\\n for paragraph breaks. Structure as: Correct Answer: Explain why this option is correct. \\n\\nIncorrect Answers: \\n- Option A: Explain why wrong. \\n- Option B: Explain why wrong. \\n- Option C: Explain why wrong. \\n\\nKey Takeaway: Summarize the main learning point.",
   "tags": ["tag1", "tag2", "tag3"]
 }`;
       }
@@ -333,7 +369,7 @@ Format your response as JSON with this structure:
             content: prompt
           }
         ],
-        max_tokens: 2000, // Increased from 1500 to prevent truncation
+        max_tokens: 2500, // Increased to prevent truncation
         temperature: 0.8
       });
 
@@ -344,19 +380,16 @@ Format your response as JSON with this structure:
       }
 
       try {
-        // Extract JSON from the response
+        // Extract and clean JSON from the response
         const extractedJSON = extractJSON(content);
+        const cleanedJSON = cleanJSONString(extractedJSON);
         
-        // Sanitize the content before parsing
-        const sanitizedContent = sanitizeJSONContent(extractedJSON);
+        // Parse the JSON
+        const questionData = JSON.parse(cleanedJSON);
         
-        const questionData = JSON.parse(sanitizedContent);
-        
-        // Validate the parsed data has required fields
-        if (!questionData.domain || !questionData.difficulty || !questionData.question || 
-            !questionData.options || !Array.isArray(questionData.options) || 
-            questionData.correctAnswer === undefined || !questionData.explanation) {
-          throw new Error('Generated question is missing required fields');
+        // Validate the parsed data
+        if (!validateQuestionData(questionData)) {
+          throw new Error('Generated question is missing required fields or has invalid structure');
         }
         
         return { question: questionData };
@@ -364,6 +397,7 @@ Format your response as JSON with this structure:
         console.error('Failed to parse AI question response:', parseError);
         console.error('Original content:', content);
         console.error('Extracted JSON:', extractJSON(content));
+        console.error('Cleaned JSON:', cleanJSONString(extractJSON(content)));
         
         // Provide more detailed error information
         const errorDetails = parseError instanceof Error ? parseError.message : 'Unknown parsing error';

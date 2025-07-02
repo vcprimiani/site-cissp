@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Question } from '../../types';
-import { Brain, Wand2, Loader, CheckCircle, ArrowLeft, Zap, Target, Settings, RotateCcw, Plus, Sparkles } from 'lucide-react';
+import { Brain, Wand2, Loader, CheckCircle, ArrowLeft, Zap, Target, Settings, RotateCcw, Plus, Sparkles, Shuffle } from 'lucide-react';
 import { generateAIQuestion, getAIUsageInfo, startBulkGeneration, endBulkGeneration } from '../../services/openai';
 import { formatTimeRemaining } from '../../services/aiSecurity';
 
@@ -79,20 +79,20 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
   ];
 
   const questionTypes = [
-    { value: 'most-likely', label: 'Most Likely/Best Approach' },
-    { value: 'least-likely', label: 'Least Likely/Inappropriate' },
-    { value: 'best-practice', label: 'Best Practice' },
-    { value: 'scenario-based', label: 'Scenario-Based' },
-    { value: 'definition', label: 'Definition/Concept' },
-    { value: 'comparison', label: 'Comparison/Analysis' }
+    { value: 'most-likely', label: 'Most Likely/Best Approach', icon: '🎯' },
+    { value: 'least-likely', label: 'Least Likely/Inappropriate', icon: '❌' },
+    { value: 'best-practice', label: 'Best Practice', icon: '⭐' },
+    { value: 'scenario-based', label: 'Scenario-Based', icon: '📋' },
+    { value: 'definition', label: 'Definition/Concept', icon: '📖' },
+    { value: 'comparison', label: 'Comparison/Analysis', icon: '⚖️' }
   ];
 
   const scenarioTypes = [
-    { value: 'technical', label: 'Technical Implementation' },
-    { value: 'management', label: 'Management Decision' },
-    { value: 'compliance', label: 'Compliance/Regulatory' },
-    { value: 'incident-response', label: 'Incident Response' },
-    { value: 'risk-assessment', label: 'Risk Assessment' }
+    { value: 'technical', label: 'Technical Implementation', icon: '⚙️' },
+    { value: 'management', label: 'Management Decision', icon: '👔' },
+    { value: 'compliance', label: 'Compliance/Regulatory', icon: '📋' },
+    { value: 'incident-response', label: 'Incident Response', icon: '🚨' },
+    { value: 'risk-assessment', label: 'Risk Assessment', icon: '📊' }
   ];
 
   const addBulkTopic = () => {
@@ -111,67 +111,105 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
     }
   };
 
-  const generateSingleQuestion = async () => {
+  const generateQuestions = async (count: number) => {
     setError(null);
     const topic = mode === 'simple' ? simpleTopic : advancedOptions.topic;
     
-    if (!topic.trim()) {
+    if (!topic.trim() && count !== -1) { // -1 is for random questions
       setError('Please enter a topic for question generation');
       return;
     }
 
     setProgress({
-      total: 1,
+      total: count === -1 ? 10 : count, // Random questions generates 10
       completed: 0,
       failed: 0,
       isGenerating: true,
-      currentTopic: topic
+      currentTopic: count === -1 ? 'Random CISSP Questions' : topic
     });
+
+    const newGeneratedQuestions: Question[] = [];
+    
+    if (count > 1) {
+      startBulkGeneration();
+    }
 
     try {
       const existingTerms = questions.flatMap(q => q.tags);
-      const options = mode === 'advanced' ? advancedOptions : undefined;
       
-      const result = await generateAIQuestion(topic, options, existingTerms, false);
-      
-      if (result.rateLimited) {
-        setError(result.error || 'Rate limit exceeded');
-        setProgress(prev => ({ ...prev, isGenerating: false, failed: 1 }));
-        return;
-      }
-      
-      if (result.error || !result.question) {
-        setError(result.error || 'Failed to generate question');
-        setProgress(prev => ({ ...prev, isGenerating: false, failed: 1 }));
-        return;
-      }
-
-      const newQuestion: Omit<Question, 'id' | 'createdAt'> = {
-        ...result.question,
-        tags: [...result.question.tags, 'ai-generated'],
-        createdBy: currentUser.id,
-        isActive: true
-      };
-
-      const addedQuestion = await onAddQuestion(newQuestion);
-      if (addedQuestion) {
-        setGeneratedQuestions([addedQuestion]);
-        setProgress(prev => ({ ...prev, completed: 1, isGenerating: false }));
+      for (let i = 0; i < (count === -1 ? 10 : count); i++) {
+        let currentTopic: string;
+        let currentOptions: GenerationOptions | undefined;
         
-        // Clear the topic input
-        if (mode === 'simple') {
-          setSimpleTopic('');
+        if (count === -1) {
+          // Random questions - mix domains and types
+          const randomDomain = domains[Math.floor(Math.random() * domains.length)];
+          const randomDifficulty = ['Easy', 'Medium', 'Hard'][Math.floor(Math.random() * 3)] as 'Easy' | 'Medium' | 'Hard';
+          const randomQuestionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+          const randomScenarioType = scenarioTypes[Math.floor(Math.random() * scenarioTypes.length)];
+          
+          currentTopic = `Generate a ${randomDifficulty} ${randomQuestionType.label.toLowerCase()} question for ${randomDomain}`;
+          currentOptions = {
+            domain: randomDomain,
+            difficulty: randomDifficulty,
+            questionType: randomQuestionType.value as any,
+            scenarioType: randomScenarioType.value as any,
+            topic: currentTopic,
+            includeDistractors: true,
+            focusArea: ''
+          };
         } else {
-          setAdvancedOptions(prev => ({ ...prev, topic: '' }));
+          currentTopic = topic;
+          currentOptions = mode === 'advanced' ? advancedOptions : undefined;
         }
-      } else {
-        setError('Failed to save question to database');
-        setProgress(prev => ({ ...prev, isGenerating: false, failed: 1 }));
+        
+        setProgress(prev => ({ ...prev, currentTopic }));
+
+        try {
+          const result = await generateAIQuestion(currentTopic, currentOptions, existingTerms, count > 1);
+          
+          if (result.rateLimited) {
+            setError(`Rate limit exceeded at question ${i + 1}. Generated ${newGeneratedQuestions.length} questions.`);
+            break;
+          }
+          
+          if (result.error || !result.question) {
+            setProgress(prev => ({ ...prev, failed: prev.failed + 1 }));
+            continue;
+          }
+
+          const newQuestion: Omit<Question, 'id' | 'createdAt'> = {
+            ...result.question,
+            tags: [...result.question.tags, 'ai-generated'],
+            createdBy: currentUser.id,
+            isActive: true
+          };
+
+          const addedQuestion = await onAddQuestion(newQuestion);
+          if (addedQuestion) {
+            newGeneratedQuestions.push(addedQuestion);
+            setProgress(prev => ({ ...prev, completed: prev.completed + 1 }));
+          } else {
+            setProgress(prev => ({ ...prev, failed: prev.failed + 1 }));
+          }
+        } catch (error: any) {
+          console.error(`Error generating question ${i + 1}:`, error);
+          setProgress(prev => ({ ...prev, failed: prev.failed + 1 }));
+        }
       }
-    } catch (error: any) {
-      console.error('Error generating question:', error);
-      setError(error.message || 'Failed to generate question');
-      setProgress(prev => ({ ...prev, isGenerating: false, failed: 1 }));
+    } finally {
+      if (count > 1) {
+        endBulkGeneration();
+      }
+      setGeneratedQuestions(newGeneratedQuestions);
+      setProgress(prev => ({ ...prev, isGenerating: false }));
+      
+      // Clear inputs
+      if (mode === 'simple') {
+        setSimpleTopic('');
+      } else {
+        setAdvancedOptions(prev => ({ ...prev, topic: '' }));
+      }
     }
   };
 
@@ -513,60 +551,93 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
 
             {/* Advanced Mode */}
             {mode === 'advanced' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Domain</label>
-                  <select
-                    value={advancedOptions.domain}
-                    onChange={(e) => setAdvancedOptions(prev => ({ ...prev, domain: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
-                    {domains.map(domain => (
-                      <option key={domain} value={domain}>{domain}</option>
-                    ))}
-                  </select>
-                </div>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Domain</label>
+                    <select
+                      value={advancedOptions.domain}
+                      onChange={(e) => setAdvancedOptions(prev => ({ ...prev, domain: e.target.value }))}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    >
+                      {domains.map(domain => (
+                        <option key={domain} value={domain}>{domain}</option>
+                      ))}
+                    </select>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
-                  <select
-                    value={advancedOptions.difficulty}
-                    onChange={(e) => setAdvancedOptions(prev => ({ ...prev, difficulty: e.target.value as any }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
-                    <option value="Easy">Easy</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Hard">Hard</option>
-                  </select>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['Easy', 'Medium', 'Hard'].map(difficulty => (
+                        <button
+                          key={difficulty}
+                          type="button"
+                          onClick={() => setAdvancedOptions(prev => ({ ...prev, difficulty: difficulty as any }))}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            advancedOptions.difficulty === difficulty
+                              ? difficulty === 'Easy' ? 'bg-green-600 text-white' :
+                                difficulty === 'Medium' ? 'bg-yellow-600 text-white' :
+                                'bg-red-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {difficulty === 'Easy' && '🟢'} 
+                          {difficulty === 'Medium' && '🟡'} 
+                          {difficulty === 'Hard' && '🔴'} {difficulty}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
-                  <select
-                    value={advancedOptions.questionType}
-                    onChange={(e) => setAdvancedOptions(prev => ({ ...prev, questionType: e.target.value as any }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {questionTypes.map(type => (
-                      <option key={type.value} value={type.value}>{type.label}</option>
+                      <button
+                        key={type.value}
+                        type="button"
+                        onClick={() => setAdvancedOptions(prev => ({ ...prev, questionType: type.value as any }))}
+                        className={`p-3 rounded-lg text-sm font-medium transition-colors text-left ${
+                          advancedOptions.questionType === type.value
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span>{type.icon}</span>
+                          <span>{type.label}</span>
+                        </div>
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Scenario Type</label>
-                  <select
-                    value={advancedOptions.scenarioType}
-                    onChange={(e) => setAdvancedOptions(prev => ({ ...prev, scenarioType: e.target.value as any }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {scenarioTypes.map(type => (
-                      <option key={type.value} value={type.value}>{type.label}</option>
+                      <button
+                        key={type.value}
+                        type="button"
+                        onClick={() => setAdvancedOptions(prev => ({ ...prev, scenarioType: type.value as any }))}
+                        className={`p-3 rounded-lg text-sm font-medium transition-colors text-left ${
+                          advancedOptions.scenarioType === type.value
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span>{type.icon}</span>
+                          <span>{type.label}</span>
+                        </div>
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
 
-                <div className="md:col-span-2">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Topic or Concept
                   </label>
@@ -610,7 +681,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                   )}
                 </div>
 
-                <div className="md:col-span-2">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Focus Area (Optional)
                   </label>
@@ -623,7 +694,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                   />
                 </div>
 
-                <div className="md:col-span-2">
+                <div>
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
@@ -639,21 +710,70 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
               </div>
             )}
 
-            {/* Generate Button */}
-            <div className="flex justify-center">
-              <button
-                onClick={showBulkMode ? generateBulkQuestions : generateSingleQuestion}
-                disabled={usageInfo.nextRequestAllowed > 0}
-                className="flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg shadow-lg"
-              >
-                <Wand2 className="w-5 h-5" />
-                <span>
-                  {showBulkMode 
-                    ? `Generate ${bulkTopics.filter(t => t.trim()).length} Questions`
-                    : 'Generate Question'
-                  }
-                </span>
-              </button>
+            {/* Generation Buttons */}
+            <div className="space-y-4">
+              {/* Quick Generation Buttons */}
+              {!showBulkMode && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Quick Generation</label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <button
+                      onClick={() => generateQuestions(1)}
+                      disabled={usageInfo.nextRequestAllowed > 0}
+                      className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      <Wand2 className="w-4 h-4" />
+                      <span>1 Question</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => generateQuestions(5)}
+                      disabled={usageInfo.nextRequestAllowed > 0}
+                      className="flex items-center justify-center space-x-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      <Zap className="w-4 h-4" />
+                      <span>5 Questions</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => generateQuestions(10)}
+                      disabled={usageInfo.nextRequestAllowed > 0}
+                      className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      <Target className="w-4 h-4" />
+                      <span>10 Questions</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => generateQuestions(-1)}
+                      disabled={usageInfo.nextRequestAllowed > 0}
+                      className="flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      <Shuffle className="w-4 h-4" />
+                      <span>10 Random</span>
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Random questions mix all domains and question types for comprehensive practice
+                  </p>
+                </div>
+              )}
+
+              {/* Bulk Generation Button */}
+              {showBulkMode && (
+                <div className="flex justify-center">
+                  <button
+                    onClick={generateBulkQuestions}
+                    disabled={usageInfo.nextRequestAllowed > 0}
+                    className="flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg shadow-lg"
+                  >
+                    <Wand2 className="w-5 h-5" />
+                    <span>
+                      Generate {bulkTopics.filter(t => t.trim()).length} Questions
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -663,11 +783,11 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
       <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 sm:p-6 border border-purple-200">
         <h3 className="font-medium text-purple-900 mb-3">💡 Generation Tips</h3>
         <ul className="text-purple-800 text-sm space-y-2">
+          <li>• <strong>Quick Options:</strong> Use 1, 5, or 10 question buttons for fast generation</li>
+          <li>• <strong>Random Questions:</strong> Perfect for comprehensive practice across all domains</li>
           <li>• <strong>Be Specific:</strong> "NAC quarantine procedures" works better than just "NAC"</li>
-          <li>• <strong>Use Real Scenarios:</strong> "Incident response for data breach" creates practical questions</li>
-          <li>• <strong>Mix Difficulties:</strong> Generate Easy questions for concepts, Hard for complex scenarios</li>
+          <li>• <strong>Advanced Mode:</strong> Use button selectors for precise question customization</li>
           <li>• <strong>Bulk Generation:</strong> Perfect for creating comprehensive question sets on related topics</li>
-          <li>• <strong>Advanced Mode:</strong> Fine-tune question types and scenarios for targeted practice</li>
           <li>• Questions are automatically tagged as "ai-generated" and saved to your question bank</li>
         </ul>
       </div>
