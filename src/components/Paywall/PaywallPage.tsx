@@ -1,18 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Crown, CheckCircle, ArrowRight, Lock, Zap, Shield, Target, Brain, Database, Loader, Tag } from 'lucide-react';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
 import { useAuth } from '../../hooks/useAuth';
+import { QuestionCard } from '../UI/QuestionCard';
+import { useQuestions } from '../../hooks/useQuestions';
+import { analyzeCISSPKeywords } from '../../services/keywordAnalysis';
+import { Question } from '../../types';
 
 export const PaywallPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
+  const { questions, loading: questionsLoading } = useQuestions();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState('');
   const [showCouponField, setShowCouponField] = useState(false);
+  const [randomQuestion, setRandomQuestion] = useState<Question | null>(null);
+  const [questionKeywords, setQuestionKeywords] = useState<string[]>([]);
+  const [keywordsLoading, setKeywordsLoading] = useState(false);
 
   // Get the first (and only) product from our stripe config
   const product = stripeProducts[0];
+
+  // Select a random question and analyze its keywords
+  useEffect(() => {
+    if (!questionsLoading && questions.length > 0 && !randomQuestion) {
+      const randomIndex = Math.floor(Math.random() * questions.length);
+      const selectedQuestion = questions[randomIndex];
+      setRandomQuestion(selectedQuestion);
+
+      // Analyze keywords for the selected question
+      const fetchKeywords = async () => {
+        setKeywordsLoading(true);
+        try {
+          const result = await analyzeCISSPKeywords(selectedQuestion.question);
+          if (result.keywords && !result.error) {
+            setQuestionKeywords(result.keywords);
+          }
+        } catch (error) {
+          console.error('Error analyzing keywords:', error);
+        } finally {
+          setKeywordsLoading(false);
+        }
+      };
+      fetchKeywords();
+    }
+  }, [questions, questionsLoading, randomQuestion]);
 
   const handleSubscribe = async () => {
     if (!isAuthenticated) {
@@ -118,6 +151,33 @@ export const PaywallPage: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Sample Question Card */}
+        {randomQuestion && (
+          <div className="mb-12 bg-white rounded-2xl shadow-xl p-8 border-2 border-purple-200">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Try a Sample Question!
+              </h2>
+              <p className="text-gray-600">
+                Here's a taste of the high-quality questions you'll get with a subscription.
+              </p>
+              {keywordsLoading && (
+                <div className="flex items-center justify-center space-x-2 mt-2">
+                  <Loader className="w-4 h-4 animate-spin text-purple-600" />
+                  <span className="text-sm text-purple-600">Analyzing keywords...</span>
+                </div>
+              )}
+            </div>
+            <QuestionCard
+              question={randomQuestion}
+              isExpanded={true}
+              showActions={false}
+              className="pointer-events-none"
+              keywords={questionKeywords}
+            />
+          </div>
+        )}
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">

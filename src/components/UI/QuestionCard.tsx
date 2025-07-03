@@ -1,34 +1,33 @@
 import React from 'react';
 import { Question } from '../../types';
-import { Star, StarOff, ChevronDown, ChevronUp, Brain, Share2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Brain, Share2 } from 'lucide-react';
 import { getDomainColor, getDifficultyColor, getStatusColor, generateColorClasses, categoryIcons } from '../../utils/colorSystem';
 import { SocialShareButtons } from './SocialShareButtons';
+import { highlightKeywords } from '../../services/keywordAnalysis';
+import { formatExplanationText } from '../../utils/textFormatting';
 
 interface QuestionCardProps {
   question: Question;
   isExpanded?: boolean;
-  isInPracticeSet?: boolean;
   onToggleExpanded?: () => void;
-  onTogglePracticeSet?: () => void;
   onDelete?: () => void;
   showActions?: boolean;
   className?: string;
+  keywords?: string[];
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
   isExpanded = false,
-  isInPracticeSet = false,
   onToggleExpanded,
-  onTogglePracticeSet,
   onDelete,
   showActions = true,
-  className = ''
+  className = '',
+  keywords = []
 }) => {
   const [showShareMenu, setShowShareMenu] = React.useState(false);
   const domainColor = getDomainColor(question.domain);
   const difficultyColor = getDifficultyColor(question.difficulty);
-  const practiceColor = getStatusColor('practice');
   const aiColor = getStatusColor('ai-generated');
 
   const getShareMessage = () => {
@@ -72,7 +71,7 @@ Study more at: https://site.cisspstudygroup.com`;
     >
       {/* Card Header */}
       <div 
-        className="p-5 cursor-pointer"
+        className={`p-5 ${onToggleExpanded ? 'cursor-pointer' : ''}`}
         onClick={onToggleExpanded}
       >
         <div className="flex items-start justify-between mb-4">
@@ -106,42 +105,49 @@ Study more at: https://site.cisspstudygroup.com`;
                 <span>{question.difficulty}</span>
               </div>
 
-              {/* Status Indicators */}
-              <div className="flex items-center space-x-2">
-                {/* Practice Set Indicator */}
-                {isInPracticeSet && (
-                  <div 
-                    className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs"
-                    style={{
-                      backgroundColor: practiceColor.primary,
-                      color: 'white'
-                    }}
-                  >
-                    <Star className="w-3 h-3 fill-current" />
-                    <span className="hidden sm:inline">Practice</span>
-                  </div>
-                )}
-
-                {/* AI Generated Indicator */}
-                {question.tags.includes('ai-generated') && (
-                  <div 
-                    className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs"
-                    style={{
-                      backgroundColor: aiColor.primary,
-                      color: 'white'
-                    }}
-                  >
-                    <Brain className="w-3 h-3" />
-                    <span className="hidden sm:inline">AI</span>
-                  </div>
-                )}
-              </div>
+              {/* AI Generated Indicator */}
+              {question.tags.includes('ai-generated') && (
+                <div 
+                  className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs"
+                  style={{
+                    backgroundColor: aiColor.primary,
+                    color: 'white'
+                  }}
+                >
+                  <Brain className="w-3 h-3" />
+                  <span className="hidden sm:inline">AI</span>
+                </div>
+              )}
             </div>
 
+            {/* Keywords Display */}
+            {keywords.length > 0 && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <span className="text-yellow-600">💡</span>
+                  <span className="font-medium text-yellow-800 text-xs">Key CISSP Terms:</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {keywords.map((keyword, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full text-xs font-medium"
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Question Text */}
-            <p className="text-sm sm:text-base font-semibold mb-4 break-words leading-relaxed text-gray-900">
-              {question.question}
-            </p>
+            <div className="text-sm sm:text-base font-semibold mb-4 break-words leading-relaxed text-gray-900">
+              {keywords.length > 0 ? (
+                <span dangerouslySetInnerHTML={{ __html: highlightKeywords(question.question, keywords) }} />
+              ) : (
+                question.question
+              )}
+            </div>
 
             {/* Tags - Softer colors */}
             <div className="flex flex-wrap gap-2 mb-3">
@@ -179,30 +185,6 @@ Study more at: https://site.cisspstudygroup.com`;
             )}
           </div>
         </div>
-
-        {/* Action Buttons */}
-        {showActions && onTogglePracticeSet && (
-          <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={onTogglePracticeSet}
-              className={`flex items-center space-x-1 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${
-                isInPracticeSet 
-                  ? 'bg-cyan-600 text-white shadow-sm' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
-              }`}
-              title={isInPracticeSet ? 'Remove from practice set' : 'Add to practice set'}
-            >
-              {isInPracticeSet ? (
-                <Star className="w-3 h-3 fill-current" />
-              ) : (
-                <StarOff className="w-3 h-3" />
-              )}
-              <span className="hidden sm:inline">
-                {isInPracticeSet ? 'In Practice' : 'Add to Practice'}
-              </span>
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Expanded Content */}
@@ -253,63 +235,66 @@ Study more at: https://site.cisspstudygroup.com`;
               Explanation:
             </h4>
             <div className="bg-white rounded-lg p-4 border-2 border-gray-200 shadow-sm">
-              <p className="leading-relaxed text-sm text-gray-800 font-medium">
-                {question.explanation}
-              </p>
+              <div 
+                className="leading-relaxed text-sm text-gray-800 font-medium"
+                dangerouslySetInnerHTML={{ __html: formatExplanationText(question.explanation) }}
+              />
             </div>
           </div>
         </div>
       )}
 
       {/* Share Button in Bottom Right Corner */}
-      <div className="absolute bottom-4 right-4 z-10">
-        <div className="relative">
-          <button
-            onClick={handleShareClick}
-            className="p-2 bg-blue-100 hover:bg-blue-200 rounded-full transition-colors group shadow-sm"
-            title="Share this question"
-          >
-            <Share2 className="w-4 h-4 text-blue-600 group-hover:text-blue-800" />
-          </button>
-          
-          {/* Share Menu Dropdown */}
-          {showShareMenu && (
-            <>
-              {/* Backdrop */}
-              <div 
-                className="fixed inset-0 z-40" 
-                onClick={() => setShowShareMenu(false)}
-              />
-              
-              {/* Share Menu */}
-              <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-80 z-50">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-medium text-gray-900">Share Question</h4>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowShareMenu(false);
-                    }}
-                    className="text-gray-400 hover:text-gray-600 text-lg leading-none"
-                  >
-                    ×
-                  </button>
+      {showActions && (
+        <div className="absolute bottom-4 right-4 z-10">
+          <div className="relative">
+            <button
+              onClick={handleShareClick}
+              className="p-2 bg-blue-100 hover:bg-blue-200 rounded-full transition-colors group shadow-sm"
+              title="Share this question"
+            >
+              <Share2 className="w-4 h-4 text-blue-600 group-hover:text-blue-800" />
+            </button>
+            
+            {/* Share Menu Dropdown */}
+            {showShareMenu && (
+              <>
+                {/* Backdrop */}
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowShareMenu(false)}
+                />
+                
+                {/* Share Menu */}
+                <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-80 z-50">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium text-gray-900">Share Question</h4>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowShareMenu(false);
+                      }}
+                      className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <SocialShareButtons
+                      title={`CISSP Practice Question - ${question.domain}`}
+                      text={getShareMessage()}
+                      hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'Practice', 'InfoSec']}
+                      variant="compact"
+                      size="sm"
+                      copyContent={getCopyContent()}
+                    />
+                  </div>
                 </div>
-                <div onClick={(e) => e.stopPropagation()}>
-                  <SocialShareButtons
-                    title={`CISSP Practice Question - ${question.domain}`}
-                    text={getShareMessage()}
-                    hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'Practice', 'InfoSec']}
-                    variant="compact"
-                    size="sm"
-                    copyContent={getCopyContent()}
-                  />
-                </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

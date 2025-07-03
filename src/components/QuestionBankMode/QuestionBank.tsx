@@ -26,7 +26,6 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   const [filterDomain, setFilterDomain] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('');
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
-  const [practiceQuestions, setPracticeQuestions] = useState<Set<string>>(new Set());
   const [showColorKey, setShowColorKey] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -110,16 +109,6 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
     setExpandedQuestions(newExpanded);
   };
 
-  const togglePracticeQuestion = (questionId: string) => {
-    const newPractice = new Set(practiceQuestions);
-    if (newPractice.has(questionId)) {
-      newPractice.delete(questionId);
-    } else {
-      newPractice.add(questionId);
-    }
-    setPracticeQuestions(newPractice);
-  };
-
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-8 text-center">
@@ -184,29 +173,6 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
           </div>
         </div>
 
-        {/* Practice Questions Summary */}
-        {practiceQuestions.size > 0 && (
-          <div className="mb-6 p-4 bg-cyan-50 border border-cyan-200 rounded-lg">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-              <div className="flex items-center space-x-2">
-                <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600" />
-                <span className="text-sm font-medium text-cyan-800">
-                  Practice Question Set: {practiceQuestions.size} questions selected
-                </span>
-              </div>
-              <button
-                onClick={() => setPracticeQuestions(new Set())}
-                className="text-sm text-cyan-700 hover:text-cyan-800 font-medium"
-              >
-                Clear All
-              </button>
-            </div>
-            <p className="text-xs text-cyan-700 mt-1">
-              These questions are highlighted and ready for interactive quiz mode.
-            </p>
-          </div>
-        )}
-
         {/* Filters */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="relative">
@@ -262,9 +228,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
               key={question.id}
               question={question}
               isExpanded={expandedQuestions.has(question.id)}
-              isInPracticeSet={practiceQuestions.has(question.id)}
               onToggleExpanded={() => toggleQuestionExpanded(question.id)}
-              onTogglePracticeSet={() => togglePracticeQuestion(question.id)}
               showActions={true}
             />
           ))
@@ -287,7 +251,6 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
                   <li>• Use the AI Generator tab to create questions automatically</li>
                   <li>• Add questions manually using the "Add Question" button</li>
                   <li>• Click questions to expand and view details</li>
-                  <li>• Add questions to your practice set for easy access</li>
                   <li>• Use the color key to understand the visual organization</li>
                   <li>• Questions are automatically saved to your secure database</li>
                 </ul>
