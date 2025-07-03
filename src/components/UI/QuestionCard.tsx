@@ -37,11 +37,13 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 
 "${question.question}"
 
-Answer: ${correctAnswer}
+✅ Answer: ${correctAnswer}
 
-💡 ${question.explanation}
+💡 Explanation: ${question.explanation}
 
-#CISSP #Cybersecurity #StudyGroup`;
+Master cybersecurity concepts with AI-powered practice questions! 🚀
+
+#CISSP #Cybersecurity #StudyGroup #InfoSec`;
   };
 
   const handleShareClick = (e: React.MouseEvent) => {
@@ -53,44 +55,9 @@ Answer: ${correctAnswer}
     <div 
       className={`bg-white rounded-xl border-2 border-gray-200 shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-200 relative ${className}`}
     >
-      {/* Share Button in Top Right Corner */}
-      <div className="absolute top-4 right-4 z-10">
-        <div className="relative">
-          <button
-            onClick={handleShareClick}
-            className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors group"
-            title="Share this question"
-          >
-            <Share2 className="w-4 h-4 text-gray-600 group-hover:text-gray-800" />
-          </button>
-          
-          {/* Share Menu Dropdown */}
-          {showShareMenu && (
-            <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-80 z-20">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="font-medium text-gray-900">Share Question</h4>
-                <button
-                  onClick={() => setShowShareMenu(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  ×
-                </button>
-              </div>
-              <SocialShareButtons
-                title={`CISSP Practice Question - ${question.domain}`}
-                text={getShareMessage()}
-                hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'Practice']}
-                variant="compact"
-                size="sm"
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Card Header */}
       <div 
-        className="p-5 cursor-pointer pr-16"
+        className="p-5 cursor-pointer"
         onClick={onToggleExpanded}
       >
         <div className="flex items-start justify-between mb-4">
@@ -279,13 +246,54 @@ Answer: ${correctAnswer}
         </div>
       )}
 
-      {/* Overlay to close share menu when clicking outside */}
-      {showShareMenu && (
-        <div 
-          className="fixed inset-0 z-10" 
-          onClick={() => setShowShareMenu(false)}
-        />
-      )}
+      {/* Share Button in Bottom Right Corner */}
+      <div className="absolute bottom-4 right-4 z-10">
+        <div className="relative">
+          <button
+            onClick={handleShareClick}
+            className="p-2 bg-blue-100 hover:bg-blue-200 rounded-full transition-colors group shadow-sm"
+            title="Share this question"
+          >
+            <Share2 className="w-4 h-4 text-blue-600 group-hover:text-blue-800" />
+          </button>
+          
+          {/* Share Menu Dropdown */}
+          {showShareMenu && (
+            <>
+              {/* Backdrop */}
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setShowShareMenu(false)}
+              />
+              
+              {/* Share Menu */}
+              <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-80 z-50">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-medium text-gray-900">Share Question</h4>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowShareMenu(false);
+                    }}
+                    className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <SocialShareButtons
+                    title={`CISSP Practice Question - ${question.domain}`}
+                    text={getShareMessage()}
+                    hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'Practice', 'InfoSec']}
+                    variant="compact"
+                    size="sm"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

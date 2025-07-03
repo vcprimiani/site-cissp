@@ -263,13 +263,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               </div>
 
               {/* Social Share Section */}
-              <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+              <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Share with Your Network</h3>
                 <SocialShareButtons
                   title="CISSP Study Group - AI-Powered Study Platform"
-                  text="Check out this amazing AI-powered CISSP study platform! Generate unlimited practice questions and ace your certification. 🚀"
-                  hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'AI']}
+                  text="🚀 Just discovered an amazing AI-powered CISSP study platform! Generate unlimited practice questions and master cybersecurity concepts. Perfect for anyone pursuing CISSP certification! Check it out at site.cisspstudygroup.com #CISSP #Cybersecurity #StudyGroup #AI #InfoSec"
+                  hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'AI', 'InfoSec']}
                   variant="compact"
-                  size="sm"
+                  size="md"
                 />
               </div>
             </div>
@@ -535,8 +536,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <h3 className="text-lg font-semibold text-white mb-4">Share with Your Network</h3>
             <SocialShareButtons
               title="CISSP Study Group - AI-Powered Study Platform"
-              text="🚀 Discovered an amazing AI-powered CISSP study platform! Generate unlimited practice questions and master cybersecurity concepts. Perfect for anyone pursuing CISSP certification! #CISSP #Cybersecurity"
-              hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'AI', 'Certification']}
+              text="🚀 Discovered an amazing AI-powered CISSP study platform! Generate unlimited practice questions and master cybersecurity concepts. Perfect for anyone pursuing CISSP certification! Check it out at site.cisspstudygroup.com #CISSP #Cybersecurity #StudyGroup #AI #InfoSec #Certification"
+              hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'AI', 'Certification', 'InfoSec']}
               variant="icon-only"
               size="lg"
               className="justify-center"

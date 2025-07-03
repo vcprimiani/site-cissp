@@ -45,7 +45,16 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz,
 
   const getShareMessage = () => {
     const emoji = percentage >= 80 ? '🎉' : percentage >= 60 ? '📚' : '💪';
-    return `Just completed a CISSP practice quiz on CISSPStudyGroup.com! ${emoji} Scored ${percentage}% (${results.correctAnswers}/${results.totalQuestions}) in ${formatTime(results.timeSpent)}. Great platform for CISSP exam prep! #CISSP #Cybersecurity`;
+    return `Just completed a CISSP practice quiz on CISSPStudyGroup.com! ${emoji} 
+
+📊 Score: ${percentage}% (${results.correctAnswers}/${results.totalQuestions})
+⏱️ Time: ${formatTime(results.timeSpent)}
+
+Great platform for CISSP exam prep with AI-powered questions and detailed explanations! Perfect for cybersecurity professionals pursuing certification.
+
+Check it out: site.cisspstudygroup.com
+
+#CISSP #Cybersecurity #StudyGroup #InfoSec #Certification`;
   };
 
   return (
@@ -127,7 +136,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz,
               <SocialShareButtons
                 title={`CISSP Quiz Results - ${percentage}% Score`}
                 text={getShareMessage()}
-                hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'Certification']}
+                hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'Certification', 'InfoSec']}
                 variant="compact"
                 size="md"
                 className="justify-center"

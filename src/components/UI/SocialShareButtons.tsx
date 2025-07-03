@@ -13,7 +13,7 @@ interface SocialShareButtonsProps {
 }
 
 export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
-  url = 'https://CISSPStudyGroup.com',
+  url = 'https://site.cisspstudygroup.com',
   title,
   text,
   hashtags = ['CISSP', 'Cybersecurity', 'StudyGroup'],
@@ -27,7 +27,6 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
   const encodedText = encodeURIComponent(text);
-  const hashtagString = hashtags.map(tag => `%23${tag}`).join('%20');
 
   const shareLinks = {
     twitter: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}&hashtags=${hashtags.join(',')}`,
@@ -36,7 +35,9 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
     email: `mailto:?subject=${encodedTitle}&body=${encodedText}%0A%0A${encodedUrl}`
   };
 
-  const handleCopyLink = async () => {
+  const handleCopyLink = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
@@ -46,7 +47,9 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
     }
   };
 
-  const handleShare = (platform: string) => {
+  const handleShare = (platform: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const link = shareLinks[platform as keyof typeof shareLinks];
     if (link) {
       window.open(link, '_blank', 'noopener,noreferrer');
@@ -73,23 +76,23 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
 
   if (variant === 'icon-only') {
     return (
-      <div className={`flex items-center space-x-1 ${className}`}>
+      <div className={`flex items-center space-x-2 ${className}`}>
         <button
-          onClick={() => handleShare('twitter')}
+          onClick={(e) => handleShare('twitter', e)}
           className={`${buttonSizeClasses[size]} bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors`}
           title="Share on Twitter"
         >
           <Twitter className={iconSize[size]} />
         </button>
         <button
-          onClick={() => handleShare('linkedin')}
+          onClick={(e) => handleShare('linkedin', e)}
           className={`${buttonSizeClasses[size]} bg-blue-700 text-white rounded-full hover:bg-blue-800 transition-colors`}
           title="Share on LinkedIn"
         >
           <Linkedin className={iconSize[size]} />
         </button>
         <button
-          onClick={() => handleShare('facebook')}
+          onClick={(e) => handleShare('facebook', e)}
           className={`${buttonSizeClasses[size]} bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors`}
           title="Share on Facebook"
         >
@@ -115,21 +118,21 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
         <span className="text-sm font-medium text-gray-700">Share:</span>
         <div className="flex space-x-1">
           <button
-            onClick={() => handleShare('twitter')}
+            onClick={(e) => handleShare('twitter', e)}
             className="p-1 text-blue-500 hover:bg-blue-50 rounded transition-colors"
             title="Twitter"
           >
             <Twitter className="w-4 h-4" />
           </button>
           <button
-            onClick={() => handleShare('linkedin')}
+            onClick={(e) => handleShare('linkedin', e)}
             className="p-1 text-blue-700 hover:bg-blue-50 rounded transition-colors"
             title="LinkedIn"
           >
             <Linkedin className="w-4 h-4" />
           </button>
           <button
-            onClick={() => handleShare('facebook')}
+            onClick={(e) => handleShare('facebook', e)}
             className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
             title="Facebook"
           >
@@ -158,7 +161,7 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
       
       <div className="grid grid-cols-2 gap-3">
         <button
-          onClick={() => handleShare('twitter')}
+          onClick={(e) => handleShare('twitter', e)}
           className="flex items-center space-x-3 p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
           <Twitter className="w-5 h-5" />
@@ -166,7 +169,7 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
         </button>
         
         <button
-          onClick={() => handleShare('linkedin')}
+          onClick={(e) => handleShare('linkedin', e)}
           className="flex items-center space-x-3 p-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
         >
           <Linkedin className="w-5 h-5" />
@@ -174,7 +177,7 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
         </button>
         
         <button
-          onClick={() => handleShare('facebook')}
+          onClick={(e) => handleShare('facebook', e)}
           className="flex items-center space-x-3 p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           <Facebook className="w-5 h-5" />
@@ -182,7 +185,7 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
         </button>
         
         <button
-          onClick={() => handleShare('email')}
+          onClick={(e) => handleShare('email', e)}
           className="flex items-center space-x-3 p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
         >
           <Mail className="w-5 h-5" />
