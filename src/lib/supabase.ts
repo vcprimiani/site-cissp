@@ -79,8 +79,27 @@ export const authHelpers = {
 
   // Sign out
   signOut: async () => {
-    const { error } = await supabase.auth.signOut()
-    return { error }
+    try {
+      const { error } = await supabase.auth.signOut()
+      
+      // Check for session not found error - this means user is already signed out
+      if (error && error.message.includes('Session from session_id claim in JWT does not exist')) {
+        // Clear local session data and treat as successful logout
+        await clearInvalidSession()
+        return { error: null }
+      }
+      
+      return { error }
+    } catch (error: any) {
+      // Handle any other errors during sign out
+      if (error.message && error.message.includes('Session from session_id claim in JWT does not exist')) {
+        // Clear local session data and treat as successful logout
+        await clearInvalidSession()
+        return { error: null }
+      }
+      
+      return { error }
+    }
   },
 
   // Get current session with error handling
