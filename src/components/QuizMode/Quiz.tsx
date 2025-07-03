@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Question } from '../../types';
-import { Clock, CheckCircle, XCircle, ArrowRight, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, ArrowRight, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader, Briefcase } from 'lucide-react';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { analyzeCISSPKeywords, highlightKeywords } from '../../services/keywordAnalysis';
+import { generateManagerPerspective } from '../../services/openai';
 import { useQuizPersistence } from '../../hooks/useQuizPersistence';
 
 interface QuizProps {
@@ -48,6 +49,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
   const [loadingKeywords, setLoadingKeywords] = useState(false);
   const [keywordError, setKeywordError] = useState<string | null>(null);
 
+  // Manager's perspective feature
+  const [managerPerspectives, setManagerPerspectives] = useState<Record<string, string>>({});
+  const [showManagerPerspective, setShowManagerPerspective] = useState(false);
+  const [loadingManagerPerspective, setLoadingManagerPerspective] = useState(false);
+  const [managerPerspectiveError, setManagerPerspectiveError] = useState<string | null>(null);
+
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
 
@@ -87,6 +94,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
     setQuestionStartTime(Date.now());
     setTallyCounts([0, 0, 0, 0]); // Reset tallies for new question
     setKeywordError(null);
+    setShowManagerPerspective(false);
+    setManagerPerspectiveError(null);
   }, [currentIndex, userAnswers]);
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -145,6 +154,45 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
       setKeywordError('Failed to analyze keywords. Please try again.');
     } finally {
       setLoadingKeywords(false);
+    }
+  };
+
+  const handleManagerPerspective = async () => {
+    const questionId = currentQuestion.id;
+    
+    // If we already have the perspective for this question, just toggle display
+    if (managerPerspectives[questionId]) {
+      setShowManagerPerspective(!showManagerPerspective);
+      return;
+    }
+
+    // If we don't have the perspective yet, generate it
+    if (loadingManagerPerspective) return;
+    
+    setLoadingManagerPerspective(true);
+    setManagerPerspectiveError(null);
+    
+    try {
+      const result = await generateManagerPerspective(
+        currentQuestion.question,
+        currentQuestion.options,
+        currentQuestion.correctAnswer,
+        currentQuestion.domain
+      );
+      
+      if (result.error) {
+        setManagerPerspectiveError(result.error);
+      } else {
+        setManagerPerspectives(prev => ({
+          ...prev,
+          [questionId]: result.content
+        }));
+        setShowManagerPerspective(true);
+      }
+    } catch (error: any) {
+      setManagerPerspectiveError('Failed to generate manager perspective. Please try again.');
+    } finally {
+      setLoadingManagerPerspective(false);
     }
   };
 
@@ -219,6 +267,72 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
       return highlightKeywords(currentQuestion.question, keywords);
     }
     return currentQuestion.question;
+  };
+
+  // Format manager perspective response for better readability
+  const formatManagerPerspective = (text: string): JSX.Element[] => {
+    const cleanText = text
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+      .replace(/\*(.*?)\*/g, '$1')     // Remove italic markdown
+      .replace(/\s+/g, ' ')           // Clean multiple spaces
+      .trim();
+
+    const sections = cleanText.split(/\n\s*\n/).filter(section => section.trim());
+    
+    return sections.map((section, index) => {
+      const trimmedSection = section.trim();
+      
+      // Check if it's a numbered section (1., 2., etc.)
+      if (/^\d+\./.test(trimmedSection)) {
+        const [title, ...content] = trimmedSection.split(/[:\-]/);
+        return (
+          <div key={index} className="mb-4">
+            <h4 className="font-semibold text-blue-800 mb-2 text-sm">
+              {title.trim()}
+            </h4>
+            {content.length > 0 && (
+              <div className="text-gray-700 text-sm leading-relaxed pl-4">
+                {content.join(':').trim()}
+              </div>
+            )}
+          </div>
+        );
+      }
+      
+      // Check if it contains bullet points
+      if (trimmedSection.includes('- ') || trimmedSection.includes('• ')) {
+        const lines = trimmedSection.split('\n');
+        const title = lines[0];
+        const bullets = lines.slice(1).filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
+        
+        return (
+          <div key={index} className="mb-4">
+            {title && !title.startsWith('-') && !title.startsWith('•') && (
+              <h4 className="font-semibold text-blue-800 mb-2 text-sm">{title}</h4>
+            )}
+            <ul className="space-y-1 pl-4">
+              {bullets.map((bullet, bIndex) => (
+                <li key={bIndex} className="text-gray-700 text-sm flex items-start">
+                  <span className="text-blue-600 mr-2 mt-1">•</span>
+                  <span className="leading-relaxed">
+                    {bullet.replace(/^[-•]\s*/, '').trim()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      }
+      
+      // Regular paragraph
+      return (
+        <div key={index} className="mb-3">
+          <p className="text-gray-700 text-sm leading-relaxed">
+            {trimmedSection}
+          </p>
+        </div>
+      );
+    });
   };
 
   return (
@@ -549,6 +663,52 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
                           {currentQuestion.explanation}
                         </p>
                       </div>
+                    </div>
+
+                    {/* Manager's Perspective Button */}
+                    <div className="mt-4">
+                      <button
+                        onClick={handleManagerPerspective}
+                        disabled={loadingManagerPerspective}
+                        className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                      >
+                        {loadingManagerPerspective ? (
+                          <Loader className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Briefcase className="w-4 h-4" />
+                        )}
+                        <span>
+                          {loadingManagerPerspective 
+                            ? 'Generating...' 
+                            : showManagerPerspective 
+                            ? 'Hide Manager\'s Perspective' 
+                            : 'Manager\'s Perspective'
+                          }
+                        </span>
+                      </button>
+
+                      {/* Manager Perspective Error */}
+                      {managerPerspectiveError && (
+                        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <XCircle className="w-4 h-4 text-red-600" />
+                            <span className="text-red-800 text-sm">{managerPerspectiveError}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Manager Perspective Content */}
+                      {showManagerPerspective && managerPerspectives[currentQuestion.id] && (
+                        <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-center space-x-2 mb-3">
+                            <Briefcase className="w-4 h-4 text-blue-600" />
+                            <span className="font-medium text-blue-900 text-sm">Manager's Strategic Perspective</span>
+                          </div>
+                          <div className="max-w-none">
+                            {formatManagerPerspective(managerPerspectives[currentQuestion.id])}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

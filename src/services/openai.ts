@@ -172,6 +172,43 @@ ${context ? `Additional context: ${context}` : ''}`;
   }
 };
 
+export const generateManagerPerspective = async (
+  question: string,
+  options: string[],
+  correctAnswer: number,
+  domain: string
+): Promise<AIResponse> => {
+  const prompt = `As a senior cybersecurity manager and CISSP professional, explain how to think through this question from a strategic management perspective:
+
+Question: ${question}
+
+Options:
+${options.map((option, index) => `${String.fromCharCode(65 + index)}. ${option}`).join('\n')}
+
+Correct Answer: ${String.fromCharCode(65 + correctAnswer)}. ${options[correctAnswer]}
+Domain: ${domain}
+
+Provide a manager's strategic perspective that covers:
+
+1. **Strategic Context**: How does this question relate to business objectives and organizational risk management?
+
+2. **Decision Framework**: What management principles and frameworks should guide the thinking process?
+
+3. **Stakeholder Considerations**: Who are the key stakeholders affected by this decision and what are their concerns?
+
+4. **Risk vs. Business Impact**: How should a manager balance security requirements with business needs and operational efficiency?
+
+5. **Implementation Perspective**: What practical considerations would a manager need to think about when implementing this solution?
+
+6. **Long-term Implications**: What are the strategic and long-term consequences of this decision?
+
+Keep the response focused on management thinking patterns, strategic decision-making, and business alignment rather than just technical details. Help the reader understand how senior security professionals approach these types of decisions in real-world scenarios.
+
+Limit response to 300 words and focus on actionable management insights.`;
+
+  return generateAIResponse(prompt, `This is a CISSP management perspective analysis for the ${domain} domain.`);
+};
+
 export const generateQuestionExplanation = async (question: string, correctAnswer: string, domain: string): Promise<AIResponse> => {
   const prompt = `Please provide an enhanced explanation for this CISSP question:
 
