@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
+import { SocialShareButtons } from '../UI/SocialShareButtons';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -246,7 +247,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 )}
               </div>
               
-              <div className="flex items-center space-x-6 text-sm text-gray-600">
+              <div className="flex items-center space-x-6 text-sm text-gray-600 mb-8">
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>Secure payments via Stripe</span>
@@ -259,6 +260,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>Cancel anytime</span>
                 </div>
+              </div>
+
+              {/* Social Share Section */}
+              <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                <SocialShareButtons
+                  title="CISSP Study Group - AI-Powered Study Platform"
+                  text="Check out this amazing AI-powered CISSP study platform! Generate unlimited practice questions and ace your certification. 🚀"
+                  hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'AI']}
+                  variant="compact"
+                  size="sm"
+                />
               </div>
             </div>
             
@@ -502,7 +514,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             Join thousands of security professionals who've achieved certification success with our AI-powered platform.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <button
               onClick={handleGetStarted}
               disabled={loading}
@@ -517,8 +529,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <span>Schedule Demo</span>
             </button>
           </div>
+
+          {/* Share Your Success Section */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
+            <h3 className="text-lg font-semibold text-white mb-4">Share with Your Network</h3>
+            <SocialShareButtons
+              title="CISSP Study Group - AI-Powered Study Platform"
+              text="🚀 Discovered an amazing AI-powered CISSP study platform! Generate unlimited practice questions and master cybersecurity concepts. Perfect for anyone pursuing CISSP certification! #CISSP #Cybersecurity"
+              hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'AI', 'Certification']}
+              variant="icon-only"
+              size="lg"
+              className="justify-center"
+            />
+          </div>
           
-          <div className="flex items-center justify-center space-x-8 mt-8 text-blue-100 text-sm">
+          <div className="flex items-center justify-center space-x-8 text-blue-100 text-sm">
             <div className="flex items-center space-x-1">
               <CheckCircle className="w-4 h-4" />
               <span>Secure payments via Stripe</span>

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Question } from '../../types';
-import { Star, StarOff, ChevronDown, ChevronUp, Brain } from 'lucide-react';
+import { Star, StarOff, ChevronDown, ChevronUp, Brain, Share2 } from 'lucide-react';
 import { getDomainColor, getDifficultyColor, getStatusColor, generateColorClasses, categoryIcons } from '../../utils/colorSystem';
+import { SocialShareButtons } from './SocialShareButtons';
 
 interface QuestionCardProps {
   question: Question;
@@ -24,18 +25,72 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   showActions = true,
   className = ''
 }) => {
+  const [showShareMenu, setShowShareMenu] = React.useState(false);
   const domainColor = getDomainColor(question.domain);
   const difficultyColor = getDifficultyColor(question.difficulty);
   const practiceColor = getStatusColor('practice');
   const aiColor = getStatusColor('ai-generated');
 
+  const getShareMessage = () => {
+    const correctAnswer = question.options[question.correctAnswer];
+    return `🧠 CISSP Practice Question from CISSPStudyGroup.com:
+
+"${question.question}"
+
+Answer: ${correctAnswer}
+
+💡 ${question.explanation}
+
+#CISSP #Cybersecurity #StudyGroup`;
+  };
+
+  const handleShareClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowShareMenu(!showShareMenu);
+  };
+
   return (
     <div 
-      className={`bg-white rounded-xl border-2 border-gray-200 shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-200 ${className}`}
+      className={`bg-white rounded-xl border-2 border-gray-200 shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-200 relative ${className}`}
     >
+      {/* Share Button in Top Right Corner */}
+      <div className="absolute top-4 right-4 z-10">
+        <div className="relative">
+          <button
+            onClick={handleShareClick}
+            className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors group"
+            title="Share this question"
+          >
+            <Share2 className="w-4 h-4 text-gray-600 group-hover:text-gray-800" />
+          </button>
+          
+          {/* Share Menu Dropdown */}
+          {showShareMenu && (
+            <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-80 z-20">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-medium text-gray-900">Share Question</h4>
+                <button
+                  onClick={() => setShowShareMenu(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ×
+                </button>
+              </div>
+              <SocialShareButtons
+                title={`CISSP Practice Question - ${question.domain}`}
+                text={getShareMessage()}
+                hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'Practice']}
+                variant="compact"
+                size="sm"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Card Header */}
       <div 
-        className="p-5 cursor-pointer"
+        className="p-5 cursor-pointer pr-16"
         onClick={onToggleExpanded}
       >
         <div className="flex items-start justify-between mb-4">
@@ -222,6 +277,14 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Overlay to close share menu when clicking outside */}
+      {showShareMenu && (
+        <div 
+          className="fixed inset-0 z-10" 
+          onClick={() => setShowShareMenu(false)}
+        />
       )}
     </div>
   );

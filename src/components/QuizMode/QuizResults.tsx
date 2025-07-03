@@ -1,6 +1,7 @@
 import React from 'react';
-import { Trophy, Clock, Target, RotateCcw, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { Trophy, Clock, Target, RotateCcw, ArrowLeft, CheckCircle, XCircle, Share2 } from 'lucide-react';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
+import { SocialShareButtons } from '../UI/SocialShareButtons';
 
 interface QuizResultsProps {
   results: {
@@ -40,6 +41,11 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz,
     if (percentage >= 70) return 'Good work! Consider reviewing the missed topics.';
     if (percentage >= 60) return 'Not bad! Focus on strengthening these concepts.';
     return 'Keep studying! Review these topics and try again.';
+  };
+
+  const getShareMessage = () => {
+    const emoji = percentage >= 80 ? '🎉' : percentage >= 60 ? '📚' : '💪';
+    return `Just completed a CISSP practice quiz on CISSPStudyGroup.com! ${emoji} Scored ${percentage}% (${results.correctAnswers}/${results.totalQuestions}) in ${formatTime(results.timeSpent)}. Great platform for CISSP exam prep! #CISSP #Cybersecurity`;
   };
 
   return (
@@ -88,7 +94,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz,
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <button
               onClick={onRetakeQuiz}
               className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
@@ -103,6 +109,30 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz,
               <ArrowLeft className="w-4 h-4" />
               <span>New Quiz</span>
             </button>
+          </div>
+
+          {/* Share Achievement Section */}
+          <div className="border-t border-gray-200 pt-8">
+            <div className="text-center mb-6">
+              <div className="flex items-center justify-center space-x-2 mb-3">
+                <Share2 className="w-5 h-5 text-gray-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Share Your Achievement</h3>
+              </div>
+              <p className="text-gray-600 text-sm">
+                Let your network know about your CISSP study progress!
+              </p>
+            </div>
+            
+            <div className="max-w-md mx-auto">
+              <SocialShareButtons
+                title={`CISSP Quiz Results - ${percentage}% Score`}
+                text={getShareMessage()}
+                hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'Certification']}
+                variant="compact"
+                size="md"
+                className="justify-center"
+              />
+            </div>
           </div>
         </div>
 
