@@ -10,6 +10,7 @@ interface SocialShareButtonsProps {
   size?: 'sm' | 'md' | 'lg';
   variant?: 'full' | 'compact' | 'icon-only';
   showCopyLink?: boolean;
+  copyContent?: string; // New prop for custom copy content
 }
 
 export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
@@ -20,7 +21,8 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
   className = '',
   size = 'md',
   variant = 'full',
-  showCopyLink = true
+  showCopyLink = true,
+  copyContent
 }) => {
   const [copied, setCopied] = React.useState(false);
 
@@ -39,11 +41,13 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
     e.preventDefault();
     e.stopPropagation();
     try {
-      await navigator.clipboard.writeText(url);
+      // Use custom copy content if provided, otherwise use the URL
+      const contentToCopy = copyContent || url;
+      await navigator.clipboard.writeText(contentToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy link:', err);
+      console.error('Failed to copy content:', err);
     }
   };
 
@@ -102,7 +106,7 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
           <button
             onClick={handleCopyLink}
             className={`${buttonSizeClasses[size]} bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors`}
-            title="Copy link"
+            title={copyContent ? "Copy question & answer" : "Copy link"}
           >
             {copied ? <Check className={iconSize[size]} /> : <Copy className={iconSize[size]} />}
           </button>
@@ -142,7 +146,7 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
             <button
               onClick={handleCopyLink}
               className="p-1 text-gray-600 hover:bg-gray-50 rounded transition-colors"
-              title="Copy link"
+              title={copyContent ? "Copy question & answer" : "Copy link"}
             >
               {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
             </button>
@@ -200,7 +204,7 @@ export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
         >
           {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
           <span className="font-medium">
-            {copied ? 'Link Copied!' : 'Copy Link'}
+            {copied ? 'Copied!' : copyContent ? 'Copy Question & Answer' : 'Copy Link'}
           </span>
         </button>
       )}

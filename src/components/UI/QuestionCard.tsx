@@ -33,17 +33,32 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 
   const getShareMessage = () => {
     const correctAnswer = question.options[question.correctAnswer];
-    return `🧠 CISSP Practice Question from CISSPStudyGroup.com:
+    // Keep under 280 characters for Twitter
+    return `🧠 I'm studying with CISSPStudyGroup.com! Check out this ${question.difficulty} ${question.domain} question:
 
-"${question.question}"
+"${question.question.length > 120 ? question.question.substring(0, 120) + '...' : question.question}"
 
 ✅ Answer: ${correctAnswer}
 
-💡 Explanation: ${question.explanation}
+Great AI-powered CISSP prep! 🚀 site.cisspstudygroup.com
 
-Master cybersecurity concepts with AI-powered practice questions! 🚀
+#CISSP #Cybersecurity #StudyGroup`;
+  };
 
-#CISSP #Cybersecurity #StudyGroup #InfoSec`;
+  const getCopyContent = () => {
+    const correctAnswer = question.options[question.correctAnswer];
+    return `CISSP Practice Question (${question.domain} - ${question.difficulty}):
+
+${question.question}
+
+Options:
+${question.options.map((option, index) => `${String.fromCharCode(65 + index)}. ${option}`).join('\n')}
+
+Correct Answer: ${String.fromCharCode(65 + question.correctAnswer)}. ${correctAnswer}
+
+Explanation: ${question.explanation}
+
+Study more at: https://site.cisspstudygroup.com`;
   };
 
   const handleShareClick = (e: React.MouseEvent) => {
@@ -287,6 +302,7 @@ Master cybersecurity concepts with AI-powered practice questions! 🚀
                     hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'Practice', 'InfoSec']}
                     variant="compact"
                     size="sm"
+                    copyContent={getCopyContent()}
                   />
                 </div>
               </div>

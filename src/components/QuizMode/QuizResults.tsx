@@ -45,16 +45,16 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz,
 
   const getShareMessage = () => {
     const emoji = percentage >= 80 ? '🎉' : percentage >= 60 ? '📚' : '💪';
-    return `Just completed a CISSP practice quiz on CISSPStudyGroup.com! ${emoji} 
+    // Keep under 280 characters for Twitter
+    return `Just scored ${percentage}% on my CISSP practice quiz! ${emoji} 
 
-📊 Score: ${percentage}% (${results.correctAnswers}/${results.totalQuestions})
-⏱️ Time: ${formatTime(results.timeSpent)}
+${results.correctAnswers}/${results.totalQuestions} correct in ${formatTime(results.timeSpent)}
 
-Great platform for CISSP exam prep with AI-powered questions and detailed explanations! Perfect for cybersecurity professionals pursuing certification.
+I'm studying with CISSPStudyGroup.com - great AI-powered questions and explanations! Perfect for CISSP prep 🚀
 
-Check it out: site.cisspstudygroup.com
+site.cisspstudygroup.com
 
-#CISSP #Cybersecurity #StudyGroup #InfoSec #Certification`;
+#CISSP #Cybersecurity #StudyGroup`;
   };
 
   return (

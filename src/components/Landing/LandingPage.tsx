@@ -267,7 +267,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Share with Your Network</h3>
                 <SocialShareButtons
                   title="CISSP Study Group - AI-Powered Study Platform"
-                  text="🚀 Just discovered an amazing AI-powered CISSP study platform! Generate unlimited practice questions and master cybersecurity concepts. Perfect for anyone pursuing CISSP certification! Check it out at site.cisspstudygroup.com #CISSP #Cybersecurity #StudyGroup #AI #InfoSec"
+                  text="🚀 Found an amazing AI-powered CISSP study platform! Generate unlimited practice questions and master cybersecurity concepts. Perfect for CISSP certification! site.cisspstudygroup.com #CISSP #Cybersecurity #StudyGroup #AI"
                   hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'AI', 'InfoSec']}
                   variant="compact"
                   size="md"
@@ -536,7 +536,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <h3 className="text-lg font-semibold text-white mb-4">Share with Your Network</h3>
             <SocialShareButtons
               title="CISSP Study Group - AI-Powered Study Platform"
-              text="🚀 Discovered an amazing AI-powered CISSP study platform! Generate unlimited practice questions and master cybersecurity concepts. Perfect for anyone pursuing CISSP certification! Check it out at site.cisspstudygroup.com #CISSP #Cybersecurity #StudyGroup #AI #InfoSec #Certification"
+              text="🚀 Found an amazing AI-powered CISSP study platform! Generate unlimited practice questions and master cybersecurity concepts. Perfect for CISSP certification! site.cisspstudygroup.com #CISSP #Cybersecurity #StudyGroup #AI"
               hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'AI', 'Certification', 'InfoSec']}
               variant="icon-only"
               size="lg"
