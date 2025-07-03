@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Question } from '../../types';
-import { Target, Play, ArrowLeft, ArrowRight, Clock, X, Settings, Filter, RotateCcw, Calendar } from 'lucide-react';
+import { Target, Play, ArrowLeft, ArrowRight, Clock, X, Settings, Filter, RotateCcw, Calendar, RefreshCw } from 'lucide-react';
 import { Quiz } from './Quiz';
 import { QuizResults } from './QuizResults';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { useQuestions } from '../../hooks/useQuestions';
 import { useSessionTracker } from '../../hooks/useSessionTracker';
+import { useQuizPersistence } from '../../hooks/useQuizPersistence';
 
 interface QuizSetupProps {
   onQuizComplete?: (incorrectQuestions: Question[]) => void;
@@ -40,6 +41,7 @@ export const QuizSetup: React.FC<QuizSetupProps> = ({ onQuizComplete }) => {
     resetSession, 
     getSessionStats 
   } = useSessionTracker();
+  const { hasPersistedQuiz, persistedState, clearPersistedState } = useQuizPersistence();
   
   const [numberOfQuestions, setNumberOfQuestions] = useState(5);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -80,6 +82,22 @@ export const QuizSetup: React.FC<QuizSetupProps> = ({ onQuizComplete }) => {
       isActive: true
     });
     setQuizMode('quiz');
+  };
+
+  const resumeQuiz = () => {
+    if (hasPersistedQuiz() && persistedState) {
+      setQuizSession({
+        questions: persistedState.questions,
+        currentIndex: persistedState.currentIndex,
+        startTime: new Date(persistedState.startTime),
+        isActive: true
+      });
+      setQuizMode('quiz');
+    }
+  };
+
+  const discardPersistedQuiz = () => {
+    clearPersistedState();
   };
 
   const exitQuiz = () => {
@@ -178,6 +196,37 @@ export const QuizSetup: React.FC<QuizSetupProps> = ({ onQuizComplete }) => {
   // Quiz Setup Interface
   return (
     <div className="space-y-6">
+      {/* Resume Quiz Banner */}
+      {hasPersistedQuiz() && persistedState && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <RefreshCw className="w-5 h-5 text-blue-600" />
+              <div>
+                <h3 className="font-semibold text-blue-900">Resume Previous Quiz</h3>
+                <p className="text-blue-700 text-sm">
+                  You have an unfinished quiz on question {persistedState.currentIndex + 1} of {persistedState.questions.length}
+                </p>
+              </div>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={discardPersistedQuiz}
+                className="px-4 py-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+              >
+                Discard
+              </button>
+              <button
+                onClick={resumeQuiz}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                Resume Quiz
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
         <div className="flex items-center space-x-3 mb-4">
@@ -374,9 +423,10 @@ export const QuizSetup: React.FC<QuizSetupProps> = ({ onQuizComplete }) => {
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 sm:p-6 border border-blue-200">
         <h3 className="font-medium text-blue-900 mb-3">💡 Quiz Tips</h3>
         <ul className="text-blue-800 text-sm space-y-2">
+          <li>• <strong>Quiz Persistence:</strong> Your quiz progress is automatically saved - you can switch tabs and resume later</li>
           <li>• <strong>Session Tracking:</strong> Questions are tracked per session to avoid repeats</li>
-          <li>• <strong>Keyword Highlighting:</strong> Use the "Highlight Keywords" button to identify key CISSP terms</li>
-          <li>• <strong>Participant Tallies:</strong> Track group responses during study sessions</li>
+          <li>• <strong>Keyword Highlighting:</strong> Use the "Highlight Keywords" button to identify key CISSP terms (analyzes once per question)</li>
+          <li>• <strong>Participant Tallies:</strong> Track group responses during study sessions without the word "option"</li>
           <li>• <strong>Immediate Feedback:</strong> Answer questions with instant feedback and scoring</li>
           <li>• <strong>Progress Tracking:</strong> See detailed results and explanations after completion</li>
           <li>• Questions are randomly selected and shuffled for each quiz</li>

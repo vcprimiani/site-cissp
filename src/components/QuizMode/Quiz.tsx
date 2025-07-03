@@ -3,6 +3,7 @@ import { Question } from '../../types';
 import { Clock, CheckCircle, XCircle, ArrowRight, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader } from 'lucide-react';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { analyzeCISSPKeywords, highlightKeywords } from '../../services/keywordAnalysis';
+import { useQuizPersistence } from '../../hooks/useQuizPersistence';
 
 interface QuizProps {
   questions: Question[];
@@ -23,44 +24,68 @@ interface QuizResults {
 }
 
 export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<(number | null)[]>(new Array(questions.length).fill(null));
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [showResult, setShowResult] = useState(false);
-  const [startTime] = useState(Date.now());
-  const [questionStartTime, setQuestionStartTime] = useState(Date.now());
-  const [questionTimes, setQuestionTimes] = useState<number[]>([]);
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const { persistedState, saveQuizState, clearPersistedState, hasPersistedQuiz } = useQuizPersistence();
+  
+  // Initialize state from persisted data or defaults
+  const [currentIndex, setCurrentIndex] = useState(persistedState?.currentIndex || 0);
+  const [userAnswers, setUserAnswers] = useState<(number | null)[]>(
+    persistedState?.userAnswers || new Array(questions.length).fill(null)
+  );
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(persistedState?.selectedAnswer || null);
+  const [showResult, setShowResult] = useState(persistedState?.showResult || false);
+  const [startTime] = useState(persistedState?.startTime || Date.now());
+  const [questionStartTime, setQuestionStartTime] = useState(persistedState?.questionStartTime || Date.now());
+  const [questionTimes, setQuestionTimes] = useState<number[]>(persistedState?.questionTimes || []);
+  const [elapsedTime, setElapsedTime] = useState(persistedState?.elapsedTime || 0);
   
   // Tally tracking for participant responses
-  const [tallyCounts, setTallyCounts] = useState<number[]>([0, 0, 0, 0]);
-  const [showTallies, setShowTallies] = useState(false);
+  const [tallyCounts, setTallyCounts] = useState<number[]>(persistedState?.tallyCounts || [0, 0, 0, 0]);
+  const [showTallies, setShowTallies] = useState(persistedState?.showTallies || false);
 
-  // Keyword highlighting
-  const [keywords, setKeywords] = useState<string[]>([]);
-  const [showKeywords, setShowKeywords] = useState(false);
+  // Keyword highlighting - store keywords per question
+  const [questionKeywords, setQuestionKeywords] = useState<Record<string, string[]>>({});
+  const [showKeywords, setShowKeywords] = useState(persistedState?.showKeywords || false);
   const [loadingKeywords, setLoadingKeywords] = useState(false);
   const [keywordError, setKeywordError] = useState<string | null>(null);
 
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
 
+  // Save state whenever it changes
+  useEffect(() => {
+    saveQuizState({
+      questions,
+      currentIndex,
+      userAnswers,
+      selectedAnswer,
+      showResult,
+      startTime,
+      questionStartTime,
+      questionTimes,
+      elapsedTime,
+      tallyCounts,
+      showTallies,
+      keywords: questionKeywords[currentQuestion?.id] || [],
+      showKeywords,
+      isActive: true
+    });
+  }, [currentIndex, userAnswers, selectedAnswer, showResult, questionStartTime, questionTimes, elapsedTime, tallyCounts, showTallies, questionKeywords, showKeywords]);
+
   // Timer effect
   useEffect(() => {
     const interval = setInterval(() => {
-      setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+      const newElapsedTime = Math.floor((Date.now() - startTime) / 1000);
+      setElapsedTime(newElapsedTime);
     }, 1000);
     return () => clearInterval(interval);
   }, [startTime]);
 
-  // Reset selected answer, tallies, and keywords when question changes
+  // Reset selected answer and tallies when question changes
   useEffect(() => {
     setSelectedAnswer(userAnswers[currentIndex]);
     setShowResult(false);
     setQuestionStartTime(Date.now());
     setTallyCounts([0, 0, 0, 0]); // Reset tallies for new question
-    setKeywords([]); // Reset keywords for new question
-    setShowKeywords(false);
     setKeywordError(null);
   }, [currentIndex, userAnswers]);
 
@@ -89,7 +114,16 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
     return tallyCounts.reduce((sum, count) => sum + count, 0);
   };
 
-  const handleAnalyzeKeywords = async () => {
+  const handleToggleKeywords = async () => {
+    const questionId = currentQuestion.id;
+    
+    // If we already have keywords for this question, just toggle display
+    if (questionKeywords[questionId]) {
+      setShowKeywords(!showKeywords);
+      return;
+    }
+
+    // If we don't have keywords yet, analyze them
     if (loadingKeywords) return;
     
     setLoadingKeywords(true);
@@ -101,7 +135,10 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
       if (result.error) {
         setKeywordError(result.error);
       } else {
-        setKeywords(result.keywords);
+        setQuestionKeywords(prev => ({
+          ...prev,
+          [questionId]: result.keywords
+        }));
         setShowKeywords(true);
       }
     } catch (error: any) {
@@ -128,7 +165,9 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
     setUserAnswers(newAnswers);
 
     if (isLastQuestion) {
-      // Quiz complete - ensure we have all question times
+      // Quiz complete - clear persisted state and calculate results
+      clearPersistedState();
+      
       const finalTimes = [...questionTimes];
       finalTimes[currentIndex] = timeSpent;
       
@@ -159,6 +198,11 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
     setShowResult(true);
   };
 
+  const handleExit = () => {
+    clearPersistedState();
+    onExit();
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -170,6 +214,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
 
   // Get highlighted question text
   const getHighlightedQuestionText = () => {
+    const keywords = questionKeywords[currentQuestion.id] || [];
     if (showKeywords && keywords.length > 0) {
       return highlightKeywords(currentQuestion.question, keywords);
     }
@@ -189,12 +234,17 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
             <div className="text-sm text-gray-600">
               Question {currentIndex + 1} of {questions.length}
             </div>
+            {hasPersistedQuiz() && (
+              <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                Resumed
+              </div>
+            )}
           </div>
           
           <div className="flex items-center space-x-4">
             {/* Keyword Analysis Button */}
             <button
-              onClick={handleAnalyzeKeywords}
+              onClick={handleToggleKeywords}
               disabled={loadingKeywords}
               className={`flex items-center space-x-2 px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
                 showKeywords 
@@ -207,7 +257,14 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
               ) : (
                 <Lightbulb className="w-4 h-4" />
               )}
-              <span>{loadingKeywords ? 'Analyzing...' : showKeywords ? 'Keywords On' : 'Highlight Keywords'}</span>
+              <span>
+                {loadingKeywords 
+                  ? 'Analyzing...' 
+                  : showKeywords 
+                  ? 'Hide Keywords' 
+                  : 'Highlight Keywords'
+                }
+              </span>
             </button>
 
             {/* Tally Toggle */}
@@ -227,7 +284,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
               <span className="font-mono text-sm">{formatTime(elapsedTime)}</span>
             </div>
             <button
-              onClick={onExit}
+              onClick={handleExit}
               className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
             >
               Exit
@@ -269,7 +326,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
                       <div key={index} className="border border-gray-200 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-medium text-gray-900">
-                            Option {String.fromCharCode(65 + index)}
+                            {String.fromCharCode(65 + index)}
                           </span>
                           <div className="flex items-center space-x-2">
                             <button
@@ -356,14 +413,14 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
                 </div>
 
                 {/* Keywords Display */}
-                {showKeywords && keywords.length > 0 && (
+                {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 && (
                   <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <div className="flex items-center space-x-2 mb-2">
                       <Lightbulb className="w-4 h-4 text-yellow-600" />
                       <span className="font-medium text-yellow-800">Key CISSP Terms:</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {keywords.map((keyword, index) => (
+                      {questionKeywords[currentQuestion.id].map((keyword, index) => (
                         <span
                           key={index}
                           className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-medium"
@@ -387,7 +444,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
 
                 {/* Question Text */}
                 <div className="mb-8">
-                  {showKeywords && keywords.length > 0 ? (
+                  {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 ? (
                     <div 
                       className="text-xl leading-relaxed text-gray-900 font-medium"
                       dangerouslySetInnerHTML={{ __html: getHighlightedQuestionText() }}
