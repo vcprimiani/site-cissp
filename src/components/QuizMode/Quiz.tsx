@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Question } from '../../types';
-import { Clock, CheckCircle, XCircle, ArrowRight, RotateCcw, Trophy, Target, Plus, Minus } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, ArrowRight, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader } from 'lucide-react';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
+import { analyzeCISSPKeywords, highlightKeywords } from '../../services/keywordAnalysis';
 
 interface QuizProps {
   questions: Question[];
@@ -35,6 +36,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
   const [tallyCounts, setTallyCounts] = useState<number[]>([0, 0, 0, 0]);
   const [showTallies, setShowTallies] = useState(false);
 
+  // Keyword highlighting
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [showKeywords, setShowKeywords] = useState(false);
+  const [loadingKeywords, setLoadingKeywords] = useState(false);
+  const [keywordError, setKeywordError] = useState<string | null>(null);
+
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
 
@@ -46,12 +53,15 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
     return () => clearInterval(interval);
   }, [startTime]);
 
-  // Reset selected answer and tallies when question changes
+  // Reset selected answer, tallies, and keywords when question changes
   useEffect(() => {
     setSelectedAnswer(userAnswers[currentIndex]);
     setShowResult(false);
     setQuestionStartTime(Date.now());
     setTallyCounts([0, 0, 0, 0]); // Reset tallies for new question
+    setKeywords([]); // Reset keywords for new question
+    setShowKeywords(false);
+    setKeywordError(null);
   }, [currentIndex, userAnswers]);
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -77,6 +87,28 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
 
   const getTotalParticipants = () => {
     return tallyCounts.reduce((sum, count) => sum + count, 0);
+  };
+
+  const handleAnalyzeKeywords = async () => {
+    if (loadingKeywords) return;
+    
+    setLoadingKeywords(true);
+    setKeywordError(null);
+    
+    try {
+      const result = await analyzeCISSPKeywords(currentQuestion.question);
+      
+      if (result.error) {
+        setKeywordError(result.error);
+      } else {
+        setKeywords(result.keywords);
+        setShowKeywords(true);
+      }
+    } catch (error: any) {
+      setKeywordError('Failed to analyze keywords. Please try again.');
+    } finally {
+      setLoadingKeywords(false);
+    }
   };
 
   const handleNextQuestion = () => {
@@ -136,6 +168,14 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
   const domainColor = getDomainColor(currentQuestion.domain);
   const difficultyColor = getDifficultyColor(currentQuestion.difficulty);
 
+  // Get highlighted question text
+  const getHighlightedQuestionText = () => {
+    if (showKeywords && keywords.length > 0) {
+      return highlightKeywords(currentQuestion.question, keywords);
+    }
+    return currentQuestion.question;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Header */}
@@ -152,6 +192,24 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
           </div>
           
           <div className="flex items-center space-x-4">
+            {/* Keyword Analysis Button */}
+            <button
+              onClick={handleAnalyzeKeywords}
+              disabled={loadingKeywords}
+              className={`flex items-center space-x-2 px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                showKeywords 
+                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' 
+                  : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+              }`}
+            >
+              {loadingKeywords ? (
+                <Loader className="w-4 h-4 animate-spin" />
+              ) : (
+                <Lightbulb className="w-4 h-4" />
+              )}
+              <span>{loadingKeywords ? 'Analyzing...' : showKeywords ? 'Keywords On' : 'Highlight Keywords'}</span>
+            </button>
+
             {/* Tally Toggle */}
             <button
               onClick={() => setShowTallies(!showTallies)}
@@ -297,11 +355,48 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
                   </div>
                 </div>
 
+                {/* Keywords Display */}
+                {showKeywords && keywords.length > 0 && (
+                  <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Lightbulb className="w-4 h-4 text-yellow-600" />
+                      <span className="font-medium text-yellow-800">Key CISSP Terms:</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {keywords.map((keyword, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-medium"
+                        >
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Keyword Error */}
+                {keywordError && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <XCircle className="w-4 h-4 text-red-600" />
+                      <span className="text-red-800 text-sm">{keywordError}</span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Question Text */}
                 <div className="mb-8">
-                  <p className="text-xl leading-relaxed text-gray-900 font-medium">
-                    {currentQuestion.question}
-                  </p>
+                  {showKeywords && keywords.length > 0 ? (
+                    <div 
+                      className="text-xl leading-relaxed text-gray-900 font-medium"
+                      dangerouslySetInnerHTML={{ __html: getHighlightedQuestionText() }}
+                    />
+                  ) : (
+                    <p className="text-xl leading-relaxed text-gray-900 font-medium">
+                      {currentQuestion.question}
+                    </p>
+                  )}
                 </div>
 
                 {/* Answer Options */}
