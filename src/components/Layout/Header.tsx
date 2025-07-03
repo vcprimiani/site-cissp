@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser 
             />
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-gray-900">CISSP Study Group</h1>
-              <p className="text-xs text-gray-600">Question Bank & Quiz Platform</p>
+              <p className="text-xs text-gray-600">AI Question Bank & Quiz Platform</p>
             </div>
             <div className="sm:hidden">
               <h1 className="text-lg font-bold text-gray-900">CISSP</h1>
