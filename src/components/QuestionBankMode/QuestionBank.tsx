@@ -147,6 +147,9 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
             >
               <Bookmark className={`w-5 h-5 mr-1 ${showBookmarksOnly ? 'fill-blue-400 text-blue-700' : 'text-gray-400'}`} fill={showBookmarksOnly ? 'currentColor' : 'none'} />
               {showBookmarksOnly ? 'Bookmarked' : 'Show Bookmarks'}
+              <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-200 text-blue-800">
+                {bookmarkedIds.length}
+              </span>
             </button>
           </div>
         </div>

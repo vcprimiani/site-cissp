@@ -344,14 +344,20 @@ Study more at: https://site.cisspstudygroup.com`;
         )}
         {/* Bookmark Button */}
         <button
-          className="p-2 rounded-full bg-white shadow hover:bg-blue-50 transition-colors border border-gray-200"
+          className={`p-2 rounded-full shadow border border-gray-200 transition-colors ${
+            isBookmarked
+              ? 'bg-blue-100 border-blue-400 ring-2 ring-blue-300 shadow-lg'
+              : 'bg-white hover:bg-blue-50'
+          }`}
           aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
           onClick={e => { e.stopPropagation(); toggleBookmark(question.id); }}
           disabled={bookmarksLoading}
           style={{ zIndex: 2 }}
         >
           <Bookmark
-            className={`w-6 h-6 ${isBookmarked ? 'text-blue-600 fill-blue-100' : 'text-gray-400'} transition-colors`}
+            className={`w-6 h-6 transition-colors ${
+              isBookmarked ? 'text-blue-700 fill-blue-400' : 'text-gray-400'
+            }`}
             fill={isBookmarked ? 'currentColor' : 'none'}
           />
         </button>
