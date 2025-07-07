@@ -263,7 +263,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <img 
                   src="/Untitled design-7.png" 
                   alt="CISSP Study Group" 
-                  className="w-8 h-8 object-contain"
+                  className="w-8 h-8 object-contain rounded-xl"
                 />
               </div>
               <div>
@@ -673,9 +673,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               className="w-full max-w-md mx-auto flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg disabled:opacity-50"
             >
               <Crown className="w-5 h-5" />
-              <span>{loading ? 'Loading...' : 'Subscribe Now'}</span>
+              <span>{loading ? 'Loading...' : 'Register & Subscribe'}</span>
               <ArrowRight className="w-5 h-5" />
             </button>
+            <p className="text-sm text-gray-600 mt-2">Create your account to access premium features and subscribe.</p>
             
             <p className="text-sm text-gray-500 mt-4">
               🔒 Secure payments • Cancel anytime • No long-term commitment
@@ -744,11 +745,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-600 to-purple-600">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center">
                   <img 
                     src="/Untitled design-7.png" 
                     alt="CISSP Study Group" 
-                    className="w-6 h-6 object-contain"
+                    className="w-6 h-6 object-contain rounded-xl"
                   />
                 </div>
                 <span className="text-lg font-bold">CISSP Study Group</span>
