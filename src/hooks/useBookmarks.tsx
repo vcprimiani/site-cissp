@@ -1,6 +1,4 @@
 import React, { useEffect, useState, useCallback, useContext, createContext, ReactNode } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuth } from './useAuth';
 
 interface BookmarksContextValue {
   bookmarkedIds: string[];
@@ -13,58 +11,52 @@ interface BookmarksContextValue {
 
 const BookmarksContext = createContext<BookmarksContextValue | undefined>(undefined);
 
+const LOCAL_STORAGE_KEY = 'cissp-bookmarks';
+
 export function BookmarksProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch bookmarks for the current user
+  // Fetch bookmarks from localStorage
   const fetchBookmarks = useCallback(async () => {
-    if (!user) {
-      setBookmarkedIds([]);
-      return;
-    }
     setLoading(true);
-    const { data, error } = await supabase
-      .from('bookmarks')
-      .select('question_id')
-      .eq('user_id', user.id);
-    if (!error && data) {
-      setBookmarkedIds(data.map((row: any) => row.question_id));
+    try {
+      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (stored) {
+        setBookmarkedIds(JSON.parse(stored));
+      } else {
+        setBookmarkedIds([]);
+      }
+    } catch {
+      setBookmarkedIds([]);
     }
     setLoading(false);
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     fetchBookmarks();
   }, [fetchBookmarks]);
 
+  // Save bookmarks to localStorage
+  const saveBookmarks = (ids: string[]) => {
+    setBookmarkedIds(ids);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(ids));
+  };
+
   // Add a bookmark
   const addBookmark = async (questionId: string) => {
-    if (!user) return;
-    setLoading(true);
-    const { error } = await supabase
-      .from('bookmarks')
-      .insert([{ user_id: user.id, question_id: questionId }]);
-    if (!error) {
-      setBookmarkedIds((prev) => [...prev, questionId]);
+    if (!bookmarkedIds.includes(questionId)) {
+      const updated = [...bookmarkedIds, questionId];
+      saveBookmarks(updated);
     }
-    setLoading(false);
   };
 
   // Remove a bookmark
   const removeBookmark = async (questionId: string) => {
-    if (!user) return;
-    setLoading(true);
-    const { error } = await supabase
-      .from('bookmarks')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('question_id', questionId);
-    if (!error) {
-      setBookmarkedIds((prev) => prev.filter((id) => id !== questionId));
+    if (bookmarkedIds.includes(questionId)) {
+      const updated = bookmarkedIds.filter(id => id !== questionId);
+      saveBookmarks(updated);
     }
-    setLoading(false);
   };
 
   // Toggle bookmark

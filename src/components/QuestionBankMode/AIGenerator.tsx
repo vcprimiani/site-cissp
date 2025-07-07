@@ -43,6 +43,8 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
     includeDistractors: true,
     focusArea: ''
   });
+  const [showSavedBanner, setShowSavedBanner] = useState(false);
+  const [savedBannerCount, setSavedBannerCount] = useState(1);
 
   // Update usage info periodically
   useEffect(() => {
@@ -300,6 +302,9 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
       
       if (newQuestions.length > 0) {
         setRecentlyAdded(prev => [...newQuestions, ...prev.slice(0, 20)]); // Keep last 20 recently added
+        setSavedBannerCount(newQuestions.length);
+        setShowSavedBanner(true);
+        setTimeout(() => setShowSavedBanner(false), 3500);
         
         // Auto-navigate to Question Bank after successful generation
         setTimeout(() => {
@@ -403,6 +408,9 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
       
       if (newQuestions.length > 0) {
         setRecentlyAdded(prev => [...newQuestions, ...prev.slice(0, 20)]); // Keep last 20 recently added
+        setSavedBannerCount(newQuestions.length);
+        setShowSavedBanner(true);
+        setTimeout(() => setShowSavedBanner(false), 3500);
         
         // Auto-navigate to Question Bank after successful generation
         setTimeout(() => {
@@ -628,61 +636,6 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
       )}
 
       {/* Recently Added Questions Notification */}
-      {recentlyAdded.length > 0 && hasActiveSubscription && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 sm:p-6">
-          <div className="flex items-center space-x-3 mb-3">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            <h3 className="text-base font-semibold text-green-900">
-              ✅ {recentlyAdded.length} Question{recentlyAdded.length > 1 ? 's' : ''} Saved to Database
-            </h3>
-          </div>
-          <p className="text-sm text-green-700 mb-3">
-            The following questions have been automatically saved to your database and are ready for use:
-          </p>
-          <div className="space-y-2 mb-4">
-            {recentlyAdded.slice(0, 3).map((question, index) => (
-              <div key={index} className="bg-white rounded-lg p-3 border border-green-200">
-                <div className="flex items-center space-x-2 mb-1">
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
-                    {question.domain}
-                  </span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    question.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
-                    question.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {question.difficulty}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-900 line-clamp-2">{question.question}</p>
-              </div>
-            ))}
-            {recentlyAdded.length > 3 && (
-              <p className="text-xs text-green-600">
-                + {recentlyAdded.length - 3} more questions saved
-              </p>
-            )}
-          </div>
-          
-          {/* Auto-navigation notice */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center space-x-2">
-              <ArrowRight className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">
-                {isNavigating ? 'Navigating to Question Bank...' : 'Taking you to Question Bank to view your new questions...'}
-              </span>
-            </div>
-            {!isNavigating && (
-              <button
-                onClick={handleNavigateToQuestionBank}
-                className="mt-2 text-sm text-blue-700 hover:text-blue-800 font-medium underline"
-              >
-                Go to Question Bank now
-              </button>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Quick Generator */}
       <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
@@ -1135,6 +1088,20 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notification Banner */}
+      {showSavedBanner && (
+        <div className="fixed bottom-0 left-0 w-full z-50 flex justify-center pointer-events-none">
+          <div className="bg-green-600 text-white px-6 py-4 rounded-t-xl shadow-lg flex items-center space-x-3 animate-fade-in pointer-events-auto">
+            <CheckCircle className="w-6 h-6 text-white" />
+            <span className="font-semibold">
+              {savedBannerCount > 1
+                ? `${savedBannerCount} questions saved!`
+                : 'Question saved!'}
+            </span>
           </div>
         </div>
       )}
