@@ -7,7 +7,6 @@ import { LandingPage } from '../Landing/LandingPage';
 
 export const AuthForm: React.FC = () => {
   const { signIn, signUp, resetPassword, loading, error } = useAuth();
-  const [showLanding, setShowLanding] = useState(true);
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -153,22 +152,7 @@ export const AuthForm: React.FC = () => {
     setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
   };
 
-  const handleGetStarted = () => {
-    setShowLanding(false);
-    setIsLogin(false); // Default to signup for new users
-  };
-
-  const handleBackToLanding = () => {
-    setShowLanding(true);
-    setFormErrors({});
-    setFormData({ name: '', email: '', password: '', confirmPassword: '' });
-  };
-
   // Show landing page by default
-  if (showLanding) {
-    return <LandingPage onGetStarted={handleGetStarted} />;
-  }
-
   if (resetEmailSent) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center px-4">
@@ -204,7 +188,7 @@ export const AuthForm: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Back to Landing Button */}
           <button
-            onClick={handleBackToLanding}
+            onClick={() => setIsLogin(true)}
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />

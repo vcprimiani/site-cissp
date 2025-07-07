@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Question } from '../../types';
-import { Database, Plus, Search, Filter, BookOpen, Loader, Bookmark } from 'lucide-react';
+import { Database, Plus, Search, Filter, BookOpen, Loader, Bookmark, Lock, Crown } from 'lucide-react';
 import { QuestionCard } from '../UI/QuestionCard';
 import { ColorKey } from '../UI/ColorKey';
 import { useBookmarks } from '../../hooks/useBookmarks';
+import { useSubscription } from '../../hooks/useSubscription';
 
 interface QuestionBankProps {
   questions: Question[];
@@ -41,6 +42,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
 
   const { bookmarkedIds } = useBookmarks();
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
+  const { isActive: hasActiveSubscription } = useSubscription();
 
   const domains = [
     'Security and Risk Management',
@@ -141,18 +143,48 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <button
-              className={`inline-flex items-center px-3 py-2 rounded-lg border text-sm font-medium shadow-sm transition-colors ${showBookmarksOnly ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
-              onClick={() => setShowBookmarksOnly(v => !v)}
+              className={`inline-flex items-center px-3 py-2 rounded-lg border text-sm font-medium shadow-sm transition-colors ${showBookmarksOnly ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'} ${!hasActiveSubscription ? 'opacity-60 cursor-not-allowed' : ''}`}
+              onClick={() => hasActiveSubscription ? setShowBookmarksOnly(v => !v) : null}
               aria-pressed={showBookmarksOnly}
+              disabled={!hasActiveSubscription}
+              title={!hasActiveSubscription ? 'Subscribe to unlock bookmarks' : ''}
             >
               <Bookmark className={`w-5 h-5 mr-1 ${showBookmarksOnly ? 'fill-blue-400 text-blue-700' : 'text-gray-400'}`} fill={showBookmarksOnly ? 'currentColor' : 'none'} />
               {showBookmarksOnly ? 'Bookmarked' : 'Show Bookmarks'}
               <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-200 text-blue-800">
                 {bookmarkedIds.length}
               </span>
+              {!hasActiveSubscription && <Lock className="w-4 h-4 ml-2 text-gray-400" />}
+            </button>
+            <button
+              className="inline-flex items-center px-3 py-2 rounded-lg border text-sm font-medium shadow-sm bg-yellow-100 text-yellow-800 border-yellow-300 cursor-not-allowed opacity-60"
+              disabled
+              title="Add Question is a premium feature. Subscribe to unlock."
+            >
+              <Plus className="w-5 h-5 mr-1" />
+              Add Question
+              {!hasActiveSubscription && <Lock className="w-4 h-4 ml-2 text-yellow-500" />}
             </button>
           </div>
         </div>
+        {/* Paywall Banner for Unsubscribed Users */}
+        {!hasActiveSubscription && (
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-4 mb-6 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Crown className="w-8 h-8 text-blue-600" />
+              <div>
+                <h3 className="text-base font-semibold text-gray-900">Unlock Full Question Bank Features</h3>
+                <p className="text-gray-600 text-sm">Subscribe to add, edit, delete, and bookmark questions. Organize your study and track your progress.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => window.location.href = '/pricing'}
+              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
+            >
+              Upgrade Now
+            </button>
+          </div>
+        )}
 
         {/* Question Bank Statistics */}
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-6">
@@ -232,7 +264,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
               question={question}
               isExpanded={expandedQuestions.has(question.id)}
               onToggleExpanded={() => toggleQuestionExpanded(question.id)}
-              showActions={true}
+              showActions={hasActiveSubscription}
             />
           ))
         ) : (
