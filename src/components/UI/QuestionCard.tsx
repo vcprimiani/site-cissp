@@ -126,7 +126,7 @@ Study more at: https://site.cisspstudygroup.com`;
 
   return (
     <div 
-      className={`bg-white rounded-xl border-2 border-gray-200 shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-200 relative ${className}`}
+      className={`bg-white rounded-xl border-2 border-gray-200 shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-200 relative w-full max-w-none ${className}`}
     >
       {/* Card Header */}
       <div 

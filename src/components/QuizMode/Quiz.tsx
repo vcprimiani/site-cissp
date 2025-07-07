@@ -463,7 +463,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-6">
-        <div className="max-w-6xl w-full">
+        <div className="max-w-7xl w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Tally Panel */}
             {/* Remove the Tally Panel (showTallies && ...) */}

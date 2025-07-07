@@ -164,7 +164,7 @@ export const PaywallPage: React.FC = () => {
 
         {/* Sample Question Card */}
         {randomQuestion && (
-          <div className="mb-12 bg-white rounded-2xl shadow-xl p-8 border-2 border-purple-200">
+          <div className="mb-12 bg-white rounded-2xl shadow-xl p-8 border-2 border-purple-200 max-w-7xl mx-auto">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 Try a Sample Question!
