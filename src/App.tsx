@@ -163,13 +163,25 @@ function App() {
           onModeChange={handleModeChange}
           currentUser={appState.currentUser}
           onLogout={() => {}} // Logout is handled by the useAuth hook
+          hasActiveSubscription={hasActiveSubscription}
+          subscriptionLoading={subscriptionLoading}
         />
         
         <main>
           {appState.mode === 'question-bank' ? (
-            <QuestionBankMode appState={appState} onUpdateState={handleUpdateState} />
+            <QuestionBankMode 
+              appState={appState} 
+              onUpdateState={handleUpdateState}
+              hasActiveSubscription={hasActiveSubscription}
+              subscriptionLoading={subscriptionLoading}
+            />
           ) : (
-            <QuizMode appState={appState} onUpdateState={handleUpdateState} />
+            <QuizMode 
+              appState={appState} 
+              onUpdateState={handleUpdateState}
+              hasActiveSubscription={hasActiveSubscription}
+              subscriptionLoading={subscriptionLoading}
+            />
           )}
         </main>
       </div>

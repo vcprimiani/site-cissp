@@ -2,7 +2,7 @@ import React from 'react';
 import { AppMode, User } from '../../types';
 import { Database, Target, LogOut, Crown, Users, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { useSubscription } from '../../hooks/useSubscription';
+// import { useSubscription } from '../../hooks/useSubscription'; // REMOVE
 import { Avatar } from '../UI/Avatar';
 import { clearInvalidSession } from '../../lib/supabase';
 
@@ -11,11 +11,13 @@ interface HeaderProps {
   onModeChange: (mode: AppMode) => void;
   currentUser: User;
   onLogout: () => void;
+  hasActiveSubscription: boolean;
+  subscriptionLoading: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser }) => {
+export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser, onLogout, hasActiveSubscription, subscriptionLoading }) => {
   const { signOut } = useAuth();
-  const { isActive, productName } = useSubscription();
+  // const { isActive, productName } = useSubscription(); // REMOVE
 
   const handleLogout = async () => {
     await signOut();
@@ -121,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser 
             </div>
 
             {/* Subscription Status */}
-            {isActive && productName && (
+            {hasActiveSubscription && (
               <div className="hidden lg:flex items-center space-x-2 bg-gradient-to-r from-green-50 to-blue-50 px-3 py-2 rounded-lg border border-green-200">
                 <Crown className="w-4 h-4 text-green-600" />
                 <span className="text-sm font-medium text-green-800">Premium</span>
@@ -133,18 +135,18 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser 
                 {/* Premium/Unpaid Card Indicator */}
                 <span
                   className={`flex items-center justify-center rounded-lg border shadow-md transition-all duration-200 mr-2 px-2 py-1 ${
-                    isActive
+                    hasActiveSubscription
                       ? 'bg-green-50 border-green-200'
                       : 'bg-red-50 border-red-200'
                   }`}
-                  title={isActive ? 'Premium Member' : 'Unpaid Member'}
+                  title={hasActiveSubscription ? 'Premium Member' : 'Unpaid Member'}
                 >
-                  {isActive ? (
+                  {hasActiveSubscription ? (
                     <CheckCircle className="w-4 h-4 text-green-600 mr-1" />
                   ) : (
                     <XCircle className="w-4 h-4 text-red-500 mr-1" />
                   )}
-                  <span className={`text-xs font-semibold ${isActive ? 'text-green-700' : 'text-red-700'}`}>{isActive ? 'Premium' : 'Unpaid'}</span>
+                  <span className={`text-xs font-semibold ${hasActiveSubscription ? 'text-green-700' : 'text-red-700'}`}>{hasActiveSubscription ? 'Premium' : 'Unpaid'}</span>
                 </span>
                 <Avatar 
                   user={currentUser} 
@@ -156,8 +158,8 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser 
                     {currentUser.name}
                   </p>
                   <div className="flex items-center space-x-1">
-                    <p className="text-xs text-gray-600">{isActive ? 'Study Leader' : 'Almost a Member'}</p>
-                    {isActive && (
+                    <p className="text-xs text-gray-600">{hasActiveSubscription ? 'Study Leader' : 'Almost a Member'}</p>
+                    {hasActiveSubscription && (
                       <Crown className="w-3 h-3 text-green-600" title="Premium subscriber" />
                     )}
                   </div>

@@ -13,6 +13,8 @@ interface QuestionBankProps {
   onAddQuestion: (question: Omit<Question, 'id' | 'createdAt'>) => Promise<Question | null>;
   onUpdateQuestion: (questionId: string, updates: Partial<Question>) => Promise<boolean>;
   onDeleteQuestion: (questionId: string) => Promise<boolean>;
+  hasActiveSubscription: boolean;
+  subscriptionLoading: boolean;
 }
 
 export const QuestionBank: React.FC<QuestionBankProps> = ({
@@ -21,7 +23,9 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   currentUser,
   onAddQuestion,
   onUpdateQuestion,
-  onDeleteQuestion
+  onDeleteQuestion,
+  hasActiveSubscription,
+  subscriptionLoading
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,7 +46,6 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
 
   const { bookmarkedIds } = useBookmarks();
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
-  const { isActive: hasActiveSubscription } = useSubscription();
 
   const domains = [
     'Security and Risk Management',
@@ -265,6 +268,8 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
               isExpanded={expandedQuestions.has(question.id)}
               onToggleExpanded={() => toggleQuestionExpanded(question.id)}
               showActions={hasActiveSubscription}
+              hasActiveSubscription={hasActiveSubscription}
+              subscriptionLoading={subscriptionLoading}
             />
           ))
         ) : (

@@ -6,7 +6,6 @@ import { SocialShareButtons } from './SocialShareButtons';
 import { highlightKeywords } from '../../services/keywordAnalysis';
 import { formatExplanationText } from '../../utils/textFormatting';
 import { useBookmarks } from '../../hooks/useBookmarks';
-import { useSubscription } from '../../hooks/useSubscription';
 import { Lock, Crown } from 'lucide-react';
 
 interface QuestionCardProps {
@@ -17,6 +16,8 @@ interface QuestionCardProps {
   showActions?: boolean;
   className?: string;
   keywords?: string[];
+  hasActiveSubscription: boolean;
+  subscriptionLoading: boolean;
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -26,7 +27,9 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   onDelete,
   showActions = true,
   className = '',
-  keywords = []
+  keywords = [],
+  hasActiveSubscription,
+  subscriptionLoading
 }) => {
   const [showShareMenu, setShowShareMenu] = React.useState(false);
   const domainColor = getDomainColor(question.domain);
@@ -34,15 +37,6 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   const aiColor = getStatusColor('ai-generated');
   const { bookmarkedIds, toggleBookmark, loading: bookmarksLoading } = useBookmarks();
   const isBookmarked = bookmarkedIds.includes(question.id);
-  const { isActive: hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
-
-  if (subscriptionLoading) {
-    return (
-      <div className="p-6 text-center text-gray-500 bg-white rounded-xl border-2 border-gray-200 shadow-md">
-        Checking subscription status...
-      </div>
-    );
-  }
 
   const getShareMessage = () => {
     const correctAnswer = question.options[question.correctAnswer];

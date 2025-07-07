@@ -8,9 +8,11 @@ import { useQuestions } from '../../hooks/useQuestions';
 interface QuestionBankModeProps {
   appState: AppState;
   onUpdateState: (updates: Partial<AppState>) => void;
+  hasActiveSubscription: boolean;
+  subscriptionLoading: boolean;
 }
 
-export const QuestionBankMode: React.FC<QuestionBankModeProps> = ({ appState, onUpdateState }) => {
+export const QuestionBankMode: React.FC<QuestionBankModeProps> = ({ appState, onUpdateState, hasActiveSubscription, subscriptionLoading }) => {
   const [activeTab, setActiveTab] = useState<'questions' | 'generator'>('questions');
   const { questions, loading, error, addQuestion, updateQuestion, deleteQuestion } = useQuestions();
 
@@ -93,6 +95,8 @@ export const QuestionBankMode: React.FC<QuestionBankModeProps> = ({ appState, on
             onAddQuestion={addQuestion}
             onUpdateQuestion={updateQuestion}
             onDeleteQuestion={deleteQuestion}
+            hasActiveSubscription={hasActiveSubscription}
+            subscriptionLoading={subscriptionLoading}
           />
         )}
         
@@ -102,6 +106,8 @@ export const QuestionBankMode: React.FC<QuestionBankModeProps> = ({ appState, on
             currentUser={appState.currentUser!}
             onAddQuestion={addQuestion}
             onNavigateToQuestionBank={handleNavigateToQuestionBank}
+            hasActiveSubscription={hasActiveSubscription}
+            subscriptionLoading={subscriptionLoading}
           />
         )}
       </div>
