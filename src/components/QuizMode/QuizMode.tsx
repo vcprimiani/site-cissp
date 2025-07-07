@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Quiz } from './Quiz';
-import { AIAssistant } from './AIAssistant';
+import { AIAssistant as CaseyAssistant } from './AIAssistant';
 import { QuizSetup } from './QuizSetup';
 import { AppState } from '../../types';
 import { Target, Brain, Clock, Trophy } from 'lucide-react';
@@ -15,9 +15,6 @@ interface QuizModeProps {
 export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, hasActiveSubscription, subscriptionLoading }) => {
   const [activeTab, setActiveTab] = useState<'setup' | 'ai'>('setup');
   const [incorrectQuestions, setIncorrectQuestions] = useState<any[]>([]);
-  const [showQuizInfo, setShowQuizInfo] = useState(() => {
-    return localStorage.getItem('quiz-info-dismissed') !== 'true';
-  });
 
   // Load incorrect questions from localStorage
   useEffect(() => {
@@ -69,44 +66,15 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
     },
     { 
       id: 'ai', 
-      label: 'AI Assistant', 
+      label: 'Casey (Cybersecurity Study Expert)', 
       icon: Brain,
-      description: 'Get instant explanations and concept clarifications',
+      description: 'Ask Casey for instant explanations and CISSP help',
       badge: incorrectQuestions.length > 0 ? incorrectQuestions.length : undefined
     }
   ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {showQuizInfo && (
-        <div className="relative bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 mb-8 border border-green-200 flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <Target className="w-8 h-8 text-blue-600" />
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-1">Quiz Mode</h2>
-                <div className="flex items-center space-x-2">
-                  <span className="text-blue-700 text-sm font-medium flex items-center"><Clock className="w-4 h-4 mr-1" />Timed Practice</span>
-                  <span className="text-green-700 text-sm font-medium flex items-center"><Brain className="w-4 h-4 mr-1" />AI Review</span>
-                </div>
-              </div>
-            </div>
-            <div id="quiz-mode-start-buttons" className="flex flex-col sm:flex-row gap-2">
-              {/* Start Quiz buttons will be rendered here by QuizSetup */}
-            </div>
-          </div>
-          <button
-            className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl font-bold focus:outline-none"
-            aria-label="Dismiss info card"
-            onClick={() => {
-              setShowQuizInfo(false);
-              localStorage.setItem('quiz-info-dismissed', 'true');
-            }}
-          >
-            &times;
-          </button>
-        </div>
-      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
         <div className="flex border-b border-gray-200 overflow-x-auto">
@@ -158,16 +126,16 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
         
         {activeTab === 'ai' && (
           hasActiveSubscription ? (
-            <AIAssistant
-              onAskQuestion={(question) => console.log('AI Question:', question)}
+            <CaseyAssistant
+              onAskQuestion={(question) => console.log('Casey Question:', question)}
               incorrectQuestions={incorrectQuestions}
             />
           ) : (
             <div className="bg-gradient-to-r from-yellow-50 to-purple-50 border-2 border-yellow-200 rounded-xl p-8 text-center flex flex-col items-center justify-center max-w-xl mx-auto mt-12 shadow-lg">
               <h3 className="text-2xl font-bold text-gray-900 mb-2 flex items-center justify-center">
-                <span className="mr-2">🤖</span> Unlock AI Assistant
+                <span className="mr-2">🤖</span> Unlock Casey (Cybersecurity Study Expert)
               </h3>
-              <p className="text-gray-700 mb-4 text-base">Get instant explanations, concept clarifications, and more with the AI Assistant. Upgrade to premium for unlimited access!</p>
+              <p className="text-gray-700 mb-4 text-base">Get instant explanations, concept clarifications, and CISSP help from Casey, your smart study assistant. Upgrade to premium for unlimited access!</p>
               <button
                 onClick={async () => {
                   const { redirectToCheckout } = await import('../../services/stripe');
@@ -179,7 +147,7 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
               >
                 Upgrade Now
               </button>
-              <div className="mt-4 text-sm text-gray-500">Premium unlocks unlimited quizzes, AI explanations, analytics, and more.</div>
+              <div className="mt-4 text-sm text-gray-500">Premium unlocks unlimited quizzes, Casey explanations, and more.</div>
             </div>
           )
         )}
