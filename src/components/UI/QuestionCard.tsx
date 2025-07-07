@@ -246,9 +246,10 @@ Study more at: https://site.cisspstudygroup.com`;
       <div className="px-5 pb-5 relative">
         {/* Expanded content for all users */}
         {isExpanded && (
-          <>
-            {/* Answer Options */}
-            <div className="relative">
+          <div className="relative">
+            {/* Answers and Explanation (blurred/blocked for unpaid) */}
+            <div>
+              {/* Answer Options */}
               <h4 className="font-semibold mb-3 text-gray-900">
                 Answer Options:
               </h4>
@@ -268,7 +269,7 @@ Study more at: https://site.cisspstudygroup.com`;
                           index === question.correctAnswer 
                             ? 'text-green-800' 
                             : 'text-gray-900'
-                        } ${!hasActiveSubscription ? 'blur-sm select-none' : ''}`}
+                        }`}
                       >
                         {option}
                       </span>
@@ -280,34 +281,31 @@ Study more at: https://site.cisspstudygroup.com`;
                     </div>
                   </div>
                 ))}
-                {/* Overlay for unsubscribed users */}
-                {!hasActiveSubscription && (
-                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/70 backdrop-blur rounded-xl pointer-events-none">
-                    <Lock className="w-8 h-8 text-blue-500 mb-2 pointer-events-auto" />
-                    <button
-                      className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow pointer-events-auto"
-                      onClick={() => window.location.href = '/pricing'}
-                      style={{ pointerEvents: 'auto' }}
-                    >
-                      Upgrade Now
-                    </button>
-                  </div>
-                )}
               </div>
-            </div>
 
-            {/* Explanation */}
-            <div className="relative mt-6">
-              <h4 className="font-semibold mb-3 text-gray-900">
-                Explanation:
-              </h4>
-              <div className={`bg-white rounded-lg p-4 border-2 border-gray-200 shadow-sm ${!hasActiveSubscription ? 'blur-sm select-none relative' : ''}`}>
-                {formatExplanation(question.explanation)}
-                {/* Overlay for unsubscribed users (if not already shown above) */}
-                {/* Only show overlay once, so only on answers section above */}
+              {/* Explanation */}
+              <div className="relative mt-6">
+                <h4 className="font-semibold mb-3 text-gray-900">
+                  Explanation:
+                </h4>
+                <div className="bg-white rounded-lg p-4 border-2 border-gray-200 shadow-sm">
+                  {formatExplanation(question.explanation)}
+                </div>
               </div>
             </div>
-          </>
+            {/* Overlay for unsubscribed users, covers both answers and explanation */}
+            {!hasActiveSubscription && (
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 backdrop-blur rounded-xl" style={{ pointerEvents: 'auto' }}>
+                <Lock className="w-8 h-8 text-blue-500 mb-2" />
+                <button
+                  className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
+                  onClick={() => window.location.href = '/pricing'}
+                >
+                  Upgrade Now
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
