@@ -435,16 +435,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
             </button>
 
             {/* Tally Toggle */}
-            <button
-              onClick={() => setShowTallies(!showTallies)}
-              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                showTallies 
-                  ? 'bg-green-100 text-green-800 border border-green-300' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {showTallies ? 'Hide Tallies' : 'Show Tallies'}
-            </button>
+            {/* Remove the Tally Toggle button from the quiz header */}
             
             <div className="flex items-center space-x-2 text-gray-600">
               <Clock className="w-4 h-4" />
