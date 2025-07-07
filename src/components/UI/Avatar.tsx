@@ -1,5 +1,5 @@
-import React from 'react';
-import { getAvatarProps } from '../../utils/avatars';
+import React, { useState, useEffect } from 'react';
+import { getAvatarProps, animalAvatars } from '../../utils/avatars';
 
 interface AvatarProps {
   user: {
@@ -20,6 +20,20 @@ const sizeClasses = {
 };
 
 export const Avatar: React.FC<AvatarProps> = ({ user, size = 'md', className = '' }) => {
+  const identifier = user.id || user.email || user.name || 'default';
+  const localStorageKey = `avatar-choice-${identifier}`;
+  const [avatarIndex, setAvatarIndex] = useState<number>(() => {
+    const stored = localStorage.getItem(localStorageKey);
+    if (stored) return parseInt(stored, 10);
+    // Default to hash-based index
+    const hash = Math.abs(Array.from(identifier).reduce((acc, c) => acc + c.charCodeAt(0), 0));
+    return hash % animalAvatars.length;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(localStorageKey, avatarIndex.toString());
+  }, [avatarIndex, localStorageKey]);
+
   // If user has a custom avatar URL, use that
   if (user.avatar_url) {
     return (
@@ -31,20 +45,27 @@ export const Avatar: React.FC<AvatarProps> = ({ user, size = 'md', className = '
     );
   }
 
-  // Otherwise, use animal avatar
-  const avatarProps = getAvatarProps(user);
-  
+  const avatar = animalAvatars[avatarIndex];
+
+  const handleClick = () => {
+    setAvatarIndex((prev) => (prev + 1) % animalAvatars.length);
+  };
+
   return (
     <div 
-      className={`${sizeClasses[size]} rounded-full flex items-center justify-center ${className}`}
+      className={`${sizeClasses[size]} rounded-full flex items-center justify-center cursor-pointer transition-shadow hover:shadow-lg ${className}`}
       style={{ 
-        backgroundColor: avatarProps.bgColor,
-        color: avatarProps.color 
+        backgroundColor: avatar.bgColor,
+        color: avatar.color 
       }}
-      title={`${user.name || 'User'}'s avatar - ${avatarProps.name}`}
+      title={`Click to change avatar (${avatar.name})`}
+      onClick={handleClick}
+      tabIndex={0}
+      role="button"
+      aria-label="Change avatar"
     >
       <span className="select-none">
-        {avatarProps.emoji}
+        {avatar.emoji}
       </span>
     </div>
   );
