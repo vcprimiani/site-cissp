@@ -470,7 +470,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
 
             {/* Question Card */}
             <div className={showTallies ? "lg:col-span-9" : "lg:col-span-12"}>
-              <div className="bg-white rounded-2xl shadow-xl p-8">
+              <div className="bg-white rounded-2xl shadow-xl p-8 max-h-[90vh] overflow-y-auto flex flex-col justify-between">
                 {/* Question Header */}
                 <div className="flex flex-wrap items-center justify-between mb-6">
                   <div className="flex flex-wrap gap-3">
