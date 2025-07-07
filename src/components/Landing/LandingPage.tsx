@@ -30,7 +30,11 @@ import {
   UserCheck,
   Sparkles,
   GraduationCap,
-  Rocket
+  Rocket,
+  Smartphone,
+  Monitor,
+  Tablet,
+  Globe
 } from 'lucide-react';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
@@ -242,6 +246,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
     'Bookmark and save questions',
     'Daily free quiz for all users',
     'Session tracking and persistence',
+    'Cross-platform sync (iOS, Android, Web)',
+    'Unlimited full-length mock exams (coming soon)',
     'Cancel anytime - no commitment'
   ];
 
@@ -264,8 +270,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <p className="text-xs text-gray-600">AI-Powered Study Platform</p>
               </div>
             </div>
+            
+            {/* Platform Badges */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-xs text-gray-600">
+                <Smartphone className="w-4 h-4" />
+                <span>iOS & Android</span>
+              </div>
+              <div className="flex items-center space-x-2 text-xs text-gray-600">
+                <Monitor className="w-4 h-4" />
+                <span>Web</span>
+              </div>
+            </div>
+            
             <button
-              onClick={handleGetStarted}
+              onClick={onGetStarted}
               disabled={loading}
               className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50"
             >
@@ -372,6 +391,79 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>Cancel anytime</span>
+                </div>
+              </div>
+
+              {/* Platform Support Section */}
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border border-green-200 mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Available on All Platforms</h3>
+                    <p className="text-sm text-gray-600">Study anywhere, anytime</p>
+                  </div>
+                  <Globe className="w-6 h-6 text-green-600" />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Smartphone className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">iOS & Android</p>
+                      <p className="text-xs text-gray-600">Mobile apps</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Monitor className="w-5 h-5 text-purple-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Web Browser</p>
+                      <p className="text-xs text-gray-600">Desktop & tablet</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Zap className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Sync Everywhere</p>
+                      <p className="text-xs text-gray-600">Real-time updates</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mock Exam Coming Soon Banner */}
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200 mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <Rocket className="w-5 h-5 text-purple-600 mr-2" />
+                      Coming Soon: Unlimited Full-Length Mock Exams
+                    </h3>
+                    <p className="text-sm text-gray-600">Practice with realistic CISSP exam simulations</p>
+                  </div>
+                  <div className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-semibold">
+                    BETA
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-purple-600" />
+                    <span className="text-gray-700">Full 4-hour exam simulations</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-purple-600" />
+                    <span className="text-gray-700">Real exam environment</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-purple-600" />
+                    <span className="text-gray-700">Detailed performance analysis</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-purple-600" />
+                    <span className="text-gray-700">Domain-specific scoring</span>
+                  </div>
+                </div>
+                <div className="mt-4 p-3 bg-purple-100 rounded-lg">
+                  <p className="text-xs text-purple-800 font-medium">
+                    🎯 <strong>Early Access:</strong> Subscribe now and get priority access to unlimited mock exams when they launch!
+                  </p>
                 </div>
               </div>
 
