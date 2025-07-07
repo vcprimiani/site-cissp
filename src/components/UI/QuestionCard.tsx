@@ -247,9 +247,10 @@ Study more at: https://site.cisspstudygroup.com`;
         </div>
       )}
 
-      {/* Share Button in Bottom Right Corner */}
-      {showActions && (
-        <div className="absolute bottom-4 right-4 z-10">
+      {/* Action Buttons - bottom right, side by side */}
+      <div className="absolute bottom-3 right-3 z-10 flex flex-row gap-2">
+        {/* Share Button */}
+        {showActions && (
           <div className="relative">
             <button
               onClick={handleShareClick}
@@ -258,7 +259,6 @@ Study more at: https://site.cisspstudygroup.com`;
             >
               <Share2 className="w-4 h-4 text-blue-600 group-hover:text-blue-800" />
             </button>
-            
             {/* Share Menu Dropdown */}
             {showShareMenu && (
               <>
@@ -267,7 +267,6 @@ Study more at: https://site.cisspstudygroup.com`;
                   className="fixed inset-0 z-40" 
                   onClick={() => setShowShareMenu(false)}
                 />
-                
                 {/* Share Menu */}
                 <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-80 z-50">
                   <div className="flex items-center justify-between mb-3">
@@ -296,22 +295,21 @@ Study more at: https://site.cisspstudygroup.com`;
               </>
             )}
           </div>
-        </div>
-      )}
-
-      {/* Bookmark Icon - bottom right */}
-      <button
-        className="absolute bottom-3 right-3 p-2 rounded-full bg-white shadow hover:bg-blue-50 transition-colors border border-gray-200"
-        aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
-        onClick={e => { e.stopPropagation(); toggleBookmark(question.id); }}
-        disabled={bookmarksLoading}
-        style={{ zIndex: 2 }}
-      >
-        <Bookmark
-          className={`w-6 h-6 ${isBookmarked ? 'text-blue-600 fill-blue-100' : 'text-gray-400'} transition-colors`}
-          fill={isBookmarked ? 'currentColor' : 'none'}
-        />
-      </button>
+        )}
+        {/* Bookmark Button */}
+        <button
+          className="p-2 rounded-full bg-white shadow hover:bg-blue-50 transition-colors border border-gray-200"
+          aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+          onClick={e => { e.stopPropagation(); toggleBookmark(question.id); }}
+          disabled={bookmarksLoading}
+          style={{ zIndex: 2 }}
+        >
+          <Bookmark
+            className={`w-6 h-6 ${isBookmarked ? 'text-blue-600 fill-blue-100' : 'text-gray-400'} transition-colors`}
+            fill={isBookmarked ? 'currentColor' : 'none'}
+          />
+        </button>
+      </div>
     </div>
   );
 };
