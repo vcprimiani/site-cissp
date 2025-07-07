@@ -142,8 +142,11 @@ function App() {
     if (appState.showAuth) {
       return <AuthForm />;
     }
-    // Show landing page for unauthenticated users
-    return <LandingPage onGetStarted={() => setAppState(prev => ({ ...prev, showAuth: true }))} />;
+    // Always show landing page for unauthenticated users
+    return <LandingPage onGetStarted={() => {
+      // This will show the AuthForm component
+      setAppState(prev => ({ ...prev, showAuth: true }));
+    }} />;
   }
 
   // Show error if subscription check fails

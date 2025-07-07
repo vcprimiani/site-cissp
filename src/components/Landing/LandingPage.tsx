@@ -300,7 +300,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <button
-                  onClick={handleGetStarted}
+                  onClick={onGetStarted}
                   disabled={loading}
                   className="flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg disabled:opacity-50"
                 >
@@ -546,7 +546,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <h3 className="text-2xl font-bold text-gray-900 mb-4">{features[activeFeature].title}</h3>
               <p className="text-gray-600 mb-6">{features[activeFeature].details}</p>
               <button
-                onClick={handleGetStarted}
+                onClick={onGetStarted}
                 disabled={loading}
                 className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50"
               >
