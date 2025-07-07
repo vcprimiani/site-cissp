@@ -244,22 +244,11 @@ Study more at: https://site.cisspstudygroup.com`;
 
       {/* Always show answer/explanation section for unpaid users, only expanded for paid */}
       <div className="px-5 pb-5 relative">
-        {!hasActiveSubscription && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 backdrop-blur rounded-xl">
-            <Lock className="w-8 h-8 text-blue-500 mb-2" />
-            <p className="text-blue-800 font-semibold mb-2 text-center">Upgrade to unlock answers and explanations</p>
-            <button
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
-              onClick={() => window.location.href = '/pricing'}
-            >
-              Upgrade Now
-            </button>
-          </div>
-        )}
-        {hasActiveSubscription && isExpanded && (
+        {/* Expanded content for all users */}
+        {isExpanded && (
           <>
             {/* Answer Options */}
-            <div>
+            <div className="relative">
               <h4 className="font-semibold mb-3 text-gray-900">
                 Answer Options:
               </h4>
@@ -271,7 +260,7 @@ Study more at: https://site.cisspstudygroup.com`;
                       index === question.correctAnswer 
                         ? 'border-green-300 bg-green-50' 
                         : 'border-gray-200 bg-white'
-                    }`}
+                    } relative`}
                   >
                     <div className="flex items-center justify-between">
                       <span 
@@ -279,11 +268,11 @@ Study more at: https://site.cisspstudygroup.com`;
                           index === question.correctAnswer 
                             ? 'text-green-800' 
                             : 'text-gray-900'
-                        }`}
+                        } ${!hasActiveSubscription ? 'blur-sm select-none' : ''}`}
                       >
                         {option}
                       </span>
-                      {index === question.correctAnswer && (
+                      {index === question.correctAnswer && hasActiveSubscription && (
                         <span className="text-sm font-semibold ml-2 text-green-600">
                           ✓ Correct
                         </span>
@@ -291,16 +280,31 @@ Study more at: https://site.cisspstudygroup.com`;
                     </div>
                   </div>
                 ))}
+                {/* Overlay for unsubscribed users */}
+                {!hasActiveSubscription && (
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/70 backdrop-blur rounded-xl pointer-events-none">
+                    <Lock className="w-8 h-8 text-blue-500 mb-2 pointer-events-auto" />
+                    <button
+                      className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow pointer-events-auto"
+                      onClick={() => window.location.href = '/pricing'}
+                      style={{ pointerEvents: 'auto' }}
+                    >
+                      Upgrade Now
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Explanation */}
-            <div>
+            <div className="relative mt-6">
               <h4 className="font-semibold mb-3 text-gray-900">
                 Explanation:
               </h4>
-              <div className="bg-white rounded-lg p-4 border-2 border-gray-200 shadow-sm">
+              <div className={`bg-white rounded-lg p-4 border-2 border-gray-200 shadow-sm ${!hasActiveSubscription ? 'blur-sm select-none relative' : ''}`}>
                 {formatExplanation(question.explanation)}
+                {/* Overlay for unsubscribed users (if not already shown above) */}
+                {/* Only show overlay once, so only on answers section above */}
               </div>
             </div>
           </>
