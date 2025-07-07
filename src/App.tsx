@@ -154,23 +154,6 @@ function App() {
     );
   }
 
-  // Show paywall if authenticated but no active subscription
-  if (!hasActiveSubscription) {
-    return (
-      <BookmarksProvider>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-          <Header
-            mode={appState.mode}
-            onModeChange={handleModeChange}
-            currentUser={appState.currentUser}
-            onLogout={() => {}} // Logout is handled by the useAuth hook
-          />
-          <PaywallPage />
-        </div>
-      </BookmarksProvider>
-    );
-  }
-
   // Show full app for authenticated users with active subscription
   return (
     <BookmarksProvider>
