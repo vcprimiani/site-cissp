@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { getAvatarProps, animalAvatars } from '../../utils/avatars';
+import React from 'react';
+import { getAvatarProps } from '../../utils/avatars';
 
 interface AvatarProps {
   user: {
@@ -20,20 +20,6 @@ const sizeClasses = {
 };
 
 export const Avatar: React.FC<AvatarProps> = ({ user, size = 'md', className = '' }) => {
-  const identifier = user.id || user.email || user.name || 'default';
-  const localStorageKey = `avatar-choice-${identifier}`;
-  const [avatarIndex, setAvatarIndex] = useState<number>(() => {
-    const stored = localStorage.getItem(localStorageKey);
-    if (stored) return parseInt(stored, 10);
-    // Default to hash-based index
-    const hash = Math.abs(Array.from(identifier).reduce((acc, c) => acc + c.charCodeAt(0), 0));
-    return hash % animalAvatars.length;
-  });
-
-  useEffect(() => {
-    localStorage.setItem(localStorageKey, avatarIndex.toString());
-  }, [avatarIndex, localStorageKey]);
-
   // If user has a custom avatar URL, use that
   if (user.avatar_url) {
     return (
@@ -45,27 +31,20 @@ export const Avatar: React.FC<AvatarProps> = ({ user, size = 'md', className = '
     );
   }
 
-  const avatar = animalAvatars[avatarIndex];
-
-  const handleClick = () => {
-    setAvatarIndex((prev) => (prev + 1) % animalAvatars.length);
-  };
-
+  // Otherwise, use animal avatar
+  const avatarProps = getAvatarProps(user);
+  
   return (
     <div 
-      className={`${sizeClasses[size]} rounded-full flex items-center justify-center cursor-pointer transition-shadow hover:shadow-lg ${className}`}
+      className={`${sizeClasses[size]} rounded-full flex items-center justify-center ${className}`}
       style={{ 
-        backgroundColor: avatar.bgColor,
-        color: avatar.color 
+        backgroundColor: avatarProps.bgColor,
+        color: avatarProps.color 
       }}
-      title={`Click to change avatar (${avatar.name})`}
-      onClick={handleClick}
-      tabIndex={0}
-      role="button"
-      aria-label="Change avatar"
+      title={`${user.name || 'User'}'s avatar - ${avatarProps.name}`}
     >
       <span className="select-none">
-        {avatar.emoji}
+        {avatarProps.emoji}
       </span>
     </div>
   );
