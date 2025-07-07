@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Question } from '../../types';
-import { Database, Plus, Search, Filter, BookOpen, Loader } from 'lucide-react';
+import { Database, Plus, Search, Filter, BookOpen, Loader, Bookmark } from 'lucide-react';
 import { QuestionCard } from '../UI/QuestionCard';
 import { ColorKey } from '../UI/ColorKey';
+import { useBookmarks } from '../../hooks/useBookmarks';
 
 interface QuestionBankProps {
   questions: Question[];
@@ -38,6 +39,9 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
     tags: ''
   });
 
+  const { bookmarkedIds } = useBookmarks();
+  const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
+
   const domains = [
     'Security and Risk Management',
     'Asset Security',
@@ -50,7 +54,9 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   ];
 
   // Filter questions
-  const filteredQuestions = questions.filter(q => {
+  const filteredQuestions = showBookmarksOnly
+    ? questions.filter(q => bookmarkedIds.includes(q.id))
+    : questions.filter(q => {
     const matchesSearch = q.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          q.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesDomain = !filterDomain || q.domain === filterDomain;
@@ -147,6 +153,14 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
             >
               <Plus className="w-4 h-4" />
               <span>Add Question</span>
+            </button>
+            <button
+              className={`inline-flex items-center px-3 py-2 rounded-lg border text-sm font-medium shadow-sm transition-colors ${showBookmarksOnly ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
+              onClick={() => setShowBookmarksOnly(v => !v)}
+              aria-pressed={showBookmarksOnly}
+            >
+              <Bookmark className={`w-5 h-5 mr-1 ${showBookmarksOnly ? 'fill-blue-400 text-blue-700' : 'text-gray-400'}`} fill={showBookmarksOnly ? 'currentColor' : 'none'} />
+              {showBookmarksOnly ? 'Bookmarked' : 'Show Bookmarks'}
             </button>
           </div>
         </div>

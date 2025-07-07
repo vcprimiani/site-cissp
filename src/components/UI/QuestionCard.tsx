@@ -1,10 +1,11 @@
 import React from 'react';
 import { Question } from '../../types';
-import { ChevronDown, ChevronUp, Brain, Share2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Brain, Share2, Bookmark } from 'lucide-react';
 import { getDomainColor, getDifficultyColor, getStatusColor, generateColorClasses, categoryIcons } from '../../utils/colorSystem';
 import { SocialShareButtons } from './SocialShareButtons';
 import { highlightKeywords } from '../../services/keywordAnalysis';
 import { formatExplanationText } from '../../utils/textFormatting';
+import { useBookmarks } from '../../hooks/useBookmarks';
 
 interface QuestionCardProps {
   question: Question;
@@ -29,6 +30,8 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   const domainColor = getDomainColor(question.domain);
   const difficultyColor = getDifficultyColor(question.difficulty);
   const aiColor = getStatusColor('ai-generated');
+  const { bookmarkedIds, toggleBookmark, loading: bookmarksLoading } = useBookmarks();
+  const isBookmarked = bookmarkedIds.includes(question.id);
 
   const getShareMessage = () => {
     const correctAnswer = question.options[question.correctAnswer];
@@ -295,6 +298,20 @@ Study more at: https://site.cisspstudygroup.com`;
           </div>
         </div>
       )}
+
+      {/* Bookmark Icon - bottom right */}
+      <button
+        className="absolute bottom-3 right-3 p-2 rounded-full bg-white shadow hover:bg-blue-50 transition-colors border border-gray-200"
+        aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+        onClick={e => { e.stopPropagation(); toggleBookmark(question.id); }}
+        disabled={bookmarksLoading}
+        style={{ zIndex: 2 }}
+      >
+        <Bookmark
+          className={`w-6 h-6 ${isBookmarked ? 'text-blue-600 fill-blue-100' : 'text-gray-400'} transition-colors`}
+          fill={isBookmarked ? 'currentColor' : 'none'}
+        />
+      </button>
     </div>
   );
 };

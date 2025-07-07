@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Question } from '../../types';
-import { Target, Play, ArrowLeft, ArrowRight, Clock, X, Settings, Filter, RotateCcw, Calendar, RefreshCw } from 'lucide-react';
+import { Target, Play, ArrowLeft, ArrowRight, Clock, X, Settings, Filter, RotateCcw, Calendar, RefreshCw, Bookmark } from 'lucide-react';
 import { Quiz } from './Quiz';
 import { QuizResults } from './QuizResults';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { useQuestions } from '../../hooks/useQuestions';
 import { useSessionTracker } from '../../hooks/useSessionTracker';
 import { useQuizPersistence } from '../../hooks/useQuizPersistence';
+import { useBookmarks } from '../../hooks/useBookmarks';
 
 interface QuizSetupProps {
   onQuizComplete?: (incorrectQuestions: Question[]) => void;
@@ -42,6 +43,7 @@ export const QuizSetup: React.FC<QuizSetupProps> = ({ onQuizComplete }) => {
     getSessionStats 
   } = useSessionTracker();
   const { hasPersistedQuiz, persistedState, clearPersistedState } = useQuizPersistence();
+  const { bookmarkedIds, loading: bookmarksLoading } = useBookmarks();
   
   const [numberOfQuestions, setNumberOfQuestions] = useState(5);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -159,6 +161,24 @@ export const QuizSetup: React.FC<QuizSetupProps> = ({ onQuizComplete }) => {
       return `${hours}h ${minutes}m`;
     }
     return `${minutes}m`;
+  };
+
+  // Add this function to start a quiz from bookmarks
+  const startQuizFromBookmarks = () => {
+    const bookmarkedQuestions = questions.filter(q => bookmarkedIds.includes(q.id));
+    if (bookmarkedQuestions.length === 0) return;
+    const questionsToUse = Math.min(numberOfQuestions, bookmarkedQuestions.length);
+    const shuffledQuestions = [...bookmarkedQuestions]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, questionsToUse);
+    markQuestionsAsUsed(shuffledQuestions);
+    setQuizSession({
+      questions: shuffledQuestions,
+      currentIndex: 0,
+      startTime: new Date(),
+      isActive: true
+    });
+    setQuizMode('quiz');
   };
 
   // Quiz Mode
@@ -399,6 +419,17 @@ export const QuizSetup: React.FC<QuizSetupProps> = ({ onQuizComplete }) => {
           >
             <Play className="w-5 h-5" />
             <span>Start Quiz</span>
+          </button>
+
+          {/* Start Quiz from Bookmarks Button */}
+          <button
+            className={`w-full flex items-center justify-center space-x-2 px-6 py-3 rounded-lg border text-sm font-medium shadow-sm transition-colors ${bookmarkedIds.length === 0 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200'}`}
+            onClick={startQuizFromBookmarks}
+            disabled={bookmarkedIds.length === 0 || bookmarksLoading}
+            aria-disabled={bookmarkedIds.length === 0 || bookmarksLoading}
+          >
+            <Bookmark className="w-5 h-5 mr-2" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
+            Start Quiz from Bookmarks
           </button>
 
           {filteredQuestions.length === 0 && (
