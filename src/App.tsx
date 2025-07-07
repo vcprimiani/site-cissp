@@ -140,7 +140,7 @@ function App() {
   if (!isAuthenticated || !appState.currentUser) {
     // Show auth form if showAuth is true, otherwise show landing page
     if (appState.showAuth) {
-      return <AuthForm />;
+      return <AuthForm onBackToLanding={() => setAppState(prev => ({ ...prev, showAuth: false }))} />;
     }
     // Always show landing page for unauthenticated users
     return <LandingPage onGetStarted={() => {

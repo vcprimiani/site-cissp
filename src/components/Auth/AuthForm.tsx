@@ -5,7 +5,11 @@ import { validatePassword, validateEmail } from '../../lib/supabase';
 import { Avatar } from '../UI/Avatar';
 import { LandingPage } from '../Landing/LandingPage';
 
-export const AuthForm: React.FC = () => {
+interface AuthFormProps {
+  onBackToLanding?: () => void;
+}
+
+export const AuthForm: React.FC<AuthFormProps> = ({ onBackToLanding }) => {
   const { signIn, signUp, resetPassword, loading, error } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -188,7 +192,7 @@ export const AuthForm: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Back to Landing Button */}
           <button
-            onClick={() => setIsLogin(true)}
+            onClick={onBackToLanding || (() => setIsLogin(true))}
             className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
