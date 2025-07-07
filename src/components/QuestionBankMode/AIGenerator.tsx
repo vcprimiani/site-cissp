@@ -12,6 +12,14 @@ interface AIGeneratorProps {
   onNavigateToQuestionBank: () => void;
 }
 
+// Helper to get the current week key (e.g., '2024-W27')
+function getCurrentWeekKey() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const week = Math.ceil(((now - new Date(year, 0, 1)) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
+  return `${year}-W${week}`;
+}
+
 export const AIGenerator: React.FC<AIGeneratorProps> = ({
   questions,
   currentUser,
@@ -45,6 +53,20 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
   });
   const [showSavedBanner, setShowSavedBanner] = useState(false);
   const [savedBannerCount, setSavedBannerCount] = useState(1);
+
+  const FREE_LIMIT = 3;
+  const weekKey = getCurrentWeekKey();
+  const [freeUsed, setFreeUsed] = useState(() => {
+    const usage = JSON.parse(localStorage.getItem('ai-free-usage') || '{}');
+    return usage[weekKey] || 0;
+  });
+
+  const incrementFreeUsage = (count: number) => {
+    const usage = JSON.parse(localStorage.getItem('ai-free-usage') || '{}');
+    usage[weekKey] = (usage[weekKey] || 0) + count;
+    localStorage.setItem('ai-free-usage', JSON.stringify(usage));
+    setFreeUsed(usage[weekKey]);
+  };
 
   // Update usage info periodically
   useEffect(() => {
@@ -315,6 +337,10 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
         setTimeout(() => {
           setRecentlyAdded(prev => prev.filter(q => !newQuestions.includes(q)));
         }, 10000);
+
+        if (!hasActiveSubscription) {
+          incrementFreeUsage(newQuestions.length);
+        }
       }
     } catch (error: any) {
       console.error('Error in quick generation:', error);
@@ -421,6 +447,10 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
         setTimeout(() => {
           setRecentlyAdded(prev => prev.filter(q => !newQuestions.includes(q)));
         }, 10000);
+
+        if (!hasActiveSubscription) {
+          incrementFreeUsage(newQuestions.length);
+        }
       }
     } catch (error: any) {
       console.error('Error in advanced generation:', error);
@@ -637,26 +667,97 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
 
       {/* Recently Added Questions Notification */}
 
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Crown className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Unlock AI Question Generation</h3>
+              <p className="text-gray-600 mb-6">
+                Subscribe to generate unlimited CISSP practice questions with advanced AI customization options.
+              </p>
+              
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center space-x-3 text-left">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">Unlimited question generation</span>
+                </div>
+                <div className="flex items-center space-x-3 text-left">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">Advanced customization options</span>
+                </div>
+                <div className="flex items-center space-x-3 text-left">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">All 8 CISSP domains covered</span>
+                </div>
+                <div className="flex items-center space-x-3 text-left">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">Cancel anytime</span>
+                </div>
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Maybe Later
+                </button>
+                <button
+                  onClick={handleUpgradeClick}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
+                >
+                  Upgrade Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notification Banner */}
+      {showSavedBanner && (
+        <div className="fixed bottom-0 left-0 w-full z-50 flex justify-center pointer-events-none">
+          <div className="bg-green-600 text-white px-6 py-4 rounded-t-xl shadow-lg flex items-center space-x-3 animate-fade-in pointer-events-auto">
+            <CheckCircle className="w-6 h-6 text-white" />
+            <span className="font-semibold">
+              {savedBannerCount > 1
+                ? `${savedBannerCount} questions saved!`
+                : 'Question saved!'}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {!hasActiveSubscription && (
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-gray-600">Free AI generations this week</span>
+            <span className="text-xs font-semibold text-blue-700">{Math.min(freeUsed, FREE_LIMIT)} / {FREE_LIMIT}</span>
+          </div>
+          <div className="w-full h-2 bg-blue-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-blue-500 rounded-full transition-all" style={{ width: `${(Math.min(freeUsed, FREE_LIMIT) / FREE_LIMIT) * 100}%` }} />
+          </div>
+        </div>
+      )}
+
       {/* Generation Controls Section (Quick + Advanced) */}
       <div className="relative">
-        {/* Overlay for unsubscribed users */}
-        {!hasActiveSubscription && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/70 backdrop-blur-sm rounded-xl">
-            <div className="flex flex-col items-center">
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-full mb-3">
-                <Lock className="w-8 h-8 text-white" />
-              </div>
-              <div className="text-lg font-semibold text-gray-900 mb-1">Premium Feature</div>
-              <div className="text-gray-700 mb-3 text-center max-w-xs">
-                Subscribe to unlock unlimited AI question generation and advanced customization options.
-              </div>
-              <button
-                onClick={handleUpgradeClick}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg"
-              >
-                Upgrade Now
-              </button>
-            </div>
+        {/* Overlay for unsubscribed users who hit the limit */}
+        {!hasActiveSubscription && freeUsed >= FREE_LIMIT && (
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/80 backdrop-blur rounded-xl">
+            <Lock className="w-8 h-8 text-blue-500 mb-2" />
+            <p className="text-blue-800 font-semibold mb-2 text-center">You’ve used your 3 free AI generations this week.</p>
+            <p className="text-gray-600 text-sm mb-4 text-center">Upgrade to unlock unlimited AI question generation and more.</p>
+            <button
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
+              onClick={handleUpgradeClick}
+            >
+              Upgrade Now
+            </button>
           </div>
         )}
 
@@ -1068,71 +1169,6 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Upgrade Modal */}
-      {showUpgradeModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Crown className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Unlock AI Question Generation</h3>
-              <p className="text-gray-600 mb-6">
-                Subscribe to generate unlimited CISSP practice questions with advanced AI customization options.
-              </p>
-              
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center space-x-3 text-left">
-                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">Unlimited question generation</span>
-                </div>
-                <div className="flex items-center space-x-3 text-left">
-                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">Advanced customization options</span>
-                </div>
-                <div className="flex items-center space-x-3 text-left">
-                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">All 8 CISSP domains covered</span>
-                </div>
-                <div className="flex items-center space-x-3 text-left">
-                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">Cancel anytime</span>
-                </div>
-              </div>
-
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => setShowUpgradeModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  Maybe Later
-                </button>
-                <button
-                  onClick={handleUpgradeClick}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
-                >
-                  Upgrade Now
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Notification Banner */}
-      {showSavedBanner && (
-        <div className="fixed bottom-0 left-0 w-full z-50 flex justify-center pointer-events-none">
-          <div className="bg-green-600 text-white px-6 py-4 rounded-t-xl shadow-lg flex items-center space-x-3 animate-fade-in pointer-events-auto">
-            <CheckCircle className="w-6 h-6 text-white" />
-            <span className="font-semibold">
-              {savedBannerCount > 1
-                ? `${savedBannerCount} questions saved!`
-                : 'Question saved!'}
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

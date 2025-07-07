@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase, authHelpers, clearInvalidSession } from '../lib/supabase'
+import { getRandomAvatarUrl } from '../utils/avatars';
 
 interface AuthState {
   user: User | null
@@ -47,7 +48,9 @@ export const useAuth = () => {
         setAuthState(prev => ({
           ...prev,
           session,
-          user: session?.user || null,
+          user: session?.user
+            ? { ...session.user, user_metadata: { ...session.user.user_metadata, avatar_url: getRandomAvatarUrl() } }
+            : null,
           loading: false
         }))
       } catch (error) {
@@ -89,7 +92,9 @@ export const useAuth = () => {
         setAuthState(prev => ({
           ...prev,
           session,
-          user: session?.user || null,
+          user: session?.user
+            ? { ...session.user, user_metadata: { ...session.user.user_metadata, avatar_url: getRandomAvatarUrl() } }
+            : null,
           loading: false,
           error: null
         }))

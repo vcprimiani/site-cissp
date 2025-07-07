@@ -91,6 +91,14 @@ export const generateUserAvatar = (identifier: string) => {
   return animalAvatars[index];
 };
 
+// Returns a random avatar URL from DiceBear (or similar service)
+export function getRandomAvatarUrl() {
+  // Use DiceBear Avatars API for a random avatar
+  // You can swap 'adventurer' for other styles (e.g., 'identicon', 'bottts', etc.)
+  const seed = Math.random().toString(36).substring(2, 15);
+  return `https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`;
+}
+
 // Get avatar component props
 export const getAvatarProps = (user: { id?: string; email?: string; name?: string }) => {
   const identifier = user.id || user.email || user.name || 'default';
