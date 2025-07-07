@@ -10,7 +10,7 @@ import { Question } from '../../types';
 
 export const PaywallPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
-  const { questions, loading: questionsLoading } = useQuestions();
+  const { questions, loading: questionsLoading, error: questionsError } = useQuestions();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState('');
@@ -126,6 +126,16 @@ export const PaywallPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Error Display for Questions Fetch */}
+        {questionsError && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+              <span className="text-red-800 font-medium">Database Error</span>
+            </div>
+            <p className="text-red-700 text-sm mt-1">{questionsError}</p>
+          </div>
+        )}
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
