@@ -151,18 +151,17 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser 
                   size="sm"
                   className="flex-shrink-0"
                 />
-              </div>
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-gray-900 truncate max-w-24 lg:max-w-none">
-                  {currentUser.name}
-                </p>
-                <div className="flex items-center space-x-1">
-                  <p className="text-xs text-gray-600">{isActive ? 'Study Leader' : 'Almost a Member'}</p>
-                  {isActive && (
-                    <Crown className="w-3 h-3 text-green-600" title="Premium subscriber" />
-                  )}
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-medium text-gray-900 truncate max-w-24 lg:max-w-none">
+                    {currentUser.name}
+                  </p>
+                  <div className="flex items-center space-x-1">
+                    <p className="text-xs text-gray-600">{isActive ? 'Study Leader' : 'Almost a Member'}</p>
+                    {isActive && (
+                      <Crown className="w-3 h-3 text-green-600" title="Premium subscriber" />
+                    )}
+                  </div>
                 </div>
-              </div>
             </div>
 
             {/* Logout Button */}
