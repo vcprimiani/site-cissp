@@ -16,7 +16,7 @@ function App() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { isActive: hasActiveSubscription, loading: subscriptionLoading, error: subscriptionError } = useSubscription();
   const [appState, setAppState] = useLocalStorage<AppState>('cissp-study-app', {
-    mode: 'question-bank',
+    mode: 'quiz',
     currentUser: null,
     users: [],
     sessions: [],

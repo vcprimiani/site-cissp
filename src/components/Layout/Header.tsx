@@ -113,7 +113,7 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser,
                 href="https://CISSPStudyGroup.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+                className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-gray-600 hover:text-gray-900 border-2 border-[#F8D27F] shadow-[0_0_8px_2px_#F8D27F] animate-pulse"
                 title="Community"
                 style={{ display: 'flex', alignItems: 'center' }}
               >

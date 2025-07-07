@@ -26,7 +26,7 @@ export const createCheckoutSession = async (params: CreateCheckoutSessionParams)
 
   // Default URLs
   const defaultSuccessUrl = `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`;
-  const defaultCancelUrl = `${window.location.origin}/pricing`;
+  const defaultCancelUrl = `${window.location.origin}/`;
 
   const requestBody: any = {
     price_id: priceId,
