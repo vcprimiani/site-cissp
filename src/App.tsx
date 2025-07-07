@@ -11,6 +11,7 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { useAuth } from './hooks/useAuth';
 import { useSubscription } from './hooks/useSubscription';
 import { BookmarksProvider } from './hooks/useBookmarks';
+import { LandingPage } from './components/Landing/LandingPage';
 
 function App() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -136,7 +137,8 @@ function App() {
 
   // Show auth form if not authenticated
   if (!isAuthenticated || !appState.currentUser) {
-    return <AuthForm />;
+    // Show landing page for unauthenticated users
+    return <LandingPage onGetStarted={() => setAppState(prev => ({ ...prev, showAuth: true }))} />;
   }
 
   // Show error if subscription check fails
