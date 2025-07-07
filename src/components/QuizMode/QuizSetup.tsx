@@ -8,6 +8,7 @@ import { useQuestions } from '../../hooks/useQuestions';
 import { useSessionTracker } from '../../hooks/useSessionTracker';
 import { useQuizPersistence } from '../../hooks/useQuizPersistence';
 import { useBookmarks } from '../../hooks/useBookmarks';
+import { fetchDailyQuizQuestionIds, fetchQuestionsByIds } from '../../services/dailyQuiz';
 
 interface QuizSetupProps {
   onQuizComplete?: (incorrectQuestions: Question[]) => void;
@@ -34,7 +35,7 @@ interface QuizResults {
 
 type QuizMode = 'setup' | 'quiz' | 'results';
 
-export const QuizSetup: React.FC<QuizSetupProps> = ({ onQuizComplete }) => {
+export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boolean; subscriptionLoading: boolean }> = ({ onQuizComplete, hasActiveSubscription, subscriptionLoading }) => {
   const { questions, loading } = useQuestions();
   const { 
     getAvailableQuestions, 
@@ -51,6 +52,20 @@ export const QuizSetup: React.FC<QuizSetupProps> = ({ onQuizComplete }) => {
   const [quizMode, setQuizMode] = useState<QuizMode>('setup');
   const [showSettings, setShowSettings] = useState(false);
   const [quizResults, setQuizResults] = useState<QuizResults | null>(null);
+  const [dailyQuizQuestions, setDailyQuizQuestions] = useState<Question[] | null>(null);
+  const [dailyQuizLoading, setDailyQuizLoading] = useState(false);
+  const [dailyQuizError, setDailyQuizError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!hasActiveSubscription && !subscriptionLoading) {
+      setDailyQuizLoading(true);
+      fetchDailyQuizQuestionIds()
+        .then(ids => fetchQuestionsByIds(ids))
+        .then(qs => setDailyQuizQuestions(qs))
+        .catch(err => setDailyQuizError(err.message || 'Failed to load daily quiz'))
+        .finally(() => setDailyQuizLoading(false));
+    }
+  }, [hasActiveSubscription, subscriptionLoading]);
 
   // Get session statistics
   const sessionStats = getSessionStats();
@@ -182,13 +197,53 @@ export const QuizSetup: React.FC<QuizSetupProps> = ({ onQuizComplete }) => {
   };
 
   // Quiz Mode
-  if (quizMode === 'quiz' && quizSession) {
+  if (!hasActiveSubscription && !subscriptionLoading) {
+    // Unpaid user: show daily quiz only
+    if (dailyQuizLoading || loading) {
+      return (
+        <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Daily Quiz</h3>
+          <p className="text-gray-600">Fetching your free daily practice quiz...</p>
+        </div>
+      );
+    }
+    if (dailyQuizError) {
+      return (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+          <h3 className="text-lg font-semibold text-red-700 mb-2">Error</h3>
+          <p className="text-red-700">{dailyQuizError}</p>
+        </div>
+      );
+    }
+    if (dailyQuizQuestions && dailyQuizQuestions.length === 3) {
+      return (
+        <div>
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6 mb-6 flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-semibold text-gray-900">Free Daily Practice Quiz</h3>
+              <p className="text-gray-600 text-sm">Enjoy your complimentary 3-question quiz! Upgrade to unlock unlimited quizzes, analytics, and more.</p>
+            </div>
+            <button
+              onClick={() => window.location.href = '/pricing'}
+              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
+            >
+              Upgrade Now
+            </button>
+          </div>
+          <Quiz
+            questions={dailyQuizQuestions}
+            onComplete={onQuizComplete}
+            onExit={() => window.location.reload()}
+          />
+        </div>
+      );
+    }
     return (
-      <Quiz
-        questions={quizSession.questions}
-        onComplete={handleQuizComplete}
-        onExit={exitQuiz}
-      />
+      <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Daily Quiz Available</h3>
+        <p className="text-gray-600">Please check back later or contact support.</p>
+      </div>
     );
   }
 
