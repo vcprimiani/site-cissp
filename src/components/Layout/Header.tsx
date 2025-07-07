@@ -140,7 +140,7 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser 
                   {currentUser.name}
                 </p>
                 <div className="flex items-center space-x-1">
-                  <p className="text-xs text-gray-600">Study Leader</p>
+                  <p className="text-xs text-gray-600">{isActive ? 'Study Leader' : 'Almost a Member'}</p>
                   {isActive && (
                     <Crown className="w-3 h-3 text-green-600" title="Premium subscriber" />
                   )}
