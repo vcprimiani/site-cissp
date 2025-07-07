@@ -14,7 +14,7 @@ import { BookmarksProvider } from './hooks/useBookmarks';
 
 function App() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
-  const { isActive: hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
+  const { isActive: hasActiveSubscription, loading: subscriptionLoading, error: subscriptionError } = useSubscription();
   const [appState, setAppState] = useLocalStorage<AppState>('cissp-study-app', {
     mode: 'question-bank',
     currentUser: null,
@@ -140,7 +140,7 @@ function App() {
   }
 
   // Show error if subscription check fails
-  if (isAuthenticated && !subscriptionLoading && useSubscription().error) {
+  if (isAuthenticated && !subscriptionLoading && subscriptionError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-red-100">
         <div className="text-center">
@@ -148,7 +148,7 @@ function App() {
           <p className="text-red-700 font-semibold">
             There was a problem checking your subscription. Please try refreshing the page or contact support.
           </p>
-          <pre className="text-xs text-red-500 mt-2">{useSubscription().error}</pre>
+          <pre className="text-xs text-red-500 mt-2">{subscriptionError}</pre>
         </div>
       </div>
     );
