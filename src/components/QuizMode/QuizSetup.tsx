@@ -407,6 +407,31 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                 </span>
               </div>
             </div>
+            {/* 10 Hard Random Button */}
+            <button
+              type="button"
+              className="mt-4 px-4 py-2 rounded-lg border-2 border-red-500 bg-red-50 text-red-700 font-semibold hover:bg-red-100 transition-colors"
+              onClick={() => {
+                // Find all hard questions from all domains
+                const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
+                if (hardQuestions.length < 10) {
+                  alert('Not enough hard questions available.');
+                  return;
+                }
+                // Shuffle and pick 10
+                const shuffled = [...hardQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
+                markQuestionsAsUsed(shuffled);
+                setQuizSession({
+                  questions: shuffled,
+                  currentIndex: 0,
+                  startTime: new Date(),
+                  isActive: true
+                });
+                setQuizMode('quiz');
+              }}
+            >
+              10 Hard Random (All Domains)
+            </button>
           </div>
 
           {/* Tag Filter */}
