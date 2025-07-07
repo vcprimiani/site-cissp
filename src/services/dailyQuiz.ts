@@ -1,25 +1,27 @@
-import { supabase } from '../lib/supabase';
+import { Question } from '../types';
 
-export async function fetchDailyQuizQuestionIds() {
+const LOCAL_KEY = 'daily-quiz';
+
+function getTodayStr() {
   const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  const todayStr = today.toISOString().slice(0, 10); // YYYY-MM-DD
-  const { data, error } = await supabase
-    .from('daily_free_quiz')
-    .select('question_ids')
-    .eq('date', todayStr)
-    .maybeSingle();
-  if (error) throw error;
-  return data?.question_ids || [];
+  today.setHours(0, 0, 0, 0);
+  return today.toISOString().slice(0, 10);
 }
 
-export async function fetchQuestionsByIds(ids: string[]) {
-  if (!ids.length) return [];
-  const { data, error } = await supabase
-    .from('questions')
-    .select('*')
-    .in('id', ids);
-  if (error) throw error;
-  // Return in the same order as ids
-  return ids.map(id => data.find((q: any) => q.id === id)).filter(Boolean);
+export function getLocalDailyQuizQuestions(allQuestions: Question[]): Question[] {
+  const todayStr = getTodayStr();
+  let stored = null;
+  try {
+    stored = JSON.parse(localStorage.getItem(LOCAL_KEY) || 'null');
+  } catch {}
+  if (stored && stored.date === todayStr && Array.isArray(stored.ids) && stored.ids.length === 3) {
+    return stored.ids.map((id: string) => allQuestions.find(q => q.id === id)).filter(Boolean);
+  }
+  // Pick 3 random questions
+  const activeQuestions = allQuestions.filter(q => q.isActive);
+  if (activeQuestions.length < 3) return [];
+  const shuffled = activeQuestions.sort(() => 0.5 - Math.random());
+  const selected = shuffled.slice(0, 3).map(q => q.id);
+  localStorage.setItem(LOCAL_KEY, JSON.stringify({ date: todayStr, ids: selected }));
+  return selected.map(id => activeQuestions.find(q => q.id === id)).filter(Boolean);
 } 

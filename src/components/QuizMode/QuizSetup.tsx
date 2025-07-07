@@ -8,7 +8,7 @@ import { useQuestions } from '../../hooks/useQuestions';
 import { useSessionTracker } from '../../hooks/useSessionTracker';
 import { useQuizPersistence } from '../../hooks/useQuizPersistence';
 import { useBookmarks } from '../../hooks/useBookmarks';
-import { fetchDailyQuizQuestionIds, fetchQuestionsByIds } from '../../services/dailyQuiz';
+import { getLocalDailyQuizQuestions } from '../../services/dailyQuiz';
 
 interface QuizSetupProps {
   onQuizComplete?: (incorrectQuestions: Question[]) => void;
@@ -59,11 +59,11 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   useEffect(() => {
     if (!hasActiveSubscription && !subscriptionLoading) {
       setDailyQuizLoading(true);
-      fetchDailyQuizQuestionIds()
-        .then(ids => fetchQuestionsByIds(ids))
-        .then(qs => setDailyQuizQuestions(qs))
-        .catch(err => setDailyQuizError(err.message || 'Failed to load daily quiz'))
-        .finally(() => setDailyQuizLoading(false));
+      // fetchDailyQuizQuestionIds()
+      //   .then(ids => fetchQuestionsByIds(ids))
+      //   .then(qs => setDailyQuizQuestions(qs))
+      //   .catch(err => setDailyQuizError(err.message || 'Failed to load daily quiz'))
+      //   .finally(() => setDailyQuizLoading(false));
     }
   }, [hasActiveSubscription, subscriptionLoading]);
 
@@ -199,7 +199,8 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   // Quiz Mode
   if (!hasActiveSubscription && !subscriptionLoading) {
     // Unpaid user: show daily quiz only
-    if (dailyQuizLoading || loading) {
+    const dailyQuizQuestions = getLocalDailyQuizQuestions(questions);
+    if (loading) {
       return (
         <div className="bg-white rounded-xl shadow-lg p-8 text-center">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -208,15 +209,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
         </div>
       );
     }
-    if (dailyQuizError) {
-      return (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
-          <h3 className="text-lg font-semibold text-red-700 mb-2">Error</h3>
-          <p className="text-red-700">{dailyQuizError}</p>
-        </div>
-      );
-    }
-    if (dailyQuizQuestions && dailyQuizQuestions.length === 3) {
+    if (dailyQuizQuestions.length === 3) {
       return (
         <div>
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6 mb-6 flex items-center justify-between">
@@ -242,7 +235,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     return (
       <div className="bg-white rounded-xl shadow-lg p-8 text-center">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">No Daily Quiz Available</h3>
-        <p className="text-gray-600">Please check back later or contact support.</p>
+        <p className="text-gray-600">Please add more questions to the bank.</p>
       </div>
     );
   }
