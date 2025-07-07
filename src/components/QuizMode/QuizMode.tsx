@@ -8,9 +8,11 @@ import { Target, Brain } from 'lucide-react';
 interface QuizModeProps {
   appState: AppState;
   onUpdateState: (updates: Partial<AppState>) => void;
+  hasActiveSubscription: boolean;
+  subscriptionLoading: boolean;
 }
 
-export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState }) => {
+export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, hasActiveSubscription, subscriptionLoading }) => {
   const [activeTab, setActiveTab] = useState<'setup' | 'ai'>('setup');
   const [incorrectQuestions, setIncorrectQuestions] = useState<any[]>([]);
 
@@ -126,6 +128,8 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState }) =
               });
               window.dispatchEvent(event);
             }}
+            hasActiveSubscription={hasActiveSubscription}
+            subscriptionLoading={subscriptionLoading}
           />
         )}
         
