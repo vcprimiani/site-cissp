@@ -4,6 +4,7 @@ import { Database, Target, LogOut, Crown, Users } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useSubscription } from '../../hooks/useSubscription';
 import { Avatar } from '../UI/Avatar';
+import { clearInvalidSession } from '../../lib/supabase';
 
 interface HeaderProps {
   mode: AppMode;
@@ -18,7 +19,8 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser 
 
   const handleLogout = async () => {
     await signOut();
-    window.location.reload(); // Force reload to show login page
+    await clearInvalidSession();
+    window.location.href = '/'; // Hard redirect to root/login
   };
 
   return (

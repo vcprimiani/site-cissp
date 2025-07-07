@@ -27,7 +27,7 @@ export const QuestionBankMode: React.FC<QuestionBankModeProps> = ({ appState, on
     },
     { 
       id: 'generator', 
-      label: 'AI Generator', 
+      label: 'AI Question Generator', 
       icon: Brain,
       description: 'Generate new questions using advanced AI tools'
     }
