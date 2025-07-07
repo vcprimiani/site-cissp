@@ -456,7 +456,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
   }
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8 relative">
       {/* Subscription Status Banner */}
       {!hasActiveSubscription && (
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6">
@@ -637,221 +637,35 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
 
       {/* Recently Added Questions Notification */}
 
-      {/* Quick Generator */}
-      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-          <Wand2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
-          <span>Quick Generator</span>
-          {!hasActiveSubscription && (
-            <div className="flex items-center space-x-1 bg-orange-100 px-2 py-1 rounded-full">
-              <Lock className="w-3 h-3 text-orange-600" />
-              <span className="text-xs font-medium text-orange-800">Premium</span>
-            </div>
-          )}
-        </h3>
-
-        <div className="space-y-6">
-          {/* Domain Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Select CISSP Domain
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {domains.map((domain) => (
-                <button
-                  key={domain}
-                  onClick={() => hasActiveSubscription ? handleDomainSelect(domain) : setShowUpgradeModal(true)}
-                  className={`text-left p-3 rounded-lg border-2 transition-all duration-200 ${
-                    !hasActiveSubscription 
-                      ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                      : selectedDomain === domain
-                      ? 'border-purple-500 bg-purple-50 text-purple-900'
-                      : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-700'
-                  }`}
-                  disabled={!hasActiveSubscription}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-sm mb-1">{domain}</div>
-                      <div className="text-xs opacity-75">
-                        {domainSubcategories[domain as keyof typeof domainSubcategories].length} subcategories
-                      </div>
-                    </div>
-                    {!hasActiveSubscription && <Lock className="w-4 h-4" />}
-                  </div>
-                </button>
-              ))}
+      {/* Generation Controls Section (Quick + Advanced) */}
+      <div className="relative">
+        {/* Overlay for unsubscribed users */}
+        {!hasActiveSubscription && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/70 backdrop-blur-sm rounded-xl">
+            <div className="flex flex-col items-center">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-full mb-3">
+                <Lock className="w-8 h-8 text-white" />
+              </div>
+              <div className="text-lg font-semibold text-gray-900 mb-1">Premium Feature</div>
+              <div className="text-gray-700 mb-3 text-center max-w-xs">
+                Subscribe to unlock unlimited AI question generation and advanced customization options.
+              </div>
+              <button
+                onClick={handleUpgradeClick}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg"
+              >
+                Upgrade Now
+              </button>
             </div>
           </div>
+        )}
 
-          {/* Subcategory Selection */}
-          {selectedDomain && hasActiveSubscription && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Select Subcategory from {selectedDomain}
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {domainSubcategories[selectedDomain as keyof typeof domainSubcategories].map((subcategory) => (
-                  <button
-                    key={subcategory}
-                    onClick={() => setSelectedSubcategory(subcategory)}
-                    className={`text-left p-3 rounded-lg border transition-all duration-200 text-sm ${
-                      selectedSubcategory === subcategory
-                        ? 'border-blue-500 bg-blue-50 text-blue-900'
-                        : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-700'
-                    }`}
-                  >
-                    {subcategory}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Current Selection Display */}
-          {canGenerate && hasActiveSubscription && (
-            <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-200">
-              <div className="flex items-center space-x-2 mb-2">
-                <Target className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-medium text-green-800">Ready to Generate</span>
-              </div>
-              <p className="text-sm text-green-700">
-                <strong>Topic:</strong> {getCurrentTopic()}
-              </p>
-              {selectedDomain && (
-                <p className="text-xs text-green-600 mt-1">
-                  <strong>Domain:</strong> {selectedDomain}
-                </p>
-              )}
-              <p className="text-xs text-green-600 mt-2">
-                ✨ Questions will be automatically saved to your secure database
-              </p>
-            </div>
-          )}
-
-          {/* Generation Buttons */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">Generate & Save Questions:</span>
-              {isGenerating && generationProgress.total > 1 && (
-                <span className="text-xs text-purple-600">
-                  Generating {generationProgress.current} of {generationProgress.total}...
-                </span>
-              )}
-            </div>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {/* Single Question */}
-              <button
-                onClick={() => checkSubscriptionAndProceed(() => handleQuickGenerate(1))}
-                disabled={(!canGenerate && hasActiveSubscription) || isGenerating || !!rateLimitError}
-                className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all duration-200 ${
-                  !hasActiveSubscription
-                    ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                    : rateLimitError
-                    ? 'border-orange-200 bg-orange-50 text-orange-400 cursor-not-allowed'
-                    : 'border-purple-200 hover:border-purple-400 hover:bg-purple-50'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
-                  hasActiveSubscription && !rateLimitError ? 'bg-purple-100' : 'bg-gray-100'
-                }`}>
-                  <span className={`font-bold text-sm ${
-                    hasActiveSubscription && !rateLimitError ? 'text-purple-600' : 'text-gray-400'
-                  }`}>1</span>
-                </div>
-                <span className="text-sm font-medium text-gray-900">Single</span>
-                <span className="text-xs text-gray-600">Question</span>
-                {!hasActiveSubscription && <Lock className="w-3 h-3 mt-1" />}
-              </button>
-
-              {/* 5 Questions */}
-              <button
-                onClick={() => checkSubscriptionAndProceed(() => handleQuickGenerate(5))}
-                disabled={(!canGenerate && hasActiveSubscription) || isGenerating || !!rateLimitError}
-                className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all duration-200 ${
-                  !hasActiveSubscription
-                    ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                    : rateLimitError
-                    ? 'border-orange-200 bg-orange-50 text-orange-400 cursor-not-allowed'
-                    : 'border-blue-200 hover:border-blue-400 hover:bg-blue-50'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
-                  hasActiveSubscription && !rateLimitError ? 'bg-blue-100' : 'bg-gray-100'
-                }`}>
-                  <span className={`font-bold text-sm ${
-                    hasActiveSubscription && !rateLimitError ? 'text-blue-600' : 'text-gray-400'
-                  }`}>5</span>
-                </div>
-                <span className="text-sm font-medium text-gray-900">Quick</span>
-                <span className="text-xs text-gray-600">Set</span>
-                {!hasActiveSubscription && <Lock className="w-3 h-3 mt-1" />}
-              </button>
-
-              {/* 10 Questions */}
-              <button
-                onClick={() => checkSubscriptionAndProceed(() => handleQuickGenerate(10))}
-                disabled={(!canGenerate && hasActiveSubscription) || isGenerating || !!rateLimitError}
-                className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all duration-200 ${
-                  !hasActiveSubscription
-                    ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                    : rateLimitError
-                    ? 'border-orange-200 bg-orange-50 text-orange-400 cursor-not-allowed'
-                    : 'border-green-200 hover:border-green-400 hover:bg-green-50'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
-                  hasActiveSubscription && !rateLimitError ? 'bg-green-100' : 'bg-gray-100'
-                }`}>
-                  <span className={`font-bold text-sm ${
-                    hasActiveSubscription && !rateLimitError ? 'text-green-600' : 'text-gray-400'
-                  }`}>10</span>
-                </div>
-                <span className="text-sm font-medium text-gray-900">Full</span>
-                <span className="text-xs text-gray-600">Set</span>
-                {!hasActiveSubscription && <Lock className="w-3 h-3 mt-1" />}
-              </button>
-
-              {/* Loading State */}
-              {isGenerating && hasActiveSubscription && (
-                <div className="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
-                  <Loader className="w-6 h-6 text-gray-600 animate-spin mb-2" />
-                  <span className="text-sm font-medium text-gray-600">Generating...</span>
-                  {generationProgress.total > 1 && (
-                    <span className="text-xs text-gray-500">
-                      {generationProgress.current}/{generationProgress.total}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Help Text */}
-          {!canGenerate && hasActiveSubscription && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-yellow-800">Select a domain to generate questions</span>
-              </div>
-              <p className="text-xs text-yellow-700 mt-1">
-                Choose a domain and optionally a subcategory to get started.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Advanced Generator - Collapsible */}
-      <div className="bg-white rounded-xl shadow-lg">
-        <div 
-          className="p-4 sm:p-6 cursor-pointer"
-          onClick={() => hasActiveSubscription ? setShowAdvanced(!showAdvanced) : setShowUpgradeModal(true)}
-        >
-          <div className="flex items-center justify-between">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-              <span>🎯 Advanced Generator Options</span>
+        {/* Quick Generator Controls */}
+        <div className={hasActiveSubscription ? '' : 'pointer-events-none opacity-60 select-none'}>
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+              <Wand2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
+              <span>Quick Generator</span>
               {!hasActiveSubscription && (
                 <div className="flex items-center space-x-1 bg-orange-100 px-2 py-1 rounded-full">
                   <Lock className="w-3 h-3 text-orange-600" />
@@ -859,186 +673,400 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                 </div>
               )}
             </h3>
-            <div className="flex items-center space-x-2">
-              {hasActiveSubscription ? (
-                showAdvanced ? (
-                  <ChevronUp className="w-5 h-5 text-gray-400" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
-                )
-              ) : (
-                <Lock className="w-5 h-5 text-gray-400" />
-              )}
-            </div>
-          </div>
-          {!showAdvanced && (
-            <p className="text-sm text-gray-600 mt-2">
-              {hasActiveSubscription 
-                ? 'Configure detailed options for question generation including domain, difficulty, and question type'
-                : 'Premium feature - Subscribe to access advanced generation options'
-              }
-            </p>
-          )}
-        </div>
 
-        {showAdvanced && hasActiveSubscription && (
-          <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-200">
-            <div className="space-y-6 pt-6">
-              {/* Question Count Toggle */}
+            <div className="space-y-6">
+              {/* Domain Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Number of Questions to Generate
+                  Select CISSP Domain
                 </label>
-                <div className="flex space-x-3">
-                  {[1, 5, 10].map((count) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {domains.map((domain) => (
                     <button
-                      key={count}
-                      onClick={() => setAdvancedQuestionCount(count as 1 | 5 | 10)}
-                      className={`flex flex-col items-center justify-center p-3 border-2 rounded-lg transition-all duration-200 ${
-                        advancedQuestionCount === count
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                      key={domain}
+                      onClick={() => hasActiveSubscription ? handleDomainSelect(domain) : setShowUpgradeModal(true)}
+                      className={`text-left p-3 rounded-lg border-2 transition-all duration-200 ${
+                        !hasActiveSubscription 
+                          ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                          : selectedDomain === domain
+                          ? 'border-purple-500 bg-purple-50 text-purple-900'
+                          : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-700'
                       }`}
+                      disabled={!hasActiveSubscription}
                     >
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 ${
-                        advancedQuestionCount === count
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        <span className="text-xs font-bold">{count}</span>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-sm mb-1">{domain}</div>
+                          <div className="text-xs opacity-75">
+                            {domainSubcategories[domain as keyof typeof domainSubcategories].length} subcategories
+                          </div>
+                        </div>
+                        {!hasActiveSubscription && <Lock className="w-4 h-4" />}
                       </div>
-                      <span className="text-xs font-medium text-gray-900">
-                        {count === 1 ? 'Single' : count === 5 ? 'Quick' : 'Full'}
-                      </span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:gap-6">
+              {/* Subcategory Selection */}
+              {selectedDomain && hasActiveSubscription && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Domain</label>
-                  <select
-                    value={advancedOptions.domain}
-                    onChange={(e) => setAdvancedOptions(prev => ({ ...prev, domain: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  >
-                    {domains.map(domain => (
-                      <option key={domain} value={domain}>{domain}</option>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Select Subcategory from {selectedDomain}
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    {domainSubcategories[selectedDomain as keyof typeof domainSubcategories].map((subcategory) => (
+                      <button
+                        key={subcategory}
+                        onClick={() => setSelectedSubcategory(subcategory)}
+                        className={`text-left p-3 rounded-lg border transition-all duration-200 text-sm ${
+                          selectedSubcategory === subcategory
+                            ? 'border-blue-500 bg-blue-50 text-blue-900'
+                            : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-700'
+                        }`}
+                      >
+                        {subcategory}
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
+              )}
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
-                  <select
-                    value={advancedOptions.difficulty}
-                    onChange={(e) => setAdvancedOptions(prev => ({ ...prev, difficulty: e.target.value as any }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              {/* Current Selection Display */}
+              {canGenerate && hasActiveSubscription && (
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-200">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Target className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-green-800">Ready to Generate</span>
+                  </div>
+                  <p className="text-sm text-green-700">
+                    <strong>Topic:</strong> {getCurrentTopic()}
+                  </p>
+                  {selectedDomain && (
+                    <p className="text-xs text-green-600 mt-1">
+                      <strong>Domain:</strong> {selectedDomain}
+                    </p>
+                  )}
+                  <p className="text-xs text-green-600 mt-2">
+                    ✨ Questions will be automatically saved to your secure database
+                  </p>
+                </div>
+              )}
+
+              {/* Generation Buttons */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">Generate & Save Questions:</span>
+                  {isGenerating && generationProgress.total > 1 && (
+                    <span className="text-xs text-purple-600">
+                      Generating {generationProgress.current} of {generationProgress.total}...
+                    </span>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {/* Single Question */}
+                  <button
+                    onClick={() => checkSubscriptionAndProceed(() => handleQuickGenerate(1))}
+                    disabled={(!canGenerate && hasActiveSubscription) || isGenerating || !!rateLimitError}
+                    className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all duration-200 ${
+                      !hasActiveSubscription
+                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : rateLimitError
+                        ? 'border-orange-200 bg-orange-50 text-orange-400 cursor-not-allowed'
+                        : 'border-purple-200 hover:border-purple-400 hover:bg-purple-50'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    <option value="Easy">Easy</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Hard">Hard</option>
-                  </select>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
+                      hasActiveSubscription && !rateLimitError ? 'bg-purple-100' : 'bg-gray-100'
+                    }`}>
+                      <span className={`font-bold text-sm ${
+                        hasActiveSubscription && !rateLimitError ? 'text-purple-600' : 'text-gray-400'
+                      }`}>1</span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">Single</span>
+                    <span className="text-xs text-gray-600">Question</span>
+                    {!hasActiveSubscription && <Lock className="w-3 h-3 mt-1" />}
+                  </button>
+
+                  {/* 5 Questions */}
+                  <button
+                    onClick={() => checkSubscriptionAndProceed(() => handleQuickGenerate(5))}
+                    disabled={(!canGenerate && hasActiveSubscription) || isGenerating || !!rateLimitError}
+                    className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all duration-200 ${
+                      !hasActiveSubscription
+                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : rateLimitError
+                        ? 'border-orange-200 bg-orange-50 text-orange-400 cursor-not-allowed'
+                        : 'border-blue-200 hover:border-blue-400 hover:bg-blue-50'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
+                      hasActiveSubscription && !rateLimitError ? 'bg-blue-100' : 'bg-gray-100'
+                    }`}>
+                      <span className={`font-bold text-sm ${
+                        hasActiveSubscription && !rateLimitError ? 'text-blue-600' : 'text-gray-400'
+                      }`}>5</span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">Quick</span>
+                    <span className="text-xs text-gray-600">Set</span>
+                    {!hasActiveSubscription && <Lock className="w-3 h-3 mt-1" />}
+                  </button>
+
+                  {/* 10 Questions */}
+                  <button
+                    onClick={() => checkSubscriptionAndProceed(() => handleQuickGenerate(10))}
+                    disabled={(!canGenerate && hasActiveSubscription) || isGenerating || !!rateLimitError}
+                    className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all duration-200 ${
+                      !hasActiveSubscription
+                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                        : rateLimitError
+                        ? 'border-orange-200 bg-orange-50 text-orange-400 cursor-not-allowed'
+                        : 'border-green-200 hover:border-green-400 hover:bg-green-50'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
+                      hasActiveSubscription && !rateLimitError ? 'bg-green-100' : 'bg-gray-100'
+                    }`}>
+                      <span className={`font-bold text-sm ${
+                        hasActiveSubscription && !rateLimitError ? 'text-green-600' : 'text-gray-400'
+                      }`}>10</span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">Full</span>
+                    <span className="text-xs text-gray-600">Set</span>
+                    {!hasActiveSubscription && <Lock className="w-3 h-3 mt-1" />}
+                  </button>
+
+                  {/* Loading State */}
+                  {isGenerating && hasActiveSubscription && (
+                    <div className="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
+                      <Loader className="w-6 h-6 text-gray-600 animate-spin mb-2" />
+                      <span className="text-sm font-medium text-gray-600">Generating...</span>
+                      {generationProgress.total > 1 && (
+                        <span className="text-xs text-gray-500">
+                          {generationProgress.current}/{generationProgress.total}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
-                <div className="grid grid-cols-1 gap-3">
-                  {questionTypes.map(type => (
-                    <label key={type.value} className="flex items-start space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                      <input
-                        type="radio"
-                        name="questionType"
-                        value={type.value}
-                        checked={advancedOptions.questionType === type.value}
-                        onChange={(e) => setAdvancedOptions(prev => ({ ...prev, questionType: e.target.value as any }))}
-                        className="mt-1"
-                      />
-                      <div>
-                        <p className="font-medium text-gray-900 text-sm">{type.label}</p>
-                        <p className="text-xs text-gray-600">{type.description}</p>
-                      </div>
-                    </label>
-                  ))}
+              {/* Help Text */}
+              {!canGenerate && hasActiveSubscription && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium text-yellow-800">Select a domain to generate questions</span>
+                  </div>
+                  <p className="text-xs text-yellow-700 mt-1">
+                    Choose a domain and optionally a subcategory to get started.
+                  </p>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Scenario Focus</label>
-                <div className="grid grid-cols-1 gap-3">
-                  {scenarioTypes.map(type => (
-                    <label key={type.value} className="flex items-start space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                      <input
-                        type="radio"
-                        name="scenarioType"
-                        value={type.value}
-                        checked={advancedOptions.scenarioType === type.value}
-                        onChange={(e) => setAdvancedOptions(prev => ({ ...prev, scenarioType: e.target.value as any }))}
-                        className="mt-1"
-                      />
-                      <div>
-                        <p className="font-medium text-gray-900 text-sm">{type.label}</p>
-                        <p className="text-xs text-gray-600">{type.description}</p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Focus Area (Optional)</label>
-                  <input
-                    type="text"
-                    value={advancedOptions.focusArea}
-                    onChange={(e) => setAdvancedOptions(prev => ({ ...prev, focusArea: e.target.value }))}
-                    placeholder="e.g., quarantine procedures, remediation"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  id="includeDistractors"
-                  checked={advancedOptions.includeDistractors}
-                  onChange={(e) => setAdvancedOptions(prev => ({ ...prev, includeDistractors: e.target.checked }))}
-                  className="rounded"
-                />
-                <label htmlFor="includeDistractors" className="text-sm text-gray-700">
-                  Include strong distractors that test common misconceptions
-                </label>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-sm text-blue-800">
-                  ✨ Generated questions will be automatically saved to your secure database with the "ai-generated" tag
-                </p>
-              </div>
-
-              <button
-                onClick={handleAdvancedGenerate}
-                disabled={isGenerating || !!rateLimitError}
-                className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
-              >
-                {isGenerating ? (
-                  <Loader className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Wand2 className="w-5 h-5" />
-                )}
-                <span>
-                  {isGenerating 
-                    ? `Generating ${advancedQuestionCount} Question${advancedQuestionCount > 1 ? 's' : ''}...` 
-                    : `Generate & Save ${advancedQuestionCount} Question${advancedQuestionCount > 1 ? 's' : ''}`
-                  }
-                </span>
-              </button>
+              )}
             </div>
           </div>
-        )}
+        </div>
+
+        {/* Advanced Generator Controls */}
+        <div className={hasActiveSubscription ? '' : 'pointer-events-none opacity-60 select-none'}>
+          <div className="bg-white rounded-xl shadow-lg">
+            <div 
+              className="p-4 sm:p-6 cursor-pointer"
+              onClick={() => hasActiveSubscription ? setShowAdvanced(!showAdvanced) : setShowUpgradeModal(true)}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                  <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                  <span>🎯 Advanced Generator Options</span>
+                  {!hasActiveSubscription && (
+                    <div className="flex items-center space-x-1 bg-orange-100 px-2 py-1 rounded-full">
+                      <Lock className="w-3 h-3 text-orange-600" />
+                      <span className="text-xs font-medium text-orange-800">Premium</span>
+                    </div>
+                  )}
+                </h3>
+                <div className="flex items-center space-x-2">
+                  {hasActiveSubscription ? (
+                    showAdvanced ? (
+                      <ChevronUp className="w-5 h-5 text-gray-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )
+                  ) : (
+                    <Lock className="w-5 h-5 text-gray-400" />
+                  )}
+                </div>
+              </div>
+              {!showAdvanced && (
+                <p className="text-sm text-gray-600 mt-2">
+                  {hasActiveSubscription 
+                    ? 'Configure detailed options for question generation including domain, difficulty, and question type'
+                    : 'Premium feature - Subscribe to access advanced generation options'
+                  }
+                </p>
+              )}
+            </div>
+
+            {showAdvanced && hasActiveSubscription && (
+              <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-200">
+                <div className="space-y-6 pt-6">
+                  {/* Question Count Toggle */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Number of Questions to Generate
+                    </label>
+                    <div className="flex space-x-3">
+                      {[1, 5, 10].map((count) => (
+                        <button
+                          key={count}
+                          onClick={() => setAdvancedQuestionCount(count as 1 | 5 | 10)}
+                          className={`flex flex-col items-center justify-center p-3 border-2 rounded-lg transition-all duration-200 ${
+                            advancedQuestionCount === count
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                          }`}
+                        >
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 ${
+                            advancedQuestionCount === count
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-gray-100 text-gray-600'
+                          }`}>
+                            <span className="text-xs font-bold">{count}</span>
+                          </div>
+                          <span className="text-xs font-medium text-gray-900">
+                            {count === 1 ? 'Single' : count === 5 ? 'Quick' : 'Full'}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Domain</label>
+                      <select
+                        value={advancedOptions.domain}
+                        onChange={(e) => setAdvancedOptions(prev => ({ ...prev, domain: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      >
+                        {domains.map(domain => (
+                          <option key={domain} value={domain}>{domain}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
+                      <select
+                        value={advancedOptions.difficulty}
+                        onChange={(e) => setAdvancedOptions(prev => ({ ...prev, difficulty: e.target.value as any }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      >
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
+                    <div className="grid grid-cols-1 gap-3">
+                      {questionTypes.map(type => (
+                        <label key={type.value} className="flex items-start space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                          <input
+                            type="radio"
+                            name="questionType"
+                            value={type.value}
+                            checked={advancedOptions.questionType === type.value}
+                            onChange={(e) => setAdvancedOptions(prev => ({ ...prev, questionType: e.target.value as any }))}
+                            className="mt-1"
+                          />
+                          <div>
+                            <p className="font-medium text-gray-900 text-sm">{type.label}</p>
+                            <p className="text-xs text-gray-600">{type.description}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Scenario Focus</label>
+                    <div className="grid grid-cols-1 gap-3">
+                      {scenarioTypes.map(type => (
+                        <label key={type.value} className="flex items-start space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                          <input
+                            type="radio"
+                            name="scenarioType"
+                            value={type.value}
+                            checked={advancedOptions.scenarioType === type.value}
+                            onChange={(e) => setAdvancedOptions(prev => ({ ...prev, scenarioType: e.target.value as any }))}
+                            className="mt-1"
+                          />
+                          <div>
+                            <p className="font-medium text-gray-900 text-sm">{type.label}</p>
+                            <p className="text-xs text-gray-600">{type.description}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Focus Area (Optional)</label>
+                      <input
+                        type="text"
+                        value={advancedOptions.focusArea}
+                        onChange={(e) => setAdvancedOptions(prev => ({ ...prev, focusArea: e.target.value }))}
+                        placeholder="e.g., quarantine procedures, remediation"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="includeDistractors"
+                      checked={advancedOptions.includeDistractors}
+                      onChange={(e) => setAdvancedOptions(prev => ({ ...prev, includeDistractors: e.target.checked }))}
+                      className="rounded"
+                    />
+                    <label htmlFor="includeDistractors" className="text-sm text-gray-700">
+                      Include strong distractors that test common misconceptions
+                    </label>
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-sm text-blue-800">
+                      ✨ Generated questions will be automatically saved to your secure database with the "ai-generated" tag
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={handleAdvancedGenerate}
+                    disabled={isGenerating || !!rateLimitError}
+                    className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
+                  >
+                    {isGenerating ? (
+                      <Loader className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Wand2 className="w-5 h-5" />
+                    )}
+                    <span>
+                      {isGenerating 
+                        ? `Generating ${advancedQuestionCount} Question${advancedQuestionCount > 1 ? 's' : ''}...` 
+                        : `Generate & Save ${advancedQuestionCount} Question${advancedQuestionCount > 1 ? 's' : ''}`
+                      }
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Upgrade Modal */}
