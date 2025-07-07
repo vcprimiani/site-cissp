@@ -79,16 +79,20 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {showQuizInfo && (
-        <div className="relative bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 mb-8 border border-green-200 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Target className="w-8 h-8 text-blue-600" />
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-1">Quiz Mode</h2>
-              <div className="flex items-center space-x-2">
-                <span className="text-blue-700 text-sm font-medium flex items-center"><Clock className="w-4 h-4 mr-1" />Timed Practice</span>
-                <span className="text-purple-700 text-sm font-medium flex items-center"><Trophy className="w-4 h-4 mr-1" />Track Progress</span>
-                <span className="text-green-700 text-sm font-medium flex items-center"><Brain className="w-4 h-4 mr-1" />AI Review</span>
+        <div className="relative bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 mb-8 border border-green-200 flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <Target className="w-8 h-8 text-blue-600" />
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-1">Quiz Mode</h2>
+                <div className="flex items-center space-x-2">
+                  <span className="text-blue-700 text-sm font-medium flex items-center"><Clock className="w-4 h-4 mr-1" />Timed Practice</span>
+                  <span className="text-green-700 text-sm font-medium flex items-center"><Brain className="w-4 h-4 mr-1" />AI Review</span>
+                </div>
               </div>
+            </div>
+            <div id="quiz-mode-start-buttons" className="flex flex-col sm:flex-row gap-2">
+              {/* Start Quiz buttons will be rendered here by QuizSetup */}
             </div>
           </div>
           <button
