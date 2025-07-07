@@ -422,79 +422,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
         <div className="max-w-6xl w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Tally Panel */}
-            {showTallies && (
-              <div className="lg:col-span-3">
-                <div className="bg-white rounded-xl shadow-lg p-6 sticky top-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Participant Tallies</h3>
-                    <button
-                      onClick={resetTallies}
-                      className="text-sm text-gray-500 hover:text-gray-700 underline"
-                    >
-                      Reset
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {currentQuestion.options.map((option, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-gray-900">
-                            {String.fromCharCode(65 + index)}
-                          </span>
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() => handleTallyChange(index, false)}
-                              className="w-6 h-6 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition-colors"
-                              disabled={tallyCounts[index] === 0}
-                            >
-                              <Minus className="w-3 h-3" />
-                            </button>
-                            <span className="w-8 text-center font-bold text-lg">
-                              {tallyCounts[index]}
-                            </span>
-                            <button
-                              onClick={() => handleTallyChange(index, true)}
-                              className="w-6 h-6 rounded-full bg-green-100 text-green-600 hover:bg-green-200 flex items-center justify-center transition-colors"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </div>
-                        
-                        {/* Progress bar for this option */}
-                        <div className="w-full bg-gray-100 rounded-full h-2">
-                          <div
-                            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                            style={{
-                              width: getTotalParticipants() > 0 
-                                ? `${(tallyCounts[index] / getTotalParticipants()) * 100}%` 
-                                : '0%'
-                            }}
-                          />
-                        </div>
-                        
-                        {/* Percentage */}
-                        <div className="text-xs text-gray-500 mt-1 text-right">
-                          {getTotalParticipants() > 0 
-                            ? `${Math.round((tallyCounts[index] / getTotalParticipants()) * 100)}%`
-                            : '0%'
-                          }
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {/* Total participants */}
-                    <div className="pt-3 border-t border-gray-200">
-                      <div className="text-center">
-                        <span className="text-sm text-gray-600">Total Participants: </span>
-                        <span className="font-bold text-lg text-blue-600">{getTotalParticipants()}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Remove the Tally Panel (showTallies && ...) */}
 
             {/* Question Card */}
             <div className={showTallies ? "lg:col-span-9" : "lg:col-span-12"}>
@@ -607,25 +535,42 @@ export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => 
                           </p>
                         </div>
                         
-                        <div className="flex items-center space-x-3">
-                          {/* Tally count display */}
-                          {showTallies && (
-                            <div className="bg-gray-100 px-2 py-1 rounded-full">
-                              <span className="text-sm font-medium text-gray-700">
-                                {tallyCounts[index]}
-                              </span>
-                            </div>
-                          )}
-                          
-                          {showResult && (
-                            <div>
-                              {index === currentQuestion.correctAnswer ? (
-                                <CheckCircle className="w-6 h-6 text-green-600" />
-                              ) : selectedAnswer === index ? (
-                                <XCircle className="w-6 h-6 text-red-600" />
-                              ) : null}
-                            </div>
-                          )}
+                        {/* Inline Tally Controls */}
+                        <div className="flex flex-col items-end gap-1 ml-4">
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={e => { e.stopPropagation(); handleTallyChange(index, false); }}
+                              className="w-6 h-6 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition-colors"
+                              disabled={tallyCounts[index] === 0}
+                              tabIndex={-1}
+                            >
+                              <Minus className="w-3 h-3" />
+                            </button>
+                            <span className="w-8 text-center font-bold text-lg">{tallyCounts[index]}</span>
+                            <button
+                              onClick={e => { e.stopPropagation(); handleTallyChange(index, true); }}
+                              className="w-6 h-6 rounded-full bg-green-100 text-green-600 hover:bg-green-200 flex items-center justify-center transition-colors"
+                              tabIndex={-1}
+                            >
+                              <Plus className="w-3 h-3" />
+                            </button>
+                          </div>
+                          {/* Progress bar and percentage */}
+                          <div className="w-24 bg-gray-100 rounded-full h-2">
+                            <div
+                              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                              style={{
+                                width: getTotalParticipants() > 0 
+                                  ? `${(tallyCounts[index] / getTotalParticipants()) * 100}%` 
+                                  : '0%'
+                              }}
+                            />
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1 text-right w-24">
+                            {getTotalParticipants() > 0 
+                              ? `${Math.round((tallyCounts[index] / getTotalParticipants()) * 100)}%`
+                              : '0%'}
+                          </div>
                         </div>
                       </div>
                     </button>
