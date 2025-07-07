@@ -209,7 +209,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       name: 'Sarah Chen',
       role: 'Security Architect',
       company: 'Meridian Technologies',
-      content: 'Casey helped me understand complex concepts I was struggling with. The explanations are incredibly detailed and the questions feel just like the real exam. Passed CISSP on my first try!',
+      content: 'Casey helped me understand complex concepts I was struggling with. The explanations are incredibly detailed and the questions feel just like the real exam. Highly recommend for CISSP study!',
       rating: 5
     },
     {
@@ -223,7 +223,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       name: 'Jennifer Park',
       role: 'Cybersecurity Consultant',
       company: 'Apex Security Solutions',
-      content: 'The manager\'s perspective feature is brilliant for leadership questions. The keyword highlighting and bookmark system help me focus on my weak areas. Highly recommended!',
+      content: 'The manager\'s perspective feature is brilliant for leadership questions. The keyword highlighting and bookmark system help me focus on my weak areas. Great study platform!',
       rating: 5
     }
   ];
@@ -310,18 +310,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   ))}
                 </div>
                 <span className="text-sm font-semibold text-gray-600">
-                  Trusted by 500+ CISSP professionals
+                  Trusted by 500+ CISSP students
                 </span>
               </div>
               
               <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Pass CISSP in
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> 30 Days </span>
-                with AI-Powered Study
+                Master CISSP with
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> AI-Powered </span>
+                Study Tools
               </h1>
               
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Join thousands who passed CISSP using Casey AI, your personal cybersecurity expert. 
+                Join thousands studying for CISSP using Casey AI, your personal cybersecurity expert. 
                 Generate unlimited questions, get instant explanations, and track progress across all 8 domains.
               </p>
               
@@ -345,15 +345,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <div className="flex flex-wrap items-center justify-center sm:justify-start space-x-6 text-sm text-gray-600 mb-8">
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>95% pass rate</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>Free daily quiz</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>30-day guarantee</span>
+                  <span>Instant access</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span>Cancel anytime</span>
                 </div>
               </div>
             </div>
@@ -419,9 +419,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Trusted by CISSP Professionals Worldwide
+              Trusted by CISSP Students Worldwide
             </h2>
-            <p className="text-gray-600">Join thousands who've achieved certification success</p>
+            <p className="text-gray-600">Join thousands studying for CISSP certification</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -688,10 +688,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-            Ready to Pass CISSP?
+            Ready to Study Smarter?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join thousands of security professionals who've achieved certification success with Casey AI.
+            Join thousands of security professionals using Casey AI to enhance their CISSP preparation.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -713,11 +713,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             </button>
           </div>
 
-          {/* Risk Reversal */}
+          {/* Value Proposition */}
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
-            <h3 className="text-lg font-semibold text-white mb-2">🎯 30-Day Money-Back Guarantee</h3>
+            <h3 className="text-lg font-semibold text-white mb-2">🎯 Why Choose Casey AI?</h3>
             <p className="text-blue-100 text-sm">
-              Not satisfied? Get a full refund within 30 days. No questions asked.
+              AI-powered study assistance, unlimited practice questions, and personalized learning paths designed for CISSP preparation.
             </p>
           </div>
           
