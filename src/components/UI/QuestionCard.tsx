@@ -34,7 +34,15 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   const aiColor = getStatusColor('ai-generated');
   const { bookmarkedIds, toggleBookmark, loading: bookmarksLoading } = useBookmarks();
   const isBookmarked = bookmarkedIds.includes(question.id);
-  const { isActive: hasActiveSubscription } = useSubscription();
+  const { isActive: hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
+
+  if (subscriptionLoading) {
+    return (
+      <div className="p-6 text-center text-gray-500 bg-white rounded-xl border-2 border-gray-200 shadow-md">
+        Checking subscription status...
+      </div>
+    );
+  }
 
   const getShareMessage = () => {
     const correctAnswer = question.options[question.correctAnswer];
