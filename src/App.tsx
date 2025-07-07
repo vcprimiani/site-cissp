@@ -139,6 +139,21 @@ function App() {
     return <AuthForm />;
   }
 
+  // Show error if subscription check fails
+  if (isAuthenticated && !subscriptionLoading && useSubscription().error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-red-100">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-red-700 font-semibold">
+            There was a problem checking your subscription. Please try refreshing the page or contact support.
+          </p>
+          <pre className="text-xs text-red-500 mt-2">{useSubscription().error}</pre>
+        </div>
+      </div>
+    );
+  }
+
   // Show paywall if authenticated but no active subscription
   if (!hasActiveSubscription) {
     return (
