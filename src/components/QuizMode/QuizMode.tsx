@@ -134,10 +134,31 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
         )}
         
         {activeTab === 'ai' && (
-          <AIAssistant
-            onAskQuestion={(question) => console.log('AI Question:', question)}
-            incorrectQuestions={incorrectQuestions}
-          />
+          hasActiveSubscription ? (
+            <AIAssistant
+              onAskQuestion={(question) => console.log('AI Question:', question)}
+              incorrectQuestions={incorrectQuestions}
+            />
+          ) : (
+            <div className="bg-gradient-to-r from-yellow-50 to-purple-50 border-2 border-yellow-200 rounded-xl p-8 text-center flex flex-col items-center justify-center max-w-xl mx-auto mt-12 shadow-lg">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2 flex items-center justify-center">
+                <span className="mr-2">🤖</span> Unlock AI Assistant
+              </h3>
+              <p className="text-gray-700 mb-4 text-base">Get instant explanations, concept clarifications, and more with the AI Assistant. Upgrade to premium for unlimited access!</p>
+              <button
+                onClick={async () => {
+                  const { redirectToCheckout } = await import('../../services/stripe');
+                  const { stripeProducts } = await import('../../stripe-config');
+                  const product = stripeProducts[0];
+                  await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
+                }}
+                className="px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-300 text-gray-900 font-semibold rounded-lg shadow hover:from-yellow-500 hover:to-yellow-400 transition-all text-lg mt-2"
+              >
+                Upgrade Now
+              </button>
+              <div className="mt-4 text-sm text-gray-500">Premium unlocks unlimited quizzes, AI explanations, analytics, and more.</div>
+            </div>
+          )
         )}
       </div>
     </div>

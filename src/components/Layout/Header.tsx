@@ -109,16 +109,20 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser,
                 <Target className="w-4 h-4" />
                 <span className="hidden md:inline">Quiz</span>
               </button>
+            </div>
+
+            {/* Separate Community button to the far right with a subtle outline glow */}
+            <div className="flex-1 flex justify-end">
               <a
                 href="https://CISSPStudyGroup.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-gray-600 hover:text-gray-900 border-2 border-[#F8D27F] shadow-[0_0_8px_2px_#F8D27F] animate-pulse"
+                className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-gray-600 hover:text-gray-900 border-2 border-[#F8D27F] shadow-[0_0_0_3px_#F8D27F33] focus:ring-2 focus:ring-[#F8D27F] focus:ring-opacity-50 outline-none"
                 title="Community"
-                style={{ display: 'flex', alignItems: 'center' }}
+                style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}
               >
-                <Users className="w-4 h-4" />
-                <span className="hidden md:inline">Community</span>
+                <Users className="w-4 h-4 mr-2 text-[#F8D27F]" />
+                <span>Community</span>
               </a>
             </div>
 
