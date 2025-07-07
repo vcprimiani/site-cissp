@@ -6,6 +6,8 @@ import { SocialShareButtons } from './SocialShareButtons';
 import { highlightKeywords } from '../../services/keywordAnalysis';
 import { formatExplanationText } from '../../utils/textFormatting';
 import { useBookmarks } from '../../hooks/useBookmarks';
+import { useSubscription } from '../../hooks/useSubscription';
+import { Lock, Crown } from 'lucide-react';
 
 interface QuestionCardProps {
   question: Question;
@@ -32,6 +34,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   const aiColor = getStatusColor('ai-generated');
   const { bookmarkedIds, toggleBookmark, loading: bookmarksLoading } = useBookmarks();
   const isBookmarked = bookmarkedIds.includes(question.id);
+  const { isActive: hasActiveSubscription } = useSubscription();
 
   const getShareMessage = () => {
     const correctAnswer = question.options[question.correctAnswer];
@@ -124,7 +127,7 @@ Study more at: https://site.cisspstudygroup.com`;
       {/* Card Header */}
       <div 
         className={`p-5 ${onToggleExpanded ? 'cursor-pointer' : ''}`}
-        onClick={onToggleExpanded}
+        onClick={hasActiveSubscription ? onToggleExpanded : undefined}
       >
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 min-w-0">
@@ -239,59 +242,70 @@ Study more at: https://site.cisspstudygroup.com`;
         </div>
       </div>
 
-      {/* Expanded Content */}
-      {isExpanded && (
-        <div 
-          className="border-t-2 border-gray-100 px-5 py-5 space-y-5 bg-gray-50"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Answer Options */}
-          <div>
-            <h4 className="font-semibold mb-3 text-gray-900">
-              Answer Options:
-            </h4>
-            <div className="space-y-3">
-              {question.options.map((option, index) => (
-                <div 
-                  key={index} 
-                  className={`p-4 rounded-lg border-2 ${
-                    index === question.correctAnswer 
-                      ? 'border-green-300 bg-green-50' 
-                      : 'border-gray-200 bg-white'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span 
-                      className={`text-sm break-words flex-1 font-medium ${
-                        index === question.correctAnswer 
-                          ? 'text-green-800' 
-                          : 'text-gray-900'
-                      }`}
-                    >
-                      {option}
-                    </span>
-                    {index === question.correctAnswer && (
-                      <span className="text-sm font-semibold ml-2 text-green-600">
-                        ✓ Correct
+      {/* Always show answer/explanation section for unpaid users, only expanded for paid */}
+      <div className="px-5 pb-5 relative">
+        {!hasActiveSubscription && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 backdrop-blur rounded-xl">
+            <Lock className="w-8 h-8 text-blue-500 mb-2" />
+            <p className="text-blue-800 font-semibold mb-2 text-center">Upgrade to unlock answers and explanations</p>
+            <button
+              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
+              onClick={() => window.location.href = '/pricing'}
+            >
+              Upgrade Now
+            </button>
+          </div>
+        )}
+        {hasActiveSubscription && isExpanded && (
+          <>
+            {/* Answer Options */}
+            <div>
+              <h4 className="font-semibold mb-3 text-gray-900">
+                Answer Options:
+              </h4>
+              <div className="space-y-3">
+                {question.options.map((option, index) => (
+                  <div 
+                    key={index} 
+                    className={`p-4 rounded-lg border-2 ${
+                      index === question.correctAnswer 
+                        ? 'border-green-300 bg-green-50' 
+                        : 'border-gray-200 bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span 
+                        className={`text-sm break-words flex-1 font-medium ${
+                          index === question.correctAnswer 
+                            ? 'text-green-800' 
+                            : 'text-gray-900'
+                        }`}
+                      >
+                        {option}
                       </span>
-                    )}
+                      {index === question.correctAnswer && (
+                        <span className="text-sm font-semibold ml-2 text-green-600">
+                          ✓ Correct
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Explanation */}
-          <div>
-            <h4 className="font-semibold mb-3 text-gray-900">
-              Explanation:
-            </h4>
-            <div className="bg-white rounded-lg p-4 border-2 border-gray-200 shadow-sm">
-              {formatExplanation(question.explanation)}
+            {/* Explanation */}
+            <div>
+              <h4 className="font-semibold mb-3 text-gray-900">
+                Explanation:
+              </h4>
+              <div className="bg-white rounded-lg p-4 border-2 border-gray-200 shadow-sm">
+                {formatExplanation(question.explanation)}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
 
       {/* Action Buttons - bottom right, side by side */}
       <div className="absolute bottom-3 right-3 z-10 flex flex-row gap-2">
