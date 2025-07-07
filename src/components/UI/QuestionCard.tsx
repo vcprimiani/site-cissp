@@ -7,6 +7,8 @@ import { highlightKeywords } from '../../services/keywordAnalysis';
 import { formatExplanationText } from '../../utils/textFormatting';
 import { useBookmarks } from '../../hooks/useBookmarks';
 import { Lock, Crown } from 'lucide-react';
+import { redirectToCheckout } from '../../services/stripe';
+import { stripeProducts } from '../../stripe-config';
 
 interface QuestionCardProps {
   question: Question;
@@ -301,7 +303,10 @@ Study more at: https://site.cisspstudygroup.com`;
                 <Lock className="w-8 h-8 text-blue-500 mb-2" />
                 <button
                   className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
-                  onClick={() => window.location.href = '/pricing'}
+                  onClick={async () => {
+                    const product = stripeProducts[0];
+                    await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
+                  }}
                 >
                   Upgrade Now
                 </button>

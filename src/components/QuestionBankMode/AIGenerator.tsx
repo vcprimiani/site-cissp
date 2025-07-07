@@ -4,6 +4,8 @@ import { Brain, Wand2, Settings, Loader, Plus, Lightbulb, Target, BookOpen, Chev
 import { generateAIQuestion, AIGenerationOptions, getAIUsageInfo, startBulkGeneration, endBulkGeneration } from '../../services/openai';
 import { useSubscription } from '../../hooks/useSubscription';
 import { formatTimeRemaining } from '../../services/aiSecurity';
+import { redirectToCheckout } from '../../services/stripe';
+import { stripeProducts } from '../../stripe-config';
 
 interface AIGeneratorProps {
   questions: Question[];
@@ -222,8 +224,9 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
     }, 500);
   };
 
-  const handleUpgradeClick = () => {
-    window.location.href = '/pricing';
+  const handleUpgradeClick = async () => {
+    const product = stripeProducts[0];
+    await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
   };
 
   const handleDismissInfoCard = () => {

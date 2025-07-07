@@ -5,6 +5,8 @@ import { QuestionCard } from '../UI/QuestionCard';
 import { ColorKey } from '../UI/ColorKey';
 import { useBookmarks } from '../../hooks/useBookmarks';
 import { useSubscription } from '../../hooks/useSubscription';
+import { redirectToCheckout } from '../../services/stripe';
+import { stripeProducts } from '../../stripe-config';
 
 interface QuestionBankProps {
   questions: Question[];
@@ -181,7 +183,10 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
               </div>
             </div>
             <button
-              onClick={() => window.location.href = '/pricing'}
+              onClick={async () => {
+                const product = stripeProducts[0];
+                await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
+              }}
               className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
             >
               Upgrade Now

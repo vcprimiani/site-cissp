@@ -9,6 +9,8 @@ import { useSessionTracker } from '../../hooks/useSessionTracker';
 import { useQuizPersistence } from '../../hooks/useQuizPersistence';
 import { useBookmarks } from '../../hooks/useBookmarks';
 import { getLocalDailyQuizQuestions } from '../../services/dailyQuiz';
+import { redirectToCheckout } from '../../services/stripe';
+import { stripeProducts } from '../../stripe-config';
 
 interface QuizSetupProps {
   onQuizComplete?: (incorrectQuestions: Question[]) => void;
@@ -218,7 +220,10 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
               <p className="text-gray-600 text-sm">Enjoy your complimentary 3-question quiz! Upgrade to unlock unlimited quizzes, analytics, and more.</p>
             </div>
             <button
-              onClick={() => window.location.href = '/pricing'}
+              onClick={async () => {
+                const product = stripeProducts[0];
+                await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
+              }}
               className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
             >
               Upgrade Now
