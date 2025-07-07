@@ -15,6 +15,9 @@ interface QuestionBankModeProps {
 export const QuestionBankMode: React.FC<QuestionBankModeProps> = ({ appState, onUpdateState, hasActiveSubscription, subscriptionLoading }) => {
   const [activeTab, setActiveTab] = useState<'questions' | 'generator'>('questions');
   const { questions, loading, error, addQuestion, updateQuestion, deleteQuestion } = useQuestions();
+  const [showBankInfo, setShowBankInfo] = useState(() => {
+    return localStorage.getItem('question-bank-info-dismissed') !== 'true';
+  });
 
   const handleNavigateToQuestionBank = () => {
     setActiveTab('questions');
@@ -37,15 +40,24 @@ export const QuestionBankMode: React.FC<QuestionBankModeProps> = ({ appState, on
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Mode Description */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 mb-8 border border-blue-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Question Bank</h2>
-        <p className="text-gray-700">
-          Manage your CISSP question bank and generate new questions with advanced AI tools. Create high-quality 
-          exam-style questions and organize them for use in Interactive Quiz mode. All questions are automatically 
-          saved to your secure database.
-        </p>
-      </div>
+      {showBankInfo && (
+        <div className="relative bg-gradient-to-r from-yellow-50 to-blue-50 rounded-xl p-6 mb-8 border border-yellow-200">
+          <button
+            className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl font-bold focus:outline-none"
+            aria-label="Dismiss info card"
+            onClick={() => {
+              setShowBankInfo(false);
+              localStorage.setItem('question-bank-info-dismissed', 'true');
+            }}
+          >
+            &times;
+          </button>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Question Bank</h2>
+          <p className="text-gray-700">
+            Browse, add, and edit CISSP questions. Use tags and filters to focus your study. Premium members can bookmark questions and generate new ones with AI.
+          </p>
+        </div>
+      )}
 
       {/* Error Display */}
       {error && (

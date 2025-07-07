@@ -15,6 +15,9 @@ interface QuizModeProps {
 export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, hasActiveSubscription, subscriptionLoading }) => {
   const [activeTab, setActiveTab] = useState<'setup' | 'ai'>('setup');
   const [incorrectQuestions, setIncorrectQuestions] = useState<any[]>([]);
+  const [showQuizInfo, setShowQuizInfo] = useState(() => {
+    return localStorage.getItem('quiz-info-dismissed') !== 'true';
+  });
 
   // Load incorrect questions from localStorage
   useEffect(() => {
@@ -75,15 +78,26 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Mode Description */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 mb-8 border border-green-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Quiz Mode</h2>
-        <p className="text-gray-700">
-          Take quizzes with your question bank, get AI assistance, and track your progress. 
-          Questions answered incorrectly are automatically saved for review in the AI Assistant.
-          All questions are loaded from your secure database.
-        </p>
-      </div>
+      {showQuizInfo && (
+        <div className="relative bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 mb-8 border border-green-200">
+          <button
+            className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl font-bold focus:outline-none"
+            aria-label="Dismiss info card"
+            onClick={() => {
+              setShowQuizInfo(false);
+              localStorage.setItem('quiz-info-dismissed', 'true');
+            }}
+          >
+            &times;
+          </button>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Quiz Mode</h2>
+          <p className="text-gray-700">
+            Take quizzes with your question bank, get AI assistance, and track your progress. 
+            Questions answered incorrectly are automatically saved for review in the AI Assistant.
+            All questions are loaded from your secure database.
+          </p>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
         <div className="flex border-b border-gray-200 overflow-x-auto">
