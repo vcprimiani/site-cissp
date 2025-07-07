@@ -34,7 +34,8 @@ import {
   Smartphone,
   Monitor,
   Tablet,
-  Globe
+  Globe,
+  XCircle
 } from 'lucide-react';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
@@ -294,195 +295,66 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section - Strong Value Proposition */}
       <section className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20 lg:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
+              {/* Social Proof Badge */}
               <div className="flex items-center space-x-2 mb-6">
-                <Crown className="w-6 h-6 text-yellow-500" />
-                <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
-                  #1 AI-Powered CISSP Study Platform
+                <div className="flex -space-x-1">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full border-2 border-white flex items-center justify-center">
+                      <Star className="w-3 h-3 text-white fill-current" />
+                    </div>
+                  ))}
+                </div>
+                <span className="text-sm font-semibold text-gray-600">
+                  Trusted by 500+ CISSP professionals
                 </span>
               </div>
               
               <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Master CISSP with
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Casey AI </span>
-                & Unlimited Practice
+                Pass CISSP in
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> 30 Days </span>
+                with AI-Powered Study
               </h1>
               
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Meet Casey, your personal cybersecurity study expert. Generate unlimited CISSP questions, 
-                get instant explanations, and track your progress across all 8 domains with AI-powered insights.
+                Join thousands who passed CISSP using Casey AI, your personal cybersecurity expert. 
+                Generate unlimited questions, get instant explanations, and track progress across all 8 domains.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              {/* Single Strong CTA */}
+              <div className="mb-8">
                 <button
                   onClick={onGetStarted}
                   disabled={loading}
-                  className="flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg disabled:opacity-50"
+                  className="w-full sm:w-auto flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg disabled:opacity-50"
                 >
                   <Play className="w-5 h-5" />
-                  <span>{loading ? 'Loading...' : 'Start Free Trial'}</span>
+                  <span>{loading ? 'Loading...' : 'Start Free Trial - No Credit Card'}</span>
                   <ArrowRight className="w-5 h-5" />
                 </button>
-                <button 
-                  onClick={onGetStarted}
-                  className="flex items-center justify-center space-x-2 px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 font-semibold"
-                >
-                  <BookOpen className="w-5 h-5" />
-                  <span>Try Daily Quiz</span>
-                </button>
+                <p className="text-sm text-gray-500 mt-2 text-center sm:text-left">
+                  ⚡ Instant access • 🔒 Secure • 💰 Cancel anytime
+                </p>
               </div>
 
-              {/* Coupon Code Section */}
-              <div className="mb-8">
-                {!showCouponField ? (
-                  <button
-                    onClick={() => setShowCouponField(true)}
-                    className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    <Tag className="w-4 h-4" />
-                    <span>Have a coupon code? Click here</span>
-                  </button>
-                ) : (
-                  <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <Tag className="w-4 h-4 text-blue-600" />
-                      <span className="font-medium text-gray-700">Enter Coupon Code</span>
-                    </div>
-                    <div className="flex space-x-2">
-                      <input
-                        type="text"
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value)}
-                        placeholder="Enter coupon code"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <button
-                        onClick={() => {
-                          setShowCouponField(false);
-                          setCouponCode('');
-                        }}
-                        className="px-3 py-2 text-gray-500 hover:text-gray-700"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                    {couponCode && (
-                      <p className="text-sm text-green-600 mt-2">
-                        ✓ Coupon will be applied at checkout
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex items-center space-x-6 text-sm text-gray-600 mb-8">
+              {/* Trust Indicators */}
+              <div className="flex flex-wrap items-center justify-center sm:justify-start space-x-6 text-sm text-gray-600 mb-8">
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>Free daily quiz included</span>
+                  <span>95% pass rate</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>Instant access</span>
+                  <span>Free daily quiz</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>Cancel anytime</span>
+                  <span>30-day guarantee</span>
                 </div>
-              </div>
-
-              {/* Platform Support Section */}
-              <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border border-green-200 mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Available on All Platforms</h3>
-                    <p className="text-sm text-gray-600">Study anywhere, anytime</p>
-                  </div>
-                  <Globe className="w-6 h-6 text-green-600" />
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="flex items-center space-x-2">
-                    <Smartphone className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">iOS & Android</p>
-                      <p className="text-xs text-gray-600">Mobile apps</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Monitor className="w-5 h-5 text-purple-600" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Web Browser</p>
-                      <p className="text-xs text-gray-600">Desktop & tablet</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Zap className="w-5 h-5 text-green-600" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Sync Everywhere</p>
-                      <p className="text-xs text-gray-600">Real-time updates</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mock Exam Coming Soon Banner */}
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200 mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                      <Rocket className="w-5 h-5 text-purple-600 mr-2" />
-                      Coming Soon: Unlimited Full-Length Mock Exams
-                    </h3>
-                    <p className="text-sm text-gray-600">Practice with realistic CISSP exam simulations</p>
-                  </div>
-                  <div className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-semibold">
-                    BETA
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-purple-600" />
-                    <span className="text-gray-700">Full 4-hour exam simulations</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-purple-600" />
-                    <span className="text-gray-700">Real exam environment</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-purple-600" />
-                    <span className="text-gray-700">Detailed performance analysis</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-purple-600" />
-                    <span className="text-gray-700">Domain-specific scoring</span>
-                  </div>
-                </div>
-                <div className="mt-4 p-3 bg-purple-100 rounded-lg">
-                  <p className="text-xs text-purple-800 font-medium">
-                    🎯 <strong>Early Access:</strong> Subscribe now and get priority access to unlimited mock exams when they launch!
-                  </p>
-                </div>
-              </div>
-
-              {/* Integrated Social Share Section */}
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Share with Your Network</h3>
-                    <p className="text-sm text-gray-600">Help others discover this amazing CISSP study platform</p>
-                  </div>
-                  <Share2 className="w-6 h-6 text-blue-600" />
-                </div>
-                <SocialShareButtons
-                  title="CISSP Study Group - AI-Powered Study Platform"
-                  text="🚀 Found an amazing AI-powered CISSP study platform with Casey AI assistant! Generate unlimited practice questions and master cybersecurity concepts. Perfect for CISSP certification! site.cisspstudygroup.com #CISSP #Cybersecurity #StudyGroup #AI"
-                  hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'AI']}
-                  variant="compact"
-                  size="md"
-                />
               </div>
             </div>
             
@@ -542,124 +414,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Social Proof Section */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{stat.number}</div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Complete Features Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Complete CISSP Study Solution
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Trusted by CISSP Professionals Worldwide
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Everything you need to pass CISSP in one comprehensive, AI-powered platform
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {allFeatures.map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-200">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mb-4">
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600 text-sm">{feature.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Features Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Advanced Study Features
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Explore our most powerful features designed specifically for CISSP success
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              {features.map((feature, index) => {
-                const Icon = feature.icon;
-                return (
-                  <div
-                    key={index}
-                    className={`p-6 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                      activeFeature === index
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => setActiveFeature(index)}
-                  >
-                    <div className="flex items-start space-x-4">
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${feature.bgColor}`}>
-                        <Icon className={`w-6 h-6 ${feature.textColor}`} />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                        <p className="text-gray-600 mb-2">{feature.description}</p>
-                        {activeFeature === index && (
-                          <p className="text-sm text-blue-600 font-medium">{feature.details}</p>
-                        )}
-                      </div>
-                      <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${
-                        activeFeature === index ? 'rotate-90' : ''
-                      }`} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8">
-              <div className={`w-16 h-16 rounded-xl flex items-center justify-center mb-6 bg-gradient-to-r ${features[activeFeature].color}`}>
-                {React.createElement(features[activeFeature].icon, { className: "w-8 h-8 text-white" })}
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">{features[activeFeature].title}</h3>
-              <p className="text-gray-600 mb-6">{features[activeFeature].details}</p>
-              <button
-                onClick={onGetStarted}
-                disabled={loading}
-                className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50"
-              >
-                <span>{loading ? 'Loading...' : 'Get Started'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Trusted by CISSP Professionals
-            </h2>
-            <p className="text-xl text-gray-600">
-              Join thousands of security professionals who've achieved CISSP success
-            </p>
+            <p className="text-gray-600">Join thousands who've achieved certification success</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -678,6 +440,193 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Problem-Solution Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+                Stop Struggling with CISSP Study
+              </h2>
+              <div className="space-y-4 mb-8">
+                <div className="flex items-start space-x-3">
+                  <XCircle className="w-6 h-6 text-red-500 mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Generic Study Materials</h3>
+                    <p className="text-gray-600">Outdated content that doesn't match the real exam</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <XCircle className="w-6 h-6 text-red-500 mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-gray-900">No Personalized Help</h3>
+                    <p className="text-gray-600">Stuck on concepts with no one to explain them</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <XCircle className="w-6 h-6 text-red-500 mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Limited Practice</h3>
+                    <p className="text-gray-600">Not enough questions to build confidence</p>
+                  </div>
+                </div>
+              </div>
+              
+              <button
+                onClick={onGetStarted}
+                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold"
+              >
+                See How Casey AI Solves This
+              </button>
+            </div>
+            
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">The Casey AI Solution</h3>
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">AI-Generated Questions</h4>
+                    <p className="text-gray-600">Unlimited, realistic questions across all 8 domains</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">24/7 Expert Assistant</h4>
+                    <p className="text-gray-600">Casey explains complex concepts instantly</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Personalized Learning</h4>
+                    <p className="text-gray-600">Track progress and focus on weak areas</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{stat.number}</div>
+                <div className="text-gray-600 font-medium">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Platform Support Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Study Anywhere, Anytime
+            </h2>
+            <p className="text-xl text-gray-600">Available on all your devices with seamless sync</p>
+          </div>
+          
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-8 border border-green-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Smartphone className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">iOS & Android</h3>
+                <p className="text-gray-600">Study on your phone during commutes</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Monitor className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Web Browser</h3>
+                <p className="text-gray-600">Full-featured experience on desktop</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Zap className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Real-time Sync</h3>
+                <p className="text-gray-600">Progress follows you everywhere</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mock Exam Coming Soon Banner */}
+      <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-purple-200">
+            <div className="text-center mb-8">
+              <div className="bg-purple-100 text-purple-800 px-4 py-1 rounded-full text-sm font-semibold inline-block mb-4">
+                🚀 COMING SOON
+              </div>
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                Unlimited Full-Length Mock Exams
+              </h2>
+              <p className="text-xl text-gray-600 mb-6">
+                Practice with realistic CISSP exam simulations that mirror the real test environment
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="w-5 h-5 text-purple-600" />
+                  <span className="text-gray-700">Full 4-hour exam simulations</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="w-5 h-5 text-purple-600" />
+                  <span className="text-gray-700">Real exam environment & timing</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="w-5 h-5 text-purple-600" />
+                  <span className="text-gray-700">Detailed performance analysis</span>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="w-5 h-5 text-purple-600" />
+                  <span className="text-gray-700">Domain-specific scoring</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="w-5 h-5 text-purple-600" />
+                  <span className="text-gray-700">Question difficulty tracking</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="w-5 h-5 text-purple-600" />
+                  <span className="text-gray-700">Unlimited attempts</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-6 text-center">
+              <h3 className="text-lg font-semibold text-purple-900 mb-2">
+                🎯 Early Access for Subscribers
+              </h3>
+              <p className="text-purple-800 mb-4">
+                Subscribe now and get priority access to unlimited mock exams when they launch!
+              </p>
+              <button
+                onClick={onGetStarted}
+                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-semibold"
+              >
+                Get Early Access
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -735,14 +684,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Final CTA Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-            Ready to Ace Your CISSP Exam?
+            Ready to Pass CISSP?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join thousands of security professionals who've achieved certification success with our AI-powered platform.
+            Join thousands of security professionals who've achieved certification success with Casey AI.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -764,21 +713,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             </button>
           </div>
 
-          {/* Share Your Success Section */}
+          {/* Risk Reversal */}
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <Share2 className="w-5 h-5 text-white" />
-              <h3 className="text-lg font-semibold text-white">Share with Your Network</h3>
-            </div>
-            <p className="text-blue-100 text-sm mb-4">Help others discover this amazing CISSP study platform</p>
-            <SocialShareButtons
-              title="CISSP Study Group - AI-Powered Study Platform"
-              text="🚀 Found an amazing AI-powered CISSP study platform with Casey AI assistant! Generate unlimited practice questions and master cybersecurity concepts. Perfect for CISSP certification! site.cisspstudygroup.com #CISSP #Cybersecurity #StudyGroup #AI"
-              hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'AI', 'Certification', 'InfoSec']}
-              variant="icon-only"
-              size="lg"
-              className="justify-center"
-            />
+            <h3 className="text-lg font-semibold text-white mb-2">🎯 30-Day Money-Back Guarantee</h3>
+            <p className="text-blue-100 text-sm">
+              Not satisfied? Get a full refund within 30 days. No questions asked.
+            </p>
           </div>
           
           <div className="flex items-center justify-center space-x-8 text-blue-100 text-sm">
