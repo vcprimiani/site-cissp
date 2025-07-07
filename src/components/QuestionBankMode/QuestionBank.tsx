@@ -141,20 +141,6 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <button
-              onClick={() => setShowColorKey(!showColorKey)}
-              className="flex items-center justify-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium"
-            >
-              <span>🎨</span>
-              <span>Color Key</span>
-            </button>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="flex items-center justify-center space-x-2 px-4 py-2 bg-[#F8D380] text-gray-900 rounded-lg hover:bg-[#F6C95C] transition-all duration-200 font-medium"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Question</span>
-            </button>
-            <button
               className={`inline-flex items-center px-3 py-2 rounded-lg border text-sm font-medium shadow-sm transition-colors ${showBookmarksOnly ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
               onClick={() => setShowBookmarksOnly(v => !v)}
               aria-pressed={showBookmarksOnly}
