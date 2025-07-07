@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppMode, User } from '../../types';
-import { Database, Target, LogOut, Crown, Users } from 'lucide-react';
+import { Database, Target, LogOut, Crown, Users, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useSubscription } from '../../hooks/useSubscription';
 import { Avatar } from '../UI/Avatar';
@@ -130,11 +130,29 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser 
 
             {/* User Info - Responsive */}
             <div className="flex items-center space-x-2 sm:space-x-3 bg-gradient-to-r from-blue-50 to-purple-50 px-2 sm:px-4 py-2 rounded-lg">
-              <Avatar 
-                user={currentUser} 
-                size="sm"
-                className="flex-shrink-0"
-              />
+              <div className="relative flex items-center">
+                <Avatar 
+                  user={currentUser} 
+                  size="sm"
+                  className="flex-shrink-0"
+                />
+                {/* Premium/Unpaid Badge */}
+                <span
+                  className={`absolute -bottom-1 -right-1 rounded-full border-2 shadow-md flex items-center justify-center transition-all duration-200 ${
+                    isActive
+                      ? 'bg-green-100 border-green-300'
+                      : 'bg-red-100 border-red-300'
+                  }`}
+                  style={{ width: 20, height: 20 }}
+                  title={isActive ? 'Premium Member' : 'Unpaid Member'}
+                >
+                  {isActive ? (
+                    <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+                  ) : (
+                    <XCircle className="w-3.5 h-3.5 text-red-500" />
+                  )}
+                </span>
+              </div>
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-gray-900 truncate max-w-24 lg:max-w-none">
                   {currentUser.name}
