@@ -18,6 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser 
 
   const handleLogout = async () => {
     await signOut();
+    window.location.reload(); // Force reload to show login page
   };
 
   return (
