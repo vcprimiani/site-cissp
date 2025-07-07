@@ -3,7 +3,7 @@ import { Quiz } from './Quiz';
 import { AIAssistant } from './AIAssistant';
 import { QuizSetup } from './QuizSetup';
 import { AppState } from '../../types';
-import { Target, Brain } from 'lucide-react';
+import { Target, Brain, Clock, Trophy } from 'lucide-react';
 
 interface QuizModeProps {
   appState: AppState;
@@ -79,7 +79,18 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {showQuizInfo && (
-        <div className="relative bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 mb-8 border border-green-200">
+        <div className="relative bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 mb-8 border border-green-200 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Target className="w-8 h-8 text-blue-600" />
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-1">Quiz Mode</h2>
+              <div className="flex items-center space-x-2">
+                <span className="text-blue-700 text-sm font-medium flex items-center"><Clock className="w-4 h-4 mr-1" />Timed Practice</span>
+                <span className="text-purple-700 text-sm font-medium flex items-center"><Trophy className="w-4 h-4 mr-1" />Track Progress</span>
+                <span className="text-green-700 text-sm font-medium flex items-center"><Brain className="w-4 h-4 mr-1" />AI Review</span>
+              </div>
+            </div>
+          </div>
           <button
             className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl font-bold focus:outline-none"
             aria-label="Dismiss info card"
@@ -90,16 +101,6 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
           >
             &times;
           </button>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Quiz Mode</h2>
-          <p className="text-gray-700 mb-3">
-            Take quizzes with your question bank, get AI assistance, and track your progress. All questions are loaded from your secure database.
-          </p>
-          <div className="flex items-center bg-yellow-100 border-l-4 border-yellow-400 rounded p-3 mb-2">
-            <span className="mr-2 text-yellow-600">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" /></svg>
-            </span>
-            <span className="text-yellow-800 font-semibold">Questions you answer incorrectly are automatically saved for review in the <span className="underline">AI Assistant</span> tab.</span>
-          </div>
         </div>
       )}
 
