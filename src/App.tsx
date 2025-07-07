@@ -24,7 +24,8 @@ function App() {
     messages: [],
     questions: [],
     currentQuiz: null,
-    isAuthenticated: false
+    isAuthenticated: false,
+    showAuth: false
   });
 
   // Check for URL parameters to determine which page to show
@@ -137,6 +138,10 @@ function App() {
 
   // Show auth form if not authenticated
   if (!isAuthenticated || !appState.currentUser) {
+    // Show auth form if showAuth is true, otherwise show landing page
+    if (appState.showAuth) {
+      return <AuthForm />;
+    }
     // Show landing page for unauthenticated users
     return <LandingPage onGetStarted={() => setAppState(prev => ({ ...prev, showAuth: true }))} />;
   }

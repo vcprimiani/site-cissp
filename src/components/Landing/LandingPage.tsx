@@ -308,7 +308,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   <span>{loading ? 'Loading...' : 'Start Free Trial'}</span>
                   <ArrowRight className="w-5 h-5" />
                 </button>
-                <button className="flex items-center justify-center space-x-2 px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 font-semibold">
+                <button 
+                  onClick={onGetStarted}
+                  className="flex items-center justify-center space-x-2 px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 font-semibold"
+                >
                   <BookOpen className="w-5 h-5" />
                   <span>Try Daily Quiz</span>
                 </button>
@@ -652,7 +655,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <button
-              onClick={handleGetStarted}
+              onClick={onGetStarted}
               disabled={loading}
               className="flex items-center justify-center space-x-2 px-8 py-4 bg-white text-blue-600 rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold text-lg shadow-lg disabled:opacity-50"
             >
@@ -660,7 +663,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <span>{loading ? 'Loading...' : 'Start Free Trial'}</span>
               <ArrowRight className="w-5 h-5" />
             </button>
-            <button className="flex items-center justify-center space-x-2 px-8 py-4 border-2 border-white text-white rounded-xl hover:bg-white hover:text-blue-600 transition-all duration-200 font-semibold">
+            <button 
+              onClick={onGetStarted}
+              className="flex items-center justify-center space-x-2 px-8 py-4 border-2 border-white text-white rounded-xl hover:bg-white hover:text-blue-600 transition-all duration-200 font-semibold"
+            >
               <BookOpen className="w-5 h-5" />
               <span>Try Daily Quiz</span>
             </button>

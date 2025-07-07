@@ -82,6 +82,7 @@ export interface AppState {
   questions: Question[];
   currentQuiz: Quiz | null;
   isAuthenticated: boolean;
+  showAuth: boolean;
 }
 
 export interface AuthState {
