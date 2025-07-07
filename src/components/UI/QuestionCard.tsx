@@ -127,7 +127,7 @@ Study more at: https://site.cisspstudygroup.com`;
       {/* Card Header */}
       <div 
         className={`p-5 ${onToggleExpanded ? 'cursor-pointer' : ''}`}
-        onClick={hasActiveSubscription ? onToggleExpanded : undefined}
+        onClick={onToggleExpanded}
       >
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 min-w-0">
@@ -366,11 +366,12 @@ Study more at: https://site.cisspstudygroup.com`;
             isBookmarked
               ? 'bg-blue-100 border-blue-400 ring-2 ring-blue-300 shadow-lg'
               : 'bg-white hover:bg-blue-50'
-          }`}
+          } ${!hasActiveSubscription ? 'opacity-50 cursor-not-allowed' : ''}`}
           aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
-          onClick={e => { e.stopPropagation(); toggleBookmark(question.id); }}
-          disabled={bookmarksLoading}
+          onClick={e => { if (hasActiveSubscription) { e.stopPropagation(); toggleBookmark(question.id); } }}
+          disabled={bookmarksLoading || !hasActiveSubscription}
           style={{ zIndex: 2 }}
+          title={!hasActiveSubscription ? 'Bookmarking is for paid members only' : (isBookmarked ? 'Remove bookmark' : 'Add bookmark')}
         >
           <Bookmark
             className={`w-6 h-6 transition-colors ${
