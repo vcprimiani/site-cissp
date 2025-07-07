@@ -48,6 +48,9 @@ export const useSubscription = (): UseSubscriptionReturn => {
         .eq('user_id', user.id)
         .maybeSingle();
 
+      console.log('useSubscription: user', user);
+      console.log('useSubscription: customer', customer);
+
       if (customerError) throw customerError;
       if (!customer) {
         setSubscription(null);
@@ -61,6 +64,8 @@ export const useSubscription = (): UseSubscriptionReturn => {
         .select('*')
         .eq('customer_id', customer.customer_id)
         .maybeSingle();
+
+      console.log('useSubscription: subscriptionData', subscriptionData);
 
       if (subscriptionError) throw subscriptionError;
       setSubscription(subscriptionData);
@@ -78,6 +83,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
   }, [user]);
 
   const isActive = subscription?.status === 'active' || subscription?.status === 'trialing';
+  console.log('useSubscription: isActive', isActive, 'subscription', subscription);
 
   const productName = subscription?.price_id 
     ? getProductByPriceId(subscription.price_id)?.name || null
