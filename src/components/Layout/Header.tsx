@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppMode, User } from '../../types';
-import { Database, Target, LogOut, Crown } from 'lucide-react';
+import { Database, Target, LogOut, Crown, Users } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useSubscription } from '../../hooks/useSubscription';
 import { Avatar } from '../UI/Avatar';
@@ -67,6 +67,16 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser 
               >
                 <Target className="w-4 h-4" />
               </button>
+              <a
+                href="https://CISSPStudyGroup.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-md transition-all duration-200 text-gray-600 hover:text-gray-900"
+                title="Community"
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
+                <Users className="w-4 h-4" />
+              </a>
             </div>
 
             {/* Desktop Mode Toggle */}
@@ -95,6 +105,17 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser 
                 <Target className="w-4 h-4" />
                 <span className="hidden md:inline">Quiz</span>
               </button>
+              <a
+                href="https://CISSPStudyGroup.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+                title="Community"
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
+                <Users className="w-4 h-4" />
+                <span className="hidden md:inline">Community</span>
+              </a>
             </div>
 
             {/* Subscription Status */}

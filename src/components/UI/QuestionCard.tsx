@@ -68,6 +68,55 @@ Study more at: https://site.cisspstudygroup.com`;
     setShowShareMenu(!showShareMenu);
   };
 
+  // Add the formatExplanation function from Quiz.tsx
+  const formatExplanation = (text: string): JSX.Element[] => {
+    const cleanText = text
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const sections = cleanText.split(/\n\s*\n/).filter(section => section.trim());
+    return sections.map((section, index) => {
+      const trimmedSection = section.trim();
+      if (/^\d+\./.test(trimmedSection)) {
+        const [title, ...content] = trimmedSection.split(/[:\-]/);
+        return (
+          <div key={index} className="mb-3">
+            <h4 className="font-semibold text-blue-800 mb-1 text-sm">{title.trim()}</h4>
+            {content.length > 0 && (
+              <div className="text-gray-700 text-sm leading-relaxed pl-4">{content.join(':').trim()}</div>
+            )}
+          </div>
+        );
+      }
+      if (trimmedSection.includes('- ') || trimmedSection.includes('• ')) {
+        const lines = trimmedSection.split('\n');
+        const title = lines[0];
+        const bullets = lines.slice(1).filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
+        return (
+          <div key={index} className="mb-3">
+            {title && !title.startsWith('-') && !title.startsWith('•') && (
+              <h4 className="font-semibold text-blue-800 mb-1 text-sm">{title}</h4>
+            )}
+            <ul className="space-y-1 pl-4">
+              {bullets.map((bullet, bIndex) => (
+                <li key={bIndex} className="text-gray-700 text-sm flex items-start">
+                  <span className="text-blue-600 mr-2 mt-1">•</span>
+                  <span className="leading-relaxed">{bullet.replace(/^[-•]\s*/, '').trim()}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      }
+      return (
+        <div key={index} className="mb-2">
+          <p className="text-gray-700 text-sm leading-relaxed">{trimmedSection}</p>
+        </div>
+      );
+    });
+  };
+
   return (
     <div 
       className={`bg-white rounded-xl border-2 border-gray-200 shadow-md hover:shadow-lg hover:border-gray-300 transition-all duration-200 relative ${className}`}
@@ -238,10 +287,7 @@ Study more at: https://site.cisspstudygroup.com`;
               Explanation:
             </h4>
             <div className="bg-white rounded-lg p-4 border-2 border-gray-200 shadow-sm">
-              <div 
-                className="leading-relaxed text-sm text-gray-800 font-medium"
-                dangerouslySetInnerHTML={{ __html: formatExplanationText(question.explanation) }}
-              />
+              {formatExplanation(question.explanation)}
             </div>
           </div>
         </div>
