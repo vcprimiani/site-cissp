@@ -1,8 +1,19 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useContext, createContext, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './useAuth';
 
-export function useBookmarks() {
+interface BookmarksContextValue {
+  bookmarkedIds: string[];
+  loading: boolean;
+  addBookmark: (questionId: string) => Promise<void>;
+  removeBookmark: (questionId: string) => Promise<void>;
+  toggleBookmark: (questionId: string) => Promise<void>;
+  fetchBookmarks: () => Promise<void>;
+}
+
+const BookmarksContext = createContext<BookmarksContextValue | undefined>(undefined);
+
+export function BookmarksProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -65,7 +76,7 @@ export function useBookmarks() {
     }
   };
 
-  return {
+  const value: BookmarksContextValue = {
     bookmarkedIds,
     loading,
     addBookmark,
@@ -73,4 +84,18 @@ export function useBookmarks() {
     toggleBookmark,
     fetchBookmarks,
   };
+
+  return (
+    <BookmarksContext.Provider value={value}>
+      {children}
+    </BookmarksContext.Provider>
+  );
+}
+
+export function useBookmarks() {
+  const context = useContext(BookmarksContext);
+  if (!context) {
+    throw new Error('useBookmarks must be used within a BookmarksProvider');
+  }
+  return context;
 } 

@@ -10,6 +10,7 @@ import { AppState, AppMode, User } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useAuth } from './hooks/useAuth';
 import { useSubscription } from './hooks/useSubscription';
+import { BookmarksProvider } from './hooks/useBookmarks';
 
 function App() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -155,22 +156,24 @@ function App() {
 
   // Show full app for authenticated users with active subscription
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <Header
-        mode={appState.mode}
-        onModeChange={handleModeChange}
-        currentUser={appState.currentUser}
-        onLogout={() => {}} // Logout is handled by the useAuth hook
-      />
-      
-      <main>
-        {appState.mode === 'question-bank' ? (
-          <QuestionBankMode appState={appState} onUpdateState={handleUpdateState} />
-        ) : (
-          <QuizMode appState={appState} onUpdateState={handleUpdateState} />
-        )}
-      </main>
-    </div>
+    <BookmarksProvider>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Header
+          mode={appState.mode}
+          onModeChange={handleModeChange}
+          currentUser={appState.currentUser}
+          onLogout={() => {}} // Logout is handled by the useAuth hook
+        />
+        
+        <main>
+          {appState.mode === 'question-bank' ? (
+            <QuestionBankMode appState={appState} onUpdateState={handleUpdateState} />
+          ) : (
+            <QuizMode appState={appState} onUpdateState={handleUpdateState} />
+          )}
+        </main>
+      </div>
+    </BookmarksProvider>
   );
 }
 
