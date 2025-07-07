@@ -256,6 +256,17 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     );
   }
 
+  // Quiz Mode for paid users
+  if (quizMode === 'quiz' && quizSession) {
+    return (
+      <Quiz
+        questions={quizSession.questions}
+        onComplete={handleQuizComplete}
+        onExit={exitQuiz}
+      />
+    );
+  }
+
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-8 text-center">
