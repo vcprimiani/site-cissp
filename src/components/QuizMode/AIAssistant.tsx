@@ -7,6 +7,17 @@ interface AIAssistantProps {
   incorrectQuestions?: any[];
 }
 
+// Helper to summarize a question (first sentence or up to 10 words)
+function summarizeQuestion(text: string): string {
+  if (!text) return '';
+  // Try to get the first sentence
+  const firstSentence = text.split(/[.!?]/)[0];
+  if (firstSentence.length <= 50) return firstSentence.trim();
+  // Otherwise, get the first 10 words
+  const words = text.split(' ');
+  return words.slice(0, 10).join(' ').trim() + (words.length > 10 ? '...' : '');
+}
+
 export const AIAssistant: React.FC<AIAssistantProps> = ({ onAskQuestion, incorrectQuestions = [] }) => {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState('');
@@ -33,12 +44,16 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onAskQuestion, incorre
     if (incorrectQuestions.length > 0) {
       const incorrectTopics = incorrectQuestions.slice(0, 6).map(q => ({
         question: `I got this wrong: "${q.question}". The correct answer is "${q.options[q.correctAnswer]}". Can you explain why this is right?`,
-        displayText: q.question.length > 50 ? q.question.substring(0, 50) + "..." : q.question,
+        displayText: summarizeQuestion(q.question),
         isIncorrect: true
       }));
 
       // Mix incorrect questions with base topics
-      const mixedTopics = [...incorrectTopics, ...baseTopics.slice(0, 6)];
+      const mixedTopics = [...incorrectTopics, ...baseTopics.slice(0, 6).map(topic => ({
+        question: topic,
+        displayText: topic,
+        isIncorrect: false
+      }))];
       return mixedTopics.sort(() => Math.random() - 0.5).slice(0, 12);
     }
 
@@ -139,7 +154,7 @@ Keep your answer:
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
           <Sparkles className="w-5 h-5 text-purple-600" />
-          <span>Quick Questions</span>
+          <span>Quick Feedback</span>
           {incorrectQuestions.length > 0 && (
             <span className="text-sm text-gray-500">(Includes your mistakes)</span>
           )}
