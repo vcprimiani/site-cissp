@@ -259,7 +259,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-600 to-purple-600">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center">
                 <img 
                   src="/Untitled design-7.png" 
                   alt="CISSP Study Group" 
@@ -556,10 +556,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Zap className="w-8 h-8 text-green-600" />
+                  <Globe className="w-8 h-8 text-green-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Real-time Sync</h3>
-                <p className="text-gray-600">Progress follows you everywhere</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Access Anywhere</h3>
+                <p className="text-gray-600">Your study materials are available on any device</p>
               </div>
             </div>
           </div>
