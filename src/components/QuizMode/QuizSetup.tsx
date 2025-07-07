@@ -330,22 +330,22 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
           
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-600">{sessionStats.questionsUsed}</div>
-              <div className="text-sm text-gray-600">Questions Used</div>
+              <div className="text-base font-semibold text-blue-400">{sessionStats.questionsUsed}</div>
+              <div className="text-xs text-gray-500">Questions Used</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-purple-600">{filteredQuestions.length}</div>
-              <div className="text-sm text-gray-600">Available Now</div>
+              <div className="text-base font-semibold text-purple-400">{filteredQuestions.length}</div>
+              <div className="text-xs text-gray-500">Available Now</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-600">{questions.length}</div>
-              <div className="text-sm text-gray-600">Total Questions</div>
+              <div className="text-base font-semibold text-green-400">{questions.length}</div>
+              <div className="text-xs text-gray-500">Total Questions</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-base font-semibold text-orange-400">
                 {formatSessionDuration(sessionStats.sessionDuration)}
               </div>
-              <div className="text-sm text-gray-600">Session Duration</div>
+              <div className="text-xs text-gray-500">Session Duration</div>
             </div>
           </div>
           

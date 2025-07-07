@@ -91,11 +91,15 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
             &times;
           </button>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Quiz Mode</h2>
-          <p className="text-gray-700">
-            Take quizzes with your question bank, get AI assistance, and track your progress. 
-            Questions answered incorrectly are automatically saved for review in the AI Assistant.
-            All questions are loaded from your secure database.
+          <p className="text-gray-700 mb-3">
+            Take quizzes with your question bank, get AI assistance, and track your progress. All questions are loaded from your secure database.
           </p>
+          <div className="flex items-center bg-yellow-100 border-l-4 border-yellow-400 rounded p-3 mb-2">
+            <span className="mr-2 text-yellow-600">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" /></svg>
+            </span>
+            <span className="text-yellow-800 font-semibold">Questions you answer incorrectly are automatically saved for review in the <span className="underline">AI Assistant</span> tab.</span>
+          </div>
         </div>
       )}
 

@@ -207,7 +207,9 @@ Keep under 150 words.`;
             <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
             <div>
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900">AI Learning Assistant</h2>
-              <p className="text-xs sm:text-sm text-gray-600">Get concise explanations on CISSP concepts and review mistakes</p>
+              <p className="text-xs sm:text-sm text-gray-700 mt-1">
+                <span className="font-semibold text-purple-700">Review your missed questions,</span> get instant, focused explanations for your mistakes, and <span className="font-semibold text-purple-700">explore key CISSP topics</span> — all powered by AI. Use this tab to target your weak spots and master CISSP concepts efficiently.
+              </p>
             </div>
           </div>
           <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
@@ -359,11 +361,17 @@ Keep under 150 words.`;
       )}
 
       {/* CISSP Topic Explanations */}
-      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mt-8">
         <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
           <Lightbulb className="w-5 h-5 text-blue-600" />
           <span>CISSP Topic Explanations</span>
         </h3>
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded p-3 mb-4 flex items-center">
+          <span className="mr-2 text-yellow-600">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" /></svg>
+          </span>
+          <span className="text-yellow-800 text-sm">CISSP Topic Explanations will rotate with your missed questions. Each time you visit, you'll see a mix of your recent mistakes and important CISSP topics to review.</span>
+        </div>
         <p className="text-sm text-gray-600 mb-6">
           Get concise explanations on key CISSP concepts. Click any topic for a focused AI explanation.
         </p>
