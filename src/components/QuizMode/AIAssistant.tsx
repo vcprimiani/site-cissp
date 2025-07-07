@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Brain, MessageCircle, Sparkles, CheckCircle, Loader } from 'lucide-react';
 import { generateAIResponse } from '../../services/openai';
 
@@ -12,20 +12,42 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onAskQuestion, incorre
   const [response, setResponse] = useState('');
   const [lastQuestion, setLastQuestion] = useState('');
 
-  const simpleTopics = [
-    "What is authentication?",
-    "What is authorization?",
-    "What is encryption?",
-    "What is a firewall?",
-    "What is a virus?",
-    "What is a password?",
-    "What is a backup?",
-    "What is a network?",
-    "What is a server?",
-    "What is a client?",
-    "What is a database?",
-    "What is a patch?"
-  ];
+  // Dynamic topics that rotate based on incorrect questions
+  const dynamicTopics = useMemo(() => {
+    const baseTopics = [
+      "What is authentication?",
+      "What is authorization?",
+      "What is encryption?",
+      "What is a firewall?",
+      "What is a virus?",
+      "What is a password?",
+      "What is a backup?",
+      "What is a network?",
+      "What is a server?",
+      "What is a client?",
+      "What is a database?",
+      "What is a patch?"
+    ];
+
+    // If we have incorrect questions, create dynamic topics from them
+    if (incorrectQuestions.length > 0) {
+      const incorrectTopics = incorrectQuestions.slice(0, 6).map(q => ({
+        question: `I got this wrong: "${q.question}". The correct answer is "${q.options[q.correctAnswer]}". Can you explain why this is right?`,
+        displayText: q.question.length > 50 ? q.question.substring(0, 50) + "..." : q.question,
+        isIncorrect: true
+      }));
+
+      // Mix incorrect questions with base topics
+      const mixedTopics = [...incorrectTopics, ...baseTopics.slice(0, 6)];
+      return mixedTopics.sort(() => Math.random() - 0.5).slice(0, 12);
+    }
+
+    return baseTopics.map(topic => ({
+      question: topic,
+      displayText: topic,
+      isIncorrect: false
+    }));
+  }, [incorrectQuestions]);
 
   const handleAskCasey = async (question: string) => {
     setLoading(true);
@@ -113,37 +135,44 @@ Keep your answer:
         </div>
       </div>
 
-      {/* Quick Questions */}
+      {/* Dynamic Quick Questions */}
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
           <Sparkles className="w-5 h-5 text-purple-600" />
           <span>Quick Questions</span>
+          {incorrectQuestions.length > 0 && (
+            <span className="text-sm text-gray-500">(Includes your mistakes)</span>
+          )}
         </h2>
         
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {simpleTopics.map((topic, index) => (
+          {dynamicTopics.map((topic, index) => (
             <button
               key={index}
-              onClick={() => handleAskCasey(topic)}
+              onClick={() => handleAskCasey(topic.question)}
               disabled={loading}
-              className="p-3 text-left bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-xl transition-all disabled:opacity-50 text-sm font-medium text-gray-700 hover:text-blue-700"
+              className={`p-3 text-left rounded-xl transition-all disabled:opacity-50 text-sm font-medium ${
+                topic.isIncorrect 
+                  ? 'bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-300 text-red-700 hover:text-red-800'
+                  : 'bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 text-gray-700 hover:text-blue-700'
+              }`}
             >
-              {topic}
+              {topic.displayText}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Incorrect Questions */}
+      {/* Incorrect Questions Section (if any) */}
       {incorrectQuestions.length > 0 && (
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
             <CheckCircle className="w-5 h-5 text-green-600" />
-            <span>Review Mistakes ({incorrectQuestions.length})</span>
+            <span>Review All Mistakes ({incorrectQuestions.length})</span>
           </h2>
           
           <div className="space-y-3">
-            {incorrectQuestions.slice(0, 5).map((question, index) => (
+            {incorrectQuestions.map((question, index) => (
               <button
                 key={index}
                 onClick={() => handleIncorrectQuestion(question)}
