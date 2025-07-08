@@ -78,6 +78,13 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   const aiGeneratedQuestions = questions.filter(q => q.tags.includes('ai-generated')).length;
   const manualQuestions = totalQuestions - aiGeneratedQuestions;
 
+  // Calculate per-domain question counts and percentages
+  const domainStats = domains.map(domain => {
+    const count = questions.filter(q => q.domain === domain).length;
+    const percent = totalQuestions > 0 ? Math.round((count / totalQuestions) * 100) : 0;
+    return { domain, count, percent };
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -217,7 +224,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
@@ -228,18 +235,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             />
           </div>
-          
-          <select
-            value={filterDomain}
-            onChange={(e) => setFilterDomain(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-          >
-            <option value="">All Domains</option>
-            {domains.map(domain => (
-              <option key={domain} value={domain}>{domain}</option>
-            ))}
-          </select>
-          
+          {/* Remove domain dropdown, keep difficulty dropdown and stats */}
           <select
             value={filterDifficulty}
             onChange={(e) => setFilterDifficulty(e.target.value)}
@@ -250,11 +246,30 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
             <option value="Medium">Medium</option>
             <option value="Hard">Hard</option>
           </select>
-          
           <div className="text-sm text-gray-600 flex items-center">
             <Filter className="w-4 h-4 mr-2" />
             {filteredQuestions.length} of {totalQuestions} questions
           </div>
+        </div>
+        {/* Domain Pills Row */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <button
+            className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${!filterDomain ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50'}`}
+            onClick={() => setFilterDomain('')}
+          >
+            All Domains <span className="ml-2 text-xs font-normal">{totalQuestions}</span>
+          </button>
+          {domainStats.map(({ domain, percent, count }) => (
+            <button
+              key={domain}
+              className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors flex items-center space-x-2 ${filterDomain === domain ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50'}`}
+              onClick={() => setFilterDomain(domain)}
+            >
+              <span>{domain}</span>
+              <span className="ml-2 text-xs font-normal">{percent}%</span>
+              <span className="ml-1 text-xs text-gray-400">({count})</span>
+            </button>
+          ))}
         </div>
       </div>
 
