@@ -76,10 +76,18 @@ Study more at: https://site.cisspstudygroup.com`;
     setShowShareMenu(!showShareMenu);
   };
 
+  // Store the utterance instance so we can pause/stop it
+  const utteranceRef = React.useRef<SpeechSynthesisUtterance | null>(null);
+
   const handleReadAloud = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isSpeaking) return;
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
     const utterance = new window.SpeechSynthesisUtterance(question.question);
+    utteranceRef.current = utterance;
     setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
@@ -218,13 +226,21 @@ Study more at: https://site.cisspstudygroup.com`;
               <button
                 type="button"
                 onClick={handleReadAloud}
-                disabled={isSpeaking}
-                className={`ml-2 p-1 rounded-full border border-gray-200 hover:bg-blue-50 transition-colors ${isSpeaking ? 'opacity-50 cursor-not-allowed' : ''}`}
-                title="Read question aloud"
+                className={`ml-2 p-1 rounded-full border border-gray-200 hover:bg-blue-50 transition-colors ${isSpeaking ? 'bg-blue-100' : ''}`}
+                title={isSpeaking ? 'Pause reading' : 'Read question aloud'}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-blue-600">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75v-13.5m0 0l-4.5 4.5m4.5-4.5l4.5 4.5" />
-                </svg>
+                {isSpeaking ? (
+                  // Pause icon
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-blue-600">
+                    <rect x="6" y="5" width="4" height="14" rx="1" />
+                    <rect x="14" y="5" width="4" height="14" rx="1" />
+                  </svg>
+                ) : (
+                  // Speaker icon
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-blue-600">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 9v6h4l5 5V4l-5 5H9z" />
+                  </svg>
+                )}
               </button>
             </div>
 
