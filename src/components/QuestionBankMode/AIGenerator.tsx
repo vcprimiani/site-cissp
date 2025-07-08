@@ -478,6 +478,14 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
 
   const canGenerate = selectedDomain || selectedSubcategory;
 
+  // Calculate per-domain question counts and percentages
+  const totalQuestions = questions.length;
+  const domainStats = domains.map(domain => {
+    const count = questions.filter(q => q.domain === domain).length;
+    const percent = totalQuestions > 0 ? Math.round((count / totalQuestions) * 100) : 0;
+    return { domain, count, percent };
+  });
+
   if (subscriptionLoading) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-8 text-center">
@@ -785,11 +793,11 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                   Select CISSP Domain
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {domains.map((domain) => (
+                  {domainStats.map(({ domain, percent, count }) => (
                     <button
                       key={domain}
                       onClick={() => hasActiveSubscription ? handleDomainSelect(domain) : setShowUpgradeModal(true)}
-                      className={`text-left p-3 rounded-lg border-2 transition-all duration-200 ${
+                      className={`text-left p-3 rounded-lg border-2 transition-all duration-200 flex flex-col items-start ${
                         !hasActiveSubscription 
                           ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
                           : selectedDomain === domain
@@ -798,14 +806,16 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                       }`}
                       disabled={!hasActiveSubscription}
                     >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-sm mb-1">{domain}</div>
-                          <div className="text-xs opacity-75">
-                            {domainSubcategories[domain as keyof typeof domainSubcategories].length} subcategories
-                          </div>
+                      <div className="flex items-center justify-between w-full">
+                        <div className="font-medium text-sm mb-1 flex items-center gap-2">
+                          {domain}
+                          <span className="ml-2 text-xs font-normal text-blue-600">{percent}%</span>
+                          <span className="ml-1 text-xs text-gray-400">({count})</span>
                         </div>
                         {!hasActiveSubscription && <Lock className="w-4 h-4" />}
+                      </div>
+                      <div className="text-xs opacity-75">
+                        {domainSubcategories[domain as keyof typeof domainSubcategories].length} subcategories
                       </div>
                     </button>
                   ))}

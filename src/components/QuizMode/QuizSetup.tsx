@@ -378,7 +378,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
             </label>
             <div className="flex items-center space-x-4">
               <div className="flex space-x-2">
-                {[1, 5, 10].map(num => (
+                {[5, 10, 25].map(num => (
                   <button
                     key={num}
                     onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
