@@ -76,7 +76,7 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser,
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-md transition-all duration-200 text-gray-600 hover:text-gray-900"
-                title="Community"
+                title="Study Group"
                 style={{ display: 'flex', alignItems: 'center' }}
               >
                 <Users className="w-4 h-4" />
@@ -118,21 +118,13 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser,
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-gray-600 hover:text-gray-900 border-2 border-[#F8D27F] shadow-[0_0_0_3px_#F8D27F33] focus:ring-2 focus:ring-[#F8D27F] focus:ring-opacity-50 outline-none"
-                title="Community"
+                title="Study Group"
                 style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}
               >
                 <Users className="w-4 h-4 mr-2 text-[#F8D27F]" />
-                <span>Community</span>
+                <span>Study Group</span>
               </a>
             </div>
-
-            {/* Subscription Status */}
-            {hasActiveSubscription && (
-              <div className="hidden lg:flex items-center space-x-2 bg-gradient-to-r from-green-50 to-blue-50 px-3 py-2 rounded-lg border border-green-200">
-                <Crown className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-medium text-green-800">Premium</span>
-              </div>
-            )}
 
             {/* User Info - Responsive */}
             <div className="flex items-center space-x-2 sm:space-x-3 bg-gradient-to-r from-blue-50 to-purple-50 px-2 sm:px-4 py-2 rounded-lg">
