@@ -46,40 +46,40 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser,
           </div>
 
           {/* Mode Toggle - Responsive */}
-          <div className="flex flex-col sm:flex-row items-center w-full space-y-2 sm:space-y-0 sm:space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Mobile Mode Toggle */}
-            <div className="flex sm:hidden bg-gray-100 rounded-lg p-1 w-full flex-col space-y-2">
+            <div className="flex sm:hidden bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => onModeChange('question-bank')}
-                className={`p-2 rounded-md transition-all duration-200 w-full text-left ${
+                className={`p-2 rounded-md transition-all duration-200 ${
                   mode === 'question-bank'
                     ? 'bg-[#F8D380] text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
                 title="Question Bank"
               >
-                <div className="flex items-center"><Database className="w-4 h-4 mr-2" /> <span>Question Bank</span></div>
+                <Database className="w-4 h-4" />
               </button>
               <button
                 onClick={() => onModeChange('quiz')}
-                className={`p-2 rounded-md transition-all duration-200 w-full text-left ${
+                className={`p-2 rounded-md transition-all duration-200 ${
                   mode === 'quiz'
                     ? 'bg-[#F8D380] text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
                 title="Quiz"
               >
-                <div className="flex items-center"><Target className="w-4 h-4 mr-2" /> <span>Quiz</span></div>
+                <Target className="w-4 h-4" />
               </button>
               <a
                 href="https://CISSPStudyGroup.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-md transition-all duration-200 text-gray-600 hover:text-gray-900 w-full flex items-center"
+                className="p-2 rounded-md transition-all duration-200 text-gray-600 hover:text-gray-900"
                 title="Community"
                 style={{ display: 'flex', alignItems: 'center' }}
               >
-                <Users className="w-4 h-4 mr-2" /> <span>Community</span>
+                <Users className="w-4 h-4" />
               </a>
             </div>
 
