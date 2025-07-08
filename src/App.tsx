@@ -12,7 +12,6 @@ import { useAuth } from './hooks/useAuth';
 import { useSubscription } from './hooks/useSubscription';
 import { BookmarksProvider } from './hooks/useBookmarks';
 import { LandingPage } from './components/Landing/LandingPage';
-import { AdminSubscriptionCard } from './components/AdminSubscriptionCard';
 
 function App() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -177,8 +176,7 @@ function App() {
           hasActiveSubscription={hasActiveSubscription}
           subscriptionLoading={subscriptionLoading}
         />
-        {/* Admin Card for eggcream@gmail.com */}
-        {appState.currentUser?.email === 'eggcream@gmail.com' && <AdminSubscriptionCard />}
+        
         <main>
           {appState.mode === 'question-bank' ? (
             <QuestionBankMode 
