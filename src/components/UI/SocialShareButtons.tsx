@@ -14,7 +14,7 @@ interface SocialShareButtonsProps {
 }
 
 export const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({
-  url = 'https://site.cisspstudygroup.com',
+  url = 'https://www.cissp.app',
   title,
   text,
   hashtags = ['CISSP', 'Cybersecurity', 'StudyGroup'],
