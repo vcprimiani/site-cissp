@@ -145,7 +145,12 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onBackToLanding }) => {
     setIsResettingPassword(false);
     setResetEmailSent(false);
     setFormErrors({});
-    setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+    setFormData(prev => ({
+      name: '',
+      email: prev.email, // retain email
+      password: prev.password, // retain password
+      confirmPassword: ''
+    }));
     setPasswordValidation({ isValid: false, errors: [] });
   };
 
