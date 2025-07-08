@@ -486,6 +486,13 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
     return { domain, count, percent };
   });
 
+  // Helper to get color for percentage
+  function getPercentColor(percent: number) {
+    if (percent < 10) return 'text-red-600';
+    if (percent < 25) return 'text-orange-500';
+    return 'text-green-600';
+  }
+
   if (subscriptionLoading) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-8 text-center">
@@ -809,7 +816,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                       <div className="flex items-center justify-between w-full">
                         <div className="font-medium text-sm mb-1 flex items-center gap-2">
                           {domain}
-                          <span className="ml-2 text-xs font-normal text-blue-600">{percent}%</span>
+                          <span className={`ml-2 text-xs font-normal ${getPercentColor(percent)}`}>{percent}%</span>
                           <span className="ml-1 text-xs text-gray-400">({count})</span>
                         </div>
                         {!hasActiveSubscription && <Lock className="w-4 h-4" />}

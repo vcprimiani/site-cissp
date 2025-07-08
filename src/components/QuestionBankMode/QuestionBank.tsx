@@ -259,14 +259,13 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
           >
             All Domains <span className="ml-2 text-xs font-normal">{totalQuestions}</span>
           </button>
-          {domainStats.map(({ domain, percent, count }) => (
+          {domainStats.map(({ domain, count }) => (
             <button
               key={domain}
               className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors flex items-center space-x-2 ${filterDomain === domain ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50'}`}
               onClick={() => setFilterDomain(domain)}
             >
               <span>{domain}</span>
-              <span className="ml-2 text-xs font-normal">{percent}%</span>
               <span className="ml-1 text-xs text-gray-400">({count})</span>
             </button>
           ))}
