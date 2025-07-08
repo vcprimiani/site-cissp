@@ -750,18 +750,6 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
         </div>
       )}
 
-      {!hasActiveSubscription && (
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-600">Free AI generations this week</span>
-            <span className="text-xs font-semibold text-blue-700">{Math.min(freeUsed, FREE_LIMIT)} / {FREE_LIMIT}</span>
-          </div>
-          <div className="w-full h-2 bg-blue-100 rounded-full overflow-hidden">
-            <div className="h-2 bg-blue-500 rounded-full transition-all" style={{ width: `${(Math.min(freeUsed, FREE_LIMIT) / FREE_LIMIT) * 100}%` }} />
-          </div>
-        </div>
-      )}
-
       {/* Generation Controls Section (Quick + Advanced) */}
       <div className="relative">
         {/* Overlay for unsubscribed users who hit the limit */}
