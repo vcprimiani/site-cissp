@@ -34,6 +34,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   subscriptionLoading
 }) => {
   const [showShareMenu, setShowShareMenu] = React.useState(false);
+  const [isSpeaking, setIsSpeaking] = React.useState(false);
   const domainColor = getDomainColor(question.domain);
   const difficultyColor = getDifficultyColor(question.difficulty);
   const aiColor = getStatusColor('ai-generated');
@@ -73,6 +74,16 @@ Study more at: https://site.cisspstudygroup.com`;
   const handleShareClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowShareMenu(!showShareMenu);
+  };
+
+  const handleReadAloud = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isSpeaking) return;
+    const utterance = new window.SpeechSynthesisUtterance(question.question);
+    setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
   };
 
   // Add the formatExplanation function from Quiz.tsx
@@ -199,13 +210,22 @@ Study more at: https://site.cisspstudygroup.com`;
               </div>
             )}
 
-            {/* Question Text */}
-            <div className="text-sm sm:text-base font-semibold mb-4 break-words leading-relaxed text-gray-900">
-              {keywords.length > 0 ? (
-                <span dangerouslySetInnerHTML={{ __html: highlightKeywords(question.question, keywords) }} />
-              ) : (
-                question.question
-              )}
+            {/* Question Text and Read Aloud Button */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-gray-900 font-medium text-base">
+                {question.question}
+              </span>
+              <button
+                type="button"
+                onClick={handleReadAloud}
+                disabled={isSpeaking}
+                className={`ml-2 p-1 rounded-full border border-gray-200 hover:bg-blue-50 transition-colors ${isSpeaking ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title="Read question aloud"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-blue-600">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75v-13.5m0 0l-4.5 4.5m4.5-4.5l4.5 4.5" />
+                </svg>
+              </button>
             </div>
 
             {/* Tags - Softer colors */}
