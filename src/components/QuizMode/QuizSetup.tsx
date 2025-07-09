@@ -247,11 +247,16 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
 
   // Quiz Results Mode
   if (quizMode === 'results' && quizResults) {
+    // If user is not subscribed and just finished the daily quiz, show upsell
+    const isDailyQuiz = !hasActiveSubscription && dailyQuizQuestions && dailyQuizQuestions.length === 3;
+    const isUnsubscribed = !hasActiveSubscription;
     return (
       <QuizResults
         results={quizResults}
         onRetakeQuiz={retakeQuiz}
         onBackToSetup={exitQuiz}
+        isDailyQuiz={isDailyQuiz}
+        isUnsubscribed={isUnsubscribed}
       />
     );
   }

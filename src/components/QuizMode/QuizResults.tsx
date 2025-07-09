@@ -17,9 +17,11 @@ interface QuizResultsProps {
   };
   onRetakeQuiz: () => void;
   onBackToSetup: () => void;
+  isDailyQuiz?: boolean;
+  isUnsubscribed?: boolean;
 }
 
-export const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz, onBackToSetup }) => {
+export const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz, onBackToSetup, isDailyQuiz, isUnsubscribed }) => {
   const percentage = Math.round((results.correctAnswers / results.totalQuestions) * 100);
   const averageTime = Math.round(results.timeSpent / results.totalQuestions);
 
@@ -109,6 +111,25 @@ site.cisspstudygroup.com
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
+        {/* Daily Quiz Upsell for Unsubscribed Users */}
+        {isDailyQuiz && isUnsubscribed && (
+          <div className="bg-gradient-to-r from-yellow-100 to-pink-100 border-2 border-yellow-300 rounded-2xl shadow-xl p-8 mb-8 text-center animate-fade-in">
+            <div className="flex flex-col items-center mb-4">
+              <span className="text-5xl mb-2">🎉</span>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Great job on your Daily Quiz!</h2>
+              <p className="text-lg text-gray-700 mb-2">You scored <span className="font-bold text-purple-700">{results.correctAnswers} / {results.totalQuestions}</span> ({percentage}%)</p>
+              <p className="text-base text-gray-600 mb-4">You only get <span className="font-bold">3 free questions per day</span> as a free member.</p>
+              <p className="text-base text-gray-700 mb-4">Upgrade to unlock <span className="font-bold text-green-700">unlimited quizzes</span>, detailed analytics, and more fun study features!</p>
+              <button
+                onClick={() => window.location.href = '/pricing'}
+                className="mt-2 px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-300 text-gray-900 font-semibold rounded-lg shadow hover:from-yellow-500 hover:to-yellow-400 transition-all text-lg"
+              >
+                Upgrade Now & Keep Studying 🚀
+              </button>
+              <div className="mt-4 text-sm text-gray-500">Come back tomorrow for another free quiz!</div>
+            </div>
+          </div>
+        )}
         {/* Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
