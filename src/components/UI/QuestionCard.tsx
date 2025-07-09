@@ -9,8 +9,8 @@ import { useBookmarks } from '../../hooks/useBookmarks';
 import { Lock, Crown } from 'lucide-react';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
-import { elevenLabsService, Voice, VoiceSettings } from '../../services/elevenlabs';
-import { VoiceSelector } from './VoiceSelector';
+import { elevenLabsService } from '../../services/elevenlabs';
+import { PlayPauseButton } from './PlayPauseButton';
 
 interface QuestionCardProps {
   question: Question;
@@ -37,13 +37,6 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 }) => {
   const [showShareMenu, setShowShareMenu] = React.useState(false);
   const [isSpeaking, setIsSpeaking] = React.useState(false);
-  const [selectedVoice, setSelectedVoice] = React.useState<Voice>(elevenLabsService.getCurrentVoice());
-  const [voiceSettings, setVoiceSettings] = React.useState<VoiceSettings>({
-    stability: 0.5,
-    similarity_boost: 0.5,
-    style: 0.0,
-    use_speaker_boost: true
-  });
   const domainColor = getDomainColor(question.domain);
   const difficultyColor = getDifficultyColor(question.difficulty);
   const aiColor = getStatusColor('ai-generated');
@@ -85,27 +78,21 @@ Study more at: https://site.cisspstudygroup.com`;
     setShowShareMenu(!showShareMenu);
   };
 
-  const handleReadAloud = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (isSpeaking) {
-      elevenLabsService.stopSpeech();
-      setIsSpeaking(false);
-      return;
-    }
-
+  const handlePlayAudio = async () => {
     try {
-      setIsSpeaking(true);
-      await elevenLabsService.playSpeech(question.question, selectedVoice.id, voiceSettings);
+      await elevenLabsService.playSpeech(question.question);
     } catch (error) {
       console.error('Failed to play speech:', error);
-      setIsSpeaking(false);
       // Fallback to browser speech synthesis if ElevenLabs fails
       const utterance = new window.SpeechSynthesisUtterance(question.question);
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
       window.speechSynthesis.speak(utterance);
     }
+  };
+
+  const handlePauseAudio = () => {
+    elevenLabsService.stopSpeech();
   };
 
   // Update speaking state when ElevenLabs audio ends
@@ -242,37 +229,18 @@ Study more at: https://site.cisspstudygroup.com`;
               </div>
             )}
 
-            {/* Question Text and Read Aloud Button */}
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-gray-900 font-medium text-base">
+            {/* Question Text and Play Button */}
+            <div className="flex items-start gap-3 mb-2">
+              <span className="text-gray-900 font-medium text-base flex-1">
                 {question.question}
               </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleReadAloud}
-                  className={`p-1 rounded-full border border-gray-200 hover:bg-blue-50 transition-colors ${isSpeaking ? 'bg-blue-100' : ''}`}
-                  title={isSpeaking ? 'Stop reading' : 'Read question aloud'}
-                >
-                  {isSpeaking ? (
-                    // Pause icon
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-blue-600">
-                      <rect x="6" y="5" width="4" height="14" rx="1" />
-                      <rect x="14" y="5" width="4" height="14" rx="1" />
-                    </svg>
-                  ) : (
-                    // Speaker icon
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-blue-600">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 9v6h4l5 5V4l-5 5H9z" />
-                    </svg>
-                  )}
-                </button>
-                <VoiceSelector
-                  onVoiceChange={setSelectedVoice}
-                  onSettingsChange={setVoiceSettings}
-                  className="text-xs"
-                />
-              </div>
+              <PlayPauseButton
+                onPlay={handlePlayAudio}
+                onPause={handlePauseAudio}
+                isPlaying={isSpeaking}
+                size="sm"
+                className="flex-shrink-0"
+              />
             </div>
 
             {/* Tags - Softer colors */}

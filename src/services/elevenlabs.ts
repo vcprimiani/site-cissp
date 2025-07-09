@@ -65,8 +65,26 @@ class ElevenLabsService {
         throw new Error(error.message || 'Failed to generate speech');
       }
 
+      // Handle different response formats
+      let audioData: ArrayBuffer;
+      if (data instanceof ArrayBuffer) {
+        audioData = data;
+      } else if (data instanceof Uint8Array) {
+        audioData = data.buffer;
+      } else if (typeof data === 'string') {
+        // Convert base64 to ArrayBuffer
+        const binaryString = atob(data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        audioData = bytes.buffer;
+      } else {
+        throw new Error('Unexpected response format from ElevenLabs API');
+      }
+
       // Convert the audio data to a blob URL
-      const audioBlob = new Blob([data], { type: 'audio/mpeg' });
+      const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(audioBlob);
       
       // Cache the result
