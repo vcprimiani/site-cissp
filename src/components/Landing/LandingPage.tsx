@@ -337,7 +337,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   <ArrowRight className="w-5 h-5" />
                 </button>
                 <p className="text-sm text-gray-500 mt-2 text-center sm:text-left">
-                  ⚡ Instant access • 🔒 Secure • 💰 Cancel anytime
+                  ⚡ Instant access • 🔒 Secure
                 </p>
               </div>
 
@@ -350,10 +350,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>Instant access</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>Cancel anytime</span>
                 </div>
               </div>
             </div>
