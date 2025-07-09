@@ -29,7 +29,12 @@ const ResetPassword: React.FC = () => {
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     setLoading(false);
     if (error) setStatus('Error: ' + error.message);
-    else setStatus('Password updated! You can now log in.');
+    else {
+      setStatus('Password updated! You can now log in.');
+      setTimeout(() => {
+        window.location.href = '/'; // Redirect to login/landing page
+      }, 2000);
+    }
   };
 
   if (!isAuthenticated) {
