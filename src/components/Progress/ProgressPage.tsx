@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Trophy, Clock, BarChart2, Trash2 } from 'lucide-react';
+import { Trophy, Clock, BarChart2, Trash2, ArrowLeft } from 'lucide-react';
+import { Header } from '../Layout/Header';
+import { useAuth } from '../../hooks/useAuth';
+import { useSubscription } from '../../hooks/useSubscription';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { AppState } from '../../types';
 
 interface ProgressEntry {
   timestamp: number;
@@ -28,6 +33,32 @@ const formatTime = (seconds: number) => {
 };
 
 const ProgressPage: React.FC = () => {
+  // Only use useAuth for possible future use, but don't destructure unused values
+  const { isActive: hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
+  const [appState] = useLocalStorage<AppState>('cissp-study-app', {
+    mode: 'quiz',
+    currentUser: null,
+    users: [],
+    sessions: [],
+    messages: [],
+    questions: [],
+    currentQuiz: null,
+    isAuthenticated: false,
+    showAuth: false
+  });
+  // Fallback user for Header if currentUser is null
+  const fallbackUser = {
+    id: 'unknown',
+    name: 'User',
+    email: '',
+    role: 'leader' as const,
+    createdAt: new Date(),
+    points: 0,
+    sessionsLed: 0,
+    questionsContributed: 0,
+    achievements: [],
+    avatar_url: ''
+  };
   const [history, setHistory] = useState<ProgressEntry[]>([]);
 
   useEffect(() => {
@@ -60,8 +91,27 @@ const ProgressPage: React.FC = () => {
   const totalQuizzes = history.length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* App Header */}
+      <Header
+        mode={appState.mode}
+        onModeChange={() => {}}
+        currentUser={appState.currentUser || fallbackUser}
+        onLogout={() => {}}
+        hasActiveSubscription={hasActiveSubscription}
+        subscriptionLoading={subscriptionLoading}
+      />
+      <div className="max-w-4xl mx-auto px-4 pt-6">
+        {/* Back Button */}
+        <div className="mb-6">
+          <button
+            onClick={() => window.history.length > 1 ? window.history.back() : window.location.assign('/')}
+            className="flex items-center space-x-2 px-4 py-2 bg-white rounded-xl shadow hover:bg-blue-50 transition-colors border border-gray-200 text-blue-700 font-semibold text-base group"
+          >
+            <ArrowLeft className="w-5 h-5 text-blue-600 group-hover:-translate-x-1 transition-transform" />
+            <span>Back</span>
+          </button>
+        </div>
         {/* Local Storage Alert */}
         <div className="mb-6">
           <div className="flex items-center bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-sm animate-fade-in">
