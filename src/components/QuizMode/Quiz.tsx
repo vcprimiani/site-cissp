@@ -242,17 +242,18 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       
       const results: QuizResults = {
         totalQuestions: questions.length,
-        correctAnswers: newAnswers.reduce((count, answer, index) => 
-          answer === questions[index].correctAnswer ? count + 1 : count, 0
+        correctAnswers: newAnswers.reduce<number>((count, answer, index) => 
+          answer !== null && answer === questions[index].correctAnswer ? count + 1 : count, 0
         ),
         timeSpent: Math.floor((Date.now() - startTime) / 1000),
         questionResults: questions.map((q, index) => ({
           question: q,
           userAnswer: newAnswers[index],
-          isCorrect: newAnswers[index] === q.correctAnswer,
+          isCorrect: newAnswers[index] !== null && newAnswers[index] === q.correctAnswer,
           timeSpent: finalTimes[index] || 0
         }))
       };
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       onComplete(results);
     } else {
       // Next question
