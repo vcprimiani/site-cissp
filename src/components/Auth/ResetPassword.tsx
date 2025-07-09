@@ -30,7 +30,7 @@ const ResetPassword: React.FC = () => {
     setLoading(false);
     if (error) setStatus('Error: ' + error.message);
     else {
-      setStatus('Password updated! You can now log in.');
+      setStatus('Password updated! You can now log in. Redirecting...');
       setTimeout(() => {
         window.location.href = '/'; // Redirect to login/landing page
       }, 2000);
