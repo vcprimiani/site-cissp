@@ -14,6 +14,12 @@ export interface VoiceSettings {
   use_speaker_boost: boolean;
 }
 
+export interface GenerationStatus {
+  isGenerating: boolean;
+  progress?: number;
+  error?: string;
+}
+
 // Popular ElevenLabs voices
 export const AVAILABLE_VOICES: Voice[] = [
   { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", description: "Professional, clear, and engaging" },
@@ -37,6 +43,28 @@ class ElevenLabsService {
   private audioCache = new Map<string, string>();
   private isPlaying = false;
   private currentAudio: HTMLAudioElement | null = null;
+  private generationStatus: GenerationStatus = { isGenerating: false };
+  private statusCallbacks: ((status: GenerationStatus) => void)[] = [];
+
+  // Subscribe to generation status updates
+  onStatusUpdate(callback: (status: GenerationStatus) => void) {
+    this.statusCallbacks.push(callback);
+    return () => {
+      this.statusCallbacks = this.statusCallbacks.filter(cb => cb !== callback);
+    };
+  }
+
+  private updateStatus(status: Partial<GenerationStatus>) {
+    this.generationStatus = { ...this.generationStatus, ...status };
+    this.statusCallbacks.forEach(callback => callback(this.generationStatus));
+  }
+
+  private getErrorMessage(error: any): string {
+    if (typeof error === 'string') return error;
+    if (error?.message) return error.message;
+    if (error?.details) return error.details;
+    return 'An unexpected error occurred';
+  }
 
   async generateSpeech(
     text: string, 
@@ -52,6 +80,16 @@ class ElevenLabsService {
     }
 
     try {
+      this.updateStatus({ isGenerating: true, progress: 0, error: undefined });
+      
+      // Simulate progress updates
+      const progressInterval = setInterval(() => {
+        const currentProgress = this.generationStatus.progress || 0;
+        if (currentProgress < 90) {
+          this.updateStatus({ progress: currentProgress + 10 });
+        }
+      }, 200);
+
       const { data, error } = await supabase.functions.invoke('elevenlabs-tts', {
         body: {
           text,
@@ -60,10 +98,20 @@ class ElevenLabsService {
         }
       });
 
+      clearInterval(progressInterval);
+
       if (error) {
         console.error('ElevenLabs API error:', error);
-        throw new Error(error.message || 'Failed to generate speech');
+        const errorMessage = this.getErrorMessage(error);
+        this.updateStatus({ 
+          isGenerating: false, 
+          error: errorMessage,
+          progress: undefined 
+        });
+        throw new Error(errorMessage);
       }
+
+      this.updateStatus({ progress: 100 });
 
       // Handle different response formats
       let audioData: ArrayBuffer;
@@ -80,7 +128,13 @@ class ElevenLabsService {
         }
         audioData = bytes.buffer;
       } else {
-        throw new Error('Unexpected response format from ElevenLabs API');
+        const errorMessage = 'Unexpected response format from ElevenLabs API';
+        this.updateStatus({ 
+          isGenerating: false, 
+          error: errorMessage,
+          progress: undefined 
+        });
+        throw new Error(errorMessage);
       }
 
       // Convert the audio data to a blob URL
@@ -90,9 +144,16 @@ class ElevenLabsService {
       // Cache the result
       this.audioCache.set(cacheKey, audioUrl);
       
+      this.updateStatus({ isGenerating: false, progress: undefined, error: undefined });
       return audioUrl;
     } catch (error) {
       console.error('Speech generation failed:', error);
+      const errorMessage = this.getErrorMessage(error);
+      this.updateStatus({ 
+        isGenerating: false, 
+        error: errorMessage,
+        progress: undefined 
+      });
       throw error;
     }
   }
@@ -102,8 +163,11 @@ class ElevenLabsService {
     voiceId: string = "21m00Tcm4TlvDq8ikWAM",
     voiceSettings: VoiceSettings = DEFAULT_VOICE_SETTINGS
   ): Promise<void> {
-    // Stop any currently playing audio
-    this.stopSpeech();
+    // If already playing, pause it
+    if (this.isPlaying && this.currentAudio) {
+      this.pauseSpeech();
+      return;
+    }
 
     try {
       const audioUrl = await this.generateSpeech(text, voiceId, voiceSettings);
@@ -132,6 +196,20 @@ class ElevenLabsService {
     }
   }
 
+  pauseSpeech(): void {
+    if (this.currentAudio && this.isPlaying) {
+      this.currentAudio.pause();
+      this.isPlaying = false;
+    }
+  }
+
+  resumeSpeech(): void {
+    if (this.currentAudio && !this.isPlaying) {
+      this.currentAudio.play();
+      this.isPlaying = true;
+    }
+  }
+
   stopSpeech(): void {
     if (this.currentAudio) {
       this.currentAudio.pause();
@@ -143,6 +221,10 @@ class ElevenLabsService {
 
   isCurrentlyPlaying(): boolean {
     return this.isPlaying;
+  }
+
+  getGenerationStatus(): GenerationStatus {
+    return this.generationStatus;
   }
 
   getCurrentVoice(): Voice {

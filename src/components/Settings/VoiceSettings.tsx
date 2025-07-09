@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Volume2, Settings, Save, TestTube } from 'lucide-react';
-import { elevenLabsService, AVAILABLE_VOICES, Voice, VoiceSettings, DEFAULT_VOICE_SETTINGS } from '../../services/elevenlabs';
+import { elevenLabsService, AVAILABLE_VOICES, Voice, VoiceSettings as VoiceSettingsType, DEFAULT_VOICE_SETTINGS, GenerationStatus } from '../../services/elevenlabs';
+import { useToast } from '../UI/Toast';
 
 interface VoiceSettingsProps {
   className?: string;
@@ -8,24 +9,49 @@ interface VoiceSettingsProps {
 
 export const VoiceSettings: React.FC<VoiceSettingsProps> = ({ className = '' }) => {
   const [selectedVoice, setSelectedVoice] = useState<Voice>(AVAILABLE_VOICES[0]);
-  const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(DEFAULT_VOICE_SETTINGS);
+  const [voiceSettings, setVoiceSettings] = useState<VoiceSettingsType>(DEFAULT_VOICE_SETTINGS);
   const [isLoading, setIsLoading] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState<GenerationStatus>({ isGenerating: false });
+  
+  const { showSuccess, showError, showInfo } = useToast();
+
+  useEffect(() => {
+    // Subscribe to generation status updates
+    const unsubscribe = elevenLabsService.onStatusUpdate((status) => {
+      setGenerationStatus(status);
+      
+      if (status.error) {
+        showError('Voice Generation Failed', status.error);
+      } else if (status.isGenerating && status.progress === 100) {
+        showSuccess('Voice Generated', 'Audio is ready to play');
+      }
+    });
+
+    return unsubscribe;
+  }, [showSuccess, showError]);
 
   const handleVoiceChange = (voice: Voice) => {
     setSelectedVoice(voice);
     setSaved(false);
+    showInfo('Voice Changed', `Switched to ${voice.name}`);
   };
 
-  const handleSettingsChange = (key: keyof VoiceSettings, value: number | boolean) => {
+  const handleSettingsChange = (key: keyof VoiceSettingsType, value: number | boolean) => {
     const newSettings = { ...voiceSettings, [key]: value };
     setVoiceSettings(newSettings);
     setSaved(false);
   };
 
   const testVoice = async () => {
+    if (generationStatus.isGenerating) {
+      showError('Already Generating', 'Please wait for the current generation to complete');
+      return;
+    }
+
     setIsLoading(true);
     try {
+      showInfo('Generating Voice', 'Creating audio with your selected settings...');
       await elevenLabsService.playSpeech(
         "Hello! This is a test of the voice settings. How does this sound?",
         selectedVoice.id,
@@ -33,6 +59,7 @@ export const VoiceSettings: React.FC<VoiceSettingsProps> = ({ className = '' }) 
       );
     } catch (error) {
       console.error('Voice test failed:', error);
+      showError('Test Failed', 'Unable to generate test audio. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -43,6 +70,7 @@ export const VoiceSettings: React.FC<VoiceSettingsProps> = ({ className = '' }) 
     localStorage.setItem('elevenlabs-voice', JSON.stringify(selectedVoice));
     localStorage.setItem('elevenlabs-settings', JSON.stringify(voiceSettings));
     setSaved(true);
+    showSuccess('Settings Saved', 'Your voice preferences have been saved');
     setTimeout(() => setSaved(false), 2000);
   };
 
@@ -151,15 +179,39 @@ export const VoiceSettings: React.FC<VoiceSettingsProps> = ({ className = '' }) 
           </div>
         </div>
 
+        {/* Generation Status */}
+        {generationStatus.isGenerating && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-blue-900">Generating Audio...</div>
+                <div className="w-full bg-blue-200 rounded-full h-2 mt-2">
+                  <div 
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${generationStatus.progress || 0}%` }}
+                  ></div>
+                </div>
+                <div className="text-xs text-blue-700 mt-1">{generationStatus.progress || 0}% complete</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 pt-4">
           <button
             onClick={testVoice}
-            disabled={isLoading}
+            disabled={isLoading || generationStatus.isGenerating}
             className="flex items-center justify-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
             <TestTube className="w-5 h-5" />
-            <span>{isLoading ? 'Testing...' : 'Test Voice'}</span>
+            <span>
+              {isLoading || generationStatus.isGenerating 
+                ? 'Generating...' 
+                : 'Test Voice'
+              }
+            </span>
           </button>
           
           <button

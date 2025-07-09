@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppMode, User } from '../../types';
-import { Database, Target, LogOut, Crown, Users, CheckCircle, XCircle, Settings } from 'lucide-react';
+import { Database, Target, LogOut, Crown, Users, CheckCircle, XCircle, Settings, Volume2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 // import { useSubscription } from '../../hooks/useSubscription'; // REMOVE
 import { Avatar } from '../UI/Avatar';
@@ -13,9 +13,18 @@ interface HeaderProps {
   onLogout: () => void;
   hasActiveSubscription: boolean;
   subscriptionLoading: boolean;
+  onOpenVoiceSettings?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser, onLogout, hasActiveSubscription, subscriptionLoading }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+  mode, 
+  onModeChange, 
+  currentUser, 
+  onLogout, 
+  hasActiveSubscription, 
+  subscriptionLoading,
+  onOpenVoiceSettings 
+}) => {
   const { signOut } = useAuth();
   // const { isActive, productName } = useSubscription(); // REMOVE
   const [showSettings, setShowSettings] = React.useState(false);
@@ -24,6 +33,11 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser,
     await signOut();
     await clearInvalidSession();
     window.location.href = '/'; // Hard redirect to root/login
+  };
+
+  const handleVoiceSettings = () => {
+    setShowSettings(false);
+    onOpenVoiceSettings?.();
   };
 
   return (
@@ -157,7 +171,7 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser,
                   <div className="flex items-center space-x-1">
                     <p className="text-xs text-gray-600">{hasActiveSubscription ? 'Study Leader' : 'Almost a Member'}</p>
                     {hasActiveSubscription && (
-                      <Crown className="w-3 h-3 text-green-600" title="Premium subscriber" />
+                      <Crown className="w-3 h-3 text-green-600" />
                     )}
                   </div>
                 </div>
@@ -178,6 +192,12 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser,
                       >
                         📈 View Progress
                       </a>
+                      <button
+                        onClick={handleVoiceSettings}
+                        className="block w-full text-left px-4 py-3 text-gray-800 hover:bg-blue-50 text-sm font-medium"
+                      >
+                        🔊 Voice Settings
+                      </button>
                     </div>
                   )}
                 </div>

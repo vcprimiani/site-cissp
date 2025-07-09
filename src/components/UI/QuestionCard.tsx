@@ -92,7 +92,7 @@ Study more at: https://site.cisspstudygroup.com`;
   };
 
   const handlePauseAudio = () => {
-    elevenLabsService.stopSpeech();
+    elevenLabsService.pauseSpeech();
   };
 
   // Update speaking state when ElevenLabs audio ends
