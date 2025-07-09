@@ -45,6 +45,11 @@ const ResetPassword: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto mt-12 p-6 bg-white rounded-xl shadow">
+      <div className="flex flex-col items-center mb-6">
+        <img src="/Untitled design-7.png" alt="CISSP Study Group Logo" className="w-16 h-16 mb-2 rounded-xl" />
+        <h1 className="text-xl font-bold text-gray-900">CISSP Study Group</h1>
+        <p className="text-xs text-gray-600">AI-Powered CISSP Practice</p>
+      </div>
       <h2 className="text-2xl font-bold mb-4">Set a New Password</h2>
       {status && <div className="mb-4 text-sm text-center text-red-600">{status}</div>}
       <form onSubmit={handleReset} className="space-y-4" style={{ opacity: resetComplete ? 0.5 : 1, pointerEvents: resetComplete ? 'none' : 'auto' }}>
