@@ -487,13 +487,20 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                 // Show loading state
                 const button = event.target as HTMLButtonElement;
                 const originalText = button.textContent;
-                button.textContent = 'Generating...';
+                button.textContent = '🤖 Starting AI generation...';
                 button.disabled = true;
                 
                 try {
                   
-                  for (let i = 0; i < 10; i++) {
+                  let attempts = 0;
+                  const maxAttempts = 20; // Allow up to 20 attempts to get 10 questions
+                  
+                  while (newQuestions.length < 10 && attempts < maxAttempts) {
+                    attempts++;
                     try {
+                      // Update progress
+                      button.textContent = `🧠 Generating question ${newQuestions.length + 1}/10 (attempt ${attempts})...`;
+                      
                       // Generate a random topic for variety
                       const topics = [
                         'network security', 'access control', 'risk management', 
@@ -520,28 +527,59 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                       );
                       
                       if (response.question) {
-                        const newQuestion = {
+                        const newQuestion: Question = {
                           ...response.question,
-                          id: `ai-generated-${Date.now()}-${i}`,
+                          id: `ai-generated-${Date.now()}-${newQuestions.length}`,
                           createdBy: 'ai',
                           isActive: true,
                           createdAt: new Date(),
                           tags: [...response.question.tags, 'ai-generated']
                         };
                         newQuestions.push(newQuestion);
+                        
+                        // Show success feedback with animation
+                        button.textContent = `✅ Question ${newQuestions.length} created!`;
+                        button.classList.add('animate-pulse', 'bg-green-100', 'text-green-800', 'scale-105');
+                        
+                        // Add a small bounce effect
+                        button.style.transform = 'scale(1.05)';
+                        setTimeout(() => {
+                          button.style.transform = 'scale(1)';
+                        }, 150);
+                        
+                        // Brief pause to show success
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        
+                        // Remove animation classes
+                        button.classList.remove('animate-pulse', 'bg-green-100', 'text-green-800', 'scale-105');
+                      } else {
+                        // Show error feedback for failed generation
+                        button.textContent = `💥 Attempt ${attempts} failed`;
+                        button.classList.add('bg-red-100', 'text-red-800');
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        button.classList.remove('bg-red-100', 'text-red-800');
                       }
                       
                       // Add delay between requests
-                      if (i < 9) {
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                      }
+                      await new Promise(resolve => setTimeout(resolve, 500));
                     } catch (error: any) {
-                      console.error(`Error generating question ${i + 1}:`, error);
-                      // Continue with remaining questions even if one fails
+                      console.error(`Error generating question (attempt ${attempts}):`, error);
+                      // Show error feedback
+                      button.textContent = `💥 Attempt ${attempts} failed`;
+                      button.classList.add('bg-red-100', 'text-red-800');
+                      await new Promise(resolve => setTimeout(resolve, 500));
+                      button.classList.remove('bg-red-100', 'text-red-800');
                     }
                   }
                   
-                  if (newQuestions.length > 0) {
+                  if (newQuestions.length === 10) {
+                    // Show final success message
+                    button.textContent = `🎉 All 10 questions ready! Starting quiz...`;
+                    button.classList.add('bg-green-100', 'text-green-800', 'animate-pulse');
+                    
+                    // Brief pause to show completion
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    
                     // Mark questions as used and start quiz
                     markQuestionsAsUsed(newQuestions);
                     setQuizSession({
@@ -551,8 +589,19 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                       isActive: true
                     });
                     setQuizMode('quiz');
+                  } else if (newQuestions.length > 0) {
+                    // Partial success - show what we got
+                    button.textContent = `⚠️ Only ${newQuestions.length}/10 questions generated`;
+                    button.classList.add('bg-yellow-100', 'text-yellow-800');
+                    setTimeout(() => {
+                      alert(`Only ${newQuestions.length} questions were generated. Please try again to get a full 10-question quiz.`);
+                    }, 1000);
                   } else {
-                    alert('Failed to generate AI questions. Please try again.');
+                    button.textContent = '❌ No questions generated';
+                    button.classList.add('bg-red-100', 'text-red-800');
+                    setTimeout(() => {
+                      alert('Failed to generate AI questions. Please try again.');
+                    }, 1000);
                   }
                 } catch (error: any) {
                   console.error('Error generating AI questions:', error);
