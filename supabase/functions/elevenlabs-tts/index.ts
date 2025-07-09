@@ -29,7 +29,15 @@ serve(async (req) => {
   }
 
   try {
-    // Allow anonymous access - no auth required
+    // Check if user is authenticated (optional)
+    const authHeader = req.headers.get('authorization')
+    let isAuthenticated = false
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      // User is authenticated, but we'll still allow the request
+      isAuthenticated = true
+    }
+
     const { text, voice_id = "21m00Tcm4TlvDq8ikWAM", model_id = "eleven_monolingual_v1", voice_settings }: ElevenLabsRequest = await req.json()
 
     if (!text) {
@@ -68,6 +76,8 @@ serve(async (req) => {
       }
     }
 
+    console.log('Calling ElevenLabs API with:', { text: text.substring(0, 50) + '...', voice_id, model_id })
+
     const response = await fetch(elevenLabsUrl, {
       method: 'POST',
       headers: {
@@ -97,6 +107,7 @@ serve(async (req) => {
 
     // Get the audio data
     const audioBuffer = await response.arrayBuffer()
+    console.log('Successfully generated audio, size:', audioBuffer.byteLength, 'bytes')
     
     return new Response(audioBuffer, {
       headers: {

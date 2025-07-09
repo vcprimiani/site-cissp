@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { elevenLabsService } from '../../services/elevenlabs'
-import { showToast } from '../../utils/toast'
 
 interface PlayPauseButtonProps {
   text: string
@@ -17,7 +16,6 @@ const PlayPauseButton: React.FC<PlayPauseButtonProps> = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [audioBuffer, setAudioBuffer] = useState<ArrayBuffer | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   // Check if this button's audio is currently playing
@@ -39,40 +37,20 @@ const PlayPauseButton: React.FC<PlayPauseButtonProps> = ({
     try {
       setError(null)
 
-      // If we have audio and it's playing, pause it
-      if (audioBuffer && isPlaying) {
+      // If currently playing, pause it
+      if (isPlaying) {
         elevenLabsService.pauseAudio()
         setIsPlaying(false)
         return
       }
 
-      // If we have audio and it's paused, resume it
-      if (audioBuffer && !isPlaying) {
-        elevenLabsService.resumeAudio()
-        setIsPlaying(true)
-        return
-      }
-
-      // Generate new audio if we don't have it
+      // Generate and play audio
       setIsLoading(true)
-      const result = await elevenLabsService.generateSpeech(text, voiceId)
-
-      if (result.error) {
-        setError(result.error)
-        showToast('error', `Failed to generate speech: ${result.error}`)
-        return
-      }
-
-      if (result.audio) {
-        setAudioBuffer(result.audio)
-        await elevenLabsService.playAudio(result.audio)
-        setIsPlaying(true)
-        showToast('success', 'Playing audio')
-      }
+      await elevenLabsService.togglePlayPause(text)
+      setIsPlaying(true)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to play audio'
       setError(errorMessage)
-      showToast('error', errorMessage)
     } finally {
       setIsLoading(false)
     }

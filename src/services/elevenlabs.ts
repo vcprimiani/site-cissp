@@ -16,6 +16,7 @@ class ElevenLabsService {
   private audioCache = new Map<string, ArrayBuffer>()
   private currentAudio: HTMLAudioElement | null = null
   private isPlaying = false
+  private currentUtterance: SpeechSynthesisUtterance | null = null
 
   async generateSpeech(
     text: string,
@@ -33,8 +34,7 @@ class ElevenLabsService {
         return { audio: this.audioCache.get(cacheKey)! }
       }
 
-      // Get current session for authentication
-      const { data: { session } } = await supabase.auth.getSession()
+      console.log('Calling ElevenLabs function with text:', text.substring(0, 50) + '...')
       
       const { data, error } = await supabase.functions.invoke('elevenlabs-tts', {
         body: {
@@ -47,27 +47,28 @@ class ElevenLabsService {
             style: 0.0,
             use_speaker_boost: true
           }
-        },
-        headers: session ? {
-          Authorization: `Bearer ${session.access_token}`
-        } : {}
+        }
       })
 
       if (error) {
         console.error('ElevenLabs API error:', error)
-        return { error: error.message || 'Failed to generate speech' }
+        // Fallback to browser speech synthesis
+        console.log('Falling back to browser speech synthesis')
+        return { error: 'Using browser speech synthesis as fallback' }
       }
 
       if (data instanceof ArrayBuffer) {
+        console.log('Successfully received audio, size:', data.byteLength, 'bytes')
         // Cache the audio
         this.audioCache.set(cacheKey, data)
         return { audio: data }
       } else {
-        return { error: 'Invalid response format' }
+        console.error('Invalid response format:', typeof data)
+        return { error: 'Using browser speech synthesis as fallback' }
       }
     } catch (error) {
       console.error('ElevenLabs service error:', error)
-      return { error: 'Failed to generate speech' }
+      return { error: 'Using browser speech synthesis as fallback' }
     }
   }
 
@@ -100,9 +101,57 @@ class ElevenLabsService {
     }
   }
 
+  async playTextWithFallback(text: string): Promise<void> {
+    try {
+      // Stop any currently playing audio
+      this.stopAudio()
+      
+      // Try ElevenLabs first
+      const result = await this.generateSpeech(text)
+      
+      if (result.audio) {
+        // Use ElevenLabs audio
+        await this.playAudio(result.audio)
+      } else {
+        // Fallback to browser speech synthesis
+        console.log('Using browser speech synthesis for:', text.substring(0, 50) + '...')
+        this.playWithBrowserSpeech(text)
+      }
+    } catch (error) {
+      console.error('Error playing text:', error)
+      // Final fallback to browser speech
+      this.playWithBrowserSpeech(text)
+    }
+  }
+
+  private playWithBrowserSpeech(text: string): void {
+    // Stop any current speech
+    if (this.currentUtterance) {
+      window.speechSynthesis.cancel()
+    }
+    
+    // Create new utterance
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.onend = () => {
+      this.isPlaying = false
+      this.currentUtterance = null
+    }
+    utterance.onerror = () => {
+      this.isPlaying = false
+      this.currentUtterance = null
+    }
+    
+    this.currentUtterance = utterance
+    this.isPlaying = true
+    window.speechSynthesis.speak(utterance)
+  }
+
   pauseAudio(): void {
     if (this.currentAudio && this.isPlaying) {
       this.currentAudio.pause()
+      this.isPlaying = false
+    } else if (this.currentUtterance && this.isPlaying) {
+      window.speechSynthesis.pause()
       this.isPlaying = false
     }
   }
@@ -110,6 +159,9 @@ class ElevenLabsService {
   resumeAudio(): void {
     if (this.currentAudio && !this.isPlaying) {
       this.currentAudio.play()
+      this.isPlaying = true
+    } else if (this.currentUtterance && !this.isPlaying) {
+      window.speechSynthesis.resume()
       this.isPlaying = true
     }
   }
@@ -121,18 +173,23 @@ class ElevenLabsService {
       this.isPlaying = false
       this.currentAudio = null
     }
+    if (this.currentUtterance) {
+      window.speechSynthesis.cancel()
+      this.isPlaying = false
+      this.currentUtterance = null
+    }
   }
 
   isAudioPlaying(): boolean {
     return this.isPlaying
   }
 
-  togglePlayPause(audioBuffer: ArrayBuffer): Promise<void> {
+  async togglePlayPause(text: string): Promise<void> {
     if (this.isPlaying) {
       this.pauseAudio()
       return Promise.resolve()
     } else {
-      return this.playAudio(audioBuffer)
+      return this.playTextWithFallback(text)
     }
   }
 
