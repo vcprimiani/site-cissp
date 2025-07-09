@@ -407,73 +407,59 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
 
         {/* Quiz Configuration */}
         <div className="space-y-6">
-          {/* Number of Questions */}
+          {/* Number of Questions and Start Quiz */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Number of Questions
             </label>
-            <div className="flex items-center space-x-4">
-              <div className="flex space-x-2">
-                {[5, 10, 25].map(num => (
-                  <button
-                    key={num}
-                    onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
-                    className={`px-4 py-2 rounded-lg border-2 transition-colors font-medium ${
-                      numberOfQuestions === num
-                        ? 'border-purple-500 bg-purple-50 text-purple-700'
-                        : 'border-gray-300 hover:border-purple-300 text-gray-700'
-                    }`}
-                  >
-                    {num}
-                  </button>
-                ))}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="flex space-x-2">
+                  {[5, 10, 25].map(num => (
+                    <button
+                      key={num}
+                      onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
+                      className={`px-4 py-2 rounded-lg border-2 transition-colors font-medium ${
+                        numberOfQuestions === num
+                          ? 'border-purple-500 bg-purple-50 text-purple-700'
+                          : 'border-gray-300 hover:border-purple-300 text-gray-700'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600">or</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max={filteredQuestions.length}
+                    value={numberOfQuestions}
+                    onChange={(e) => setNumberOfQuestions(Math.max(1, Math.min(parseInt(e.target.value) || 1, filteredQuestions.length)))}
+                    className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center"
+                  />
+                  <span className="text-sm text-gray-600">
+                    (Max: {filteredQuestions.length})
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">or</span>
-                <input
-                  type="number"
-                  min="1"
-                  max={filteredQuestions.length}
-                  value={numberOfQuestions}
-                  onChange={(e) => setNumberOfQuestions(Math.max(1, Math.min(parseInt(e.target.value) || 1, filteredQuestions.length)))}
-                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center"
-                />
-                <span className="text-sm text-gray-600">
-                  (Max: {filteredQuestions.length})
-                </span>
-              </div>
+              
+              {/* Start Quiz Button */}
+              <button
+                onClick={generateQuiz}
+                disabled={filteredQuestions.length === 0}
+                className="flex items-center justify-center space-x-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                <Play className="w-4 h-4" />
+                <span>Start Quiz</span>
+              </button>
             </div>
-            {/* 10 Hard Random Button */}
-            <button
-              type="button"
-              className="mt-4 px-4 py-2 rounded-lg border-2 border-red-500 bg-red-50 text-red-700 font-semibold hover:bg-red-100 transition-colors"
-              onClick={() => {
-                // Find all hard questions from all domains
-                const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
-                if (hardQuestions.length < 10) {
-                  alert('Not enough hard questions available.');
-                  return;
-                }
-                // Shuffle and pick 10
-                const shuffled = [...hardQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
-                markQuestionsAsUsed(shuffled);
-                setQuizSession({
-                  questions: shuffled,
-                  currentIndex: 0,
-                  startTime: new Date(),
-                  isActive: true
-                });
-                setQuizMode('quiz');
-              }}
-            >
-              10 Hard Random (All Domains)
-            </button>
-            
             {/* Generate 10 New and Start Quiz Button */}
             <div className="mt-4 space-y-3">
               <button
                 type="button"
-                className="w-full px-6 py-3 rounded-xl border-2 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 font-semibold hover:from-green-100 hover:to-emerald-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="w-full px-6 py-3 rounded-xl border-2 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 font-semibold hover:from-green-100 hover:to-emerald-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                 onClick={async (event) => {
                   // Check if user has active subscription for AI features
                   if (!hasActiveSubscription) {
@@ -513,8 +499,14 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                           </div>
                         </div>
                         
-                        <div id="status-text" class="text-sm text-gray-700 font-medium">
+                        <div id="status-text" class="text-sm text-gray-700 font-medium mb-4">
                           Initializing AI...
+                        </div>
+                        
+                        <div class="flex justify-center space-x-3">
+                          <button id="cancel-btn" class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg transition-colors text-sm font-medium cursor-not-allowed" disabled>
+                            Cancel & Start Quiz
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -522,11 +514,24 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                   
                   document.body.appendChild(loadingOverlay);
                   
+                  // Add cancel functionality
+                  let isCancelled = false;
+                  const cancelBtn = document.getElementById('cancel-btn');
+                  if (cancelBtn) {
+                    cancelBtn.addEventListener('click', () => {
+                      isCancelled = true;
+                      const statusText = document.getElementById('status-text');
+                      if (statusText) {
+                        statusText.innerHTML = `⏹️ <span class="text-blue-600 font-bold">Starting quiz with ${newQuestions.length} questions...</span>`;
+                      }
+                    });
+                  }
+                  
                   try {
                     let attempts = 0;
                     const maxAttempts = 25; // Allow up to 25 attempts to get 10 questions
                     
-                    while (newQuestions.length < 10 && attempts < maxAttempts) {
+                    while (newQuestions.length < 10 && attempts < maxAttempts && !isCancelled) {
                       attempts++;
                       
                       try {
@@ -539,6 +544,14 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                           progressText.textContent = `${newQuestions.length}/10`;
                           progressBar.style.width = `${(newQuestions.length / 10) * 100}%`;
                           statusText.textContent = `🧠 Generating question ${newQuestions.length + 1}...`;
+                        }
+                        
+                        // Enable cancel button once we have at least one question
+                        const cancelBtn = document.getElementById('cancel-btn');
+                        if (cancelBtn && newQuestions.length > 0) {
+                          cancelBtn.className = 'px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium';
+                          cancelBtn.removeAttribute('disabled');
+                          cancelBtn.classList.remove('cursor-not-allowed');
                         }
                         
                         // Generate a random topic for variety
@@ -596,7 +609,26 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                       }
                     }
                     
-                    if (newQuestions.length === 10) {
+                    if (isCancelled && newQuestions.length > 0) {
+                      // User cancelled but we have some questions
+                      const statusText = document.getElementById('status-text');
+                      if (statusText) {
+                        statusText.innerHTML = `⏹️ <span class="text-blue-600 font-bold">Starting quiz with ${newQuestions.length} questions...</span>`;
+                      }
+                      
+                      // Brief pause to show the message
+                      await new Promise(resolve => setTimeout(resolve, 800));
+                      
+                      // Mark questions as used and start quiz
+                      markQuestionsAsUsed(newQuestions);
+                      setQuizSession({
+                        questions: newQuestions,
+                        currentIndex: 0,
+                        startTime: new Date(),
+                        isActive: true
+                      });
+                      setQuizMode('quiz');
+                    } else if (newQuestions.length === 10) {
                       // Show final success message
                       const statusText = document.getElementById('status-text');
                       if (statusText) {
@@ -616,7 +648,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                         isActive: true
                       });
                       setQuizMode('quiz');
-                    } else {
+                    } else if (newQuestions.length > 0) {
                       // Show partial success message
                       const statusText = document.getElementById('status-text');
                       if (statusText) {
@@ -625,6 +657,16 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                       
                       setTimeout(() => {
                         alert(`Only ${newQuestions.length} questions were generated. Please try again to get a full 10-question quiz.`);
+                      }, 1000);
+                    } else {
+                      // No questions generated at all
+                      const statusText = document.getElementById('status-text');
+                      if (statusText) {
+                        statusText.innerHTML = `❌ <span class="text-red-600 font-bold">Failed to generate questions</span>`;
+                      }
+                      
+                      setTimeout(() => {
+                        alert('Failed to generate AI questions. Please try again.');
                       }, 1000);
                     }
                   } catch (error: any) {
@@ -639,6 +681,36 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                 <div className="flex items-center justify-center space-x-2">
                   <span className="text-lg">🤖</span>
                   <span>Generate 10 New AI Questions</span>
+                  <span className="text-sm opacity-75">→</span>
+                </div>
+              </button>
+              
+              {/* 10 Hard Random Button */}
+              <button
+                type="button"
+                className="w-full px-6 py-3 rounded-xl border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 font-semibold hover:from-orange-100 hover:to-amber-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                onClick={() => {
+                  // Find all hard questions from all domains
+                  const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
+                  if (hardQuestions.length < 10) {
+                    alert('Not enough hard questions available.');
+                    return;
+                  }
+                  // Shuffle and pick 10
+                  const shuffled = [...hardQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
+                  markQuestionsAsUsed(shuffled);
+                  setQuizSession({
+                    questions: shuffled,
+                    currentIndex: 0,
+                    startTime: new Date(),
+                    isActive: true
+                  });
+                  setQuizMode('quiz');
+                }}
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <span className="text-lg">🌶️</span>
+                  <span>10 Hard Random (All Domains)</span>
                   <span className="text-sm opacity-75">→</span>
                 </div>
               </button>
@@ -711,15 +783,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
             )}
           </div>
 
-          {/* Start Quiz Button */}
-          <button
-            onClick={generateQuiz}
-            disabled={filteredQuestions.length === 0}
-            className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-          >
-            <Play className="w-5 h-5" />
-            <span>Start Quiz</span>
-          </button>
+
 
           {/* Start Quiz from Bookmarks Button */}
           <button
