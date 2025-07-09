@@ -470,153 +470,179 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
             </button>
             
             {/* Generate 10 New and Start Quiz Button */}
-            <button
-              type="button"
-              className="mt-2 px-4 py-2 rounded-lg border-2 border-green-500 bg-green-50 text-green-700 font-semibold hover:bg-green-100 transition-colors"
-              onClick={async (event) => {
-                // Check if user has active subscription for AI features
-                if (!hasActiveSubscription) {
-                  alert('AI question generation requires an active subscription. Please upgrade to use this feature.');
-                  return;
-                }
+            <div className="mt-4 space-y-3">
+              <button
+                type="button"
+                className="w-full px-6 py-3 rounded-xl border-2 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 font-semibold hover:from-green-100 hover:to-emerald-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                onClick={async (event) => {
+                  // Check if user has active subscription for AI features
+                  if (!hasActiveSubscription) {
+                    alert('AI question generation requires an active subscription. Please upgrade to use this feature.');
+                    return;
+                  }
 
-                // Generate 10 new AI questions
-                const newQuestions = [];
-                const existingTerms = availableQuestions.map(q => q.tags).flat();
-                
-                // Show loading state
-                const button = event.target as HTMLButtonElement;
-                const originalText = button.textContent;
-                button.textContent = '🤖 Starting AI generation...';
-                button.disabled = true;
-                
-                try {
+                  // Generate 10 new AI questions
+                  const newQuestions = [];
+                  const existingTerms = availableQuestions.map(q => q.tags).flat();
                   
-                  let attempts = 0;
-                  const maxAttempts = 20; // Allow up to 20 attempts to get 10 questions
+                  // Create loading overlay
+                  const button = event.target as HTMLButtonElement;
+                  const buttonContainer = button.parentElement;
                   
-                  while (newQuestions.length < 10 && attempts < maxAttempts) {
-                    attempts++;
-                    try {
-                      // Update progress
-                      button.textContent = `🧠 Generating question ${newQuestions.length + 1}/10 (attempt ${attempts})...`;
-                      
-                      // Generate a random topic for variety
-                      const topics = [
-                        'network security', 'access control', 'risk management', 
-                        'incident response', 'cryptography', 'security architecture',
-                        'compliance', 'business continuity', 'vulnerability management',
-                        'identity management', 'data protection', 'security operations'
-                      ];
-                      const randomTopic = topics[Math.floor(Math.random() * topics.length)];
-                      
-                      // Generate question with AI
-                      const response = await generateAIQuestion(
-                        randomTopic,
-                        {
-                          domain: 'Security and Risk Management', // Default domain, AI will adjust
-                          difficulty: 'Medium',
-                          questionType: 'scenario-based',
-                          scenarioType: 'technical',
-                          topic: randomTopic,
-                          includeDistractors: true,
-                          focusArea: ''
-                        },
-                        existingTerms,
-                        true // isBulkRequest
-                      );
-                      
-                      if (response.question) {
-                        const newQuestion: Question = {
-                          ...response.question,
-                          id: `ai-generated-${Date.now()}-${newQuestions.length}`,
-                          createdBy: 'ai',
-                          isActive: true,
-                          createdAt: new Date(),
-                          tags: [...response.question.tags, 'ai-generated']
-                        };
-                        newQuestions.push(newQuestion);
+                  // Create loading overlay
+                  const loadingOverlay = document.createElement('div');
+                  loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                  loadingOverlay.innerHTML = `
+                    <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+                      <div class="text-center">
+                        <div class="mb-4">
+                          <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center animate-pulse">
+                            <span class="text-2xl">🤖</span>
+                          </div>
+                          <h3 class="text-xl font-bold text-gray-800 mb-2">AI Question Generation</h3>
+                          <p class="text-gray-600 text-sm">Creating your personalized quiz...</p>
+                        </div>
                         
-                        // Show success feedback with animation
-                        button.textContent = `✅ Question ${newQuestions.length} created!`;
-                        button.classList.add('animate-pulse', 'bg-green-100', 'text-green-800', 'scale-105');
+                        <div class="mb-6">
+                          <div class="flex justify-between text-sm text-gray-600 mb-2">
+                            <span>Progress</span>
+                            <span id="progress-text">0/10</span>
+                          </div>
+                          <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                          </div>
+                        </div>
                         
-                        // Add a small bounce effect
-                        button.style.transform = 'scale(1.05)';
-                        setTimeout(() => {
-                          button.style.transform = 'scale(1)';
-                        }, 150);
+                        <div id="status-text" class="text-sm text-gray-700 font-medium">
+                          Initializing AI...
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                  
+                  document.body.appendChild(loadingOverlay);
+                  
+                  try {
+                    let attempts = 0;
+                    const maxAttempts = 25; // Allow up to 25 attempts to get 10 questions
+                    
+                    while (newQuestions.length < 10 && attempts < maxAttempts) {
+                      attempts++;
+                      
+                      try {
+                        // Update progress
+                        const progressText = document.getElementById('progress-text');
+                        const progressBar = document.getElementById('progress-bar');
+                        const statusText = document.getElementById('status-text');
                         
-                        // Brief pause to show success
+                        if (progressText && progressBar && statusText) {
+                          progressText.textContent = `${newQuestions.length}/10`;
+                          progressBar.style.width = `${(newQuestions.length / 10) * 100}%`;
+                          statusText.textContent = `🧠 Generating question ${newQuestions.length + 1}...`;
+                        }
+                        
+                        // Generate a random topic for variety
+                        const topics = [
+                          'network security', 'access control', 'risk management', 
+                          'incident response', 'cryptography', 'security architecture',
+                          'compliance', 'business continuity', 'vulnerability management',
+                          'identity management', 'data protection', 'security operations'
+                        ];
+                        const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+                        
+                        // Generate question with AI
+                        const response = await generateAIQuestion(
+                          randomTopic,
+                          {
+                            domain: 'Security and Risk Management',
+                            difficulty: 'Medium',
+                            questionType: 'scenario-based',
+                            scenarioType: 'technical',
+                            topic: randomTopic,
+                            includeDistractors: true,
+                            focusArea: ''
+                          },
+                          existingTerms,
+                          true
+                        );
+                        
+                        if (response.question) {
+                          const newQuestion: Question = {
+                            ...response.question,
+                            id: `ai-generated-${Date.now()}-${newQuestions.length}`,
+                            createdBy: 'ai',
+                            isActive: true,
+                            createdAt: new Date(),
+                            tags: [...response.question.tags, 'ai-generated']
+                          };
+                          newQuestions.push(newQuestion);
+                          
+                          // Show success feedback
+                          if (statusText) {
+                            statusText.innerHTML = `✅ <span class="text-green-600 font-bold">Question ${newQuestions.length} created!</span>`;
+                            statusText.classList.add('animate-pulse');
+                            setTimeout(() => statusText.classList.remove('animate-pulse'), 500);
+                          }
+                          
+                          // Brief pause to show success
+                          await new Promise(resolve => setTimeout(resolve, 400));
+                        }
+                        
+                        // Add delay between requests
                         await new Promise(resolve => setTimeout(resolve, 300));
-                        
-                        // Remove animation classes
-                        button.classList.remove('animate-pulse', 'bg-green-100', 'text-green-800', 'scale-105');
-                      } else {
-                        // Show error feedback for failed generation
-                        button.textContent = `💥 Attempt ${attempts} failed`;
-                        button.classList.add('bg-red-100', 'text-red-800');
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                        button.classList.remove('bg-red-100', 'text-red-800');
+                      } catch (error: any) {
+                        console.error(`Error generating question (attempt ${attempts}):`, error);
+                        // Silently continue - no error feedback shown to user
+                      }
+                    }
+                    
+                    if (newQuestions.length === 10) {
+                      // Show final success message
+                      const statusText = document.getElementById('status-text');
+                      if (statusText) {
+                        statusText.innerHTML = `🎉 <span class="text-green-600 font-bold">All 10 questions ready!</span>`;
+                        statusText.classList.add('animate-pulse');
                       }
                       
-                      // Add delay between requests
-                      await new Promise(resolve => setTimeout(resolve, 500));
-                    } catch (error: any) {
-                      console.error(`Error generating question (attempt ${attempts}):`, error);
-                      // Show error feedback
-                      button.textContent = `💥 Attempt ${attempts} failed`;
-                      button.classList.add('bg-red-100', 'text-red-800');
-                      await new Promise(resolve => setTimeout(resolve, 500));
-                      button.classList.remove('bg-red-100', 'text-red-800');
+                      // Brief pause to show completion
+                      await new Promise(resolve => setTimeout(resolve, 1000));
+                      
+                      // Mark questions as used and start quiz
+                      markQuestionsAsUsed(newQuestions);
+                      setQuizSession({
+                        questions: newQuestions,
+                        currentIndex: 0,
+                        startTime: new Date(),
+                        isActive: true
+                      });
+                      setQuizMode('quiz');
+                    } else {
+                      // Show partial success message
+                      const statusText = document.getElementById('status-text');
+                      if (statusText) {
+                        statusText.innerHTML = `⚠️ <span class="text-yellow-600 font-bold">Only ${newQuestions.length}/10 questions generated</span>`;
+                      }
+                      
+                      setTimeout(() => {
+                        alert(`Only ${newQuestions.length} questions were generated. Please try again to get a full 10-question quiz.`);
+                      }, 1000);
                     }
+                  } catch (error: any) {
+                    console.error('Error generating AI questions:', error);
+                    alert('Failed to generate AI questions. Please try again.');
+                  } finally {
+                    // Remove loading overlay
+                    document.body.removeChild(loadingOverlay);
                   }
-                  
-                  if (newQuestions.length === 10) {
-                    // Show final success message
-                    button.textContent = `🎉 All 10 questions ready! Starting quiz...`;
-                    button.classList.add('bg-green-100', 'text-green-800', 'animate-pulse');
-                    
-                    // Brief pause to show completion
-                    await new Promise(resolve => setTimeout(resolve, 800));
-                    
-                    // Mark questions as used and start quiz
-                    markQuestionsAsUsed(newQuestions);
-                    setQuizSession({
-                      questions: newQuestions,
-                      currentIndex: 0,
-                      startTime: new Date(),
-                      isActive: true
-                    });
-                    setQuizMode('quiz');
-                  } else if (newQuestions.length > 0) {
-                    // Partial success - show what we got
-                    button.textContent = `⚠️ Only ${newQuestions.length}/10 questions generated`;
-                    button.classList.add('bg-yellow-100', 'text-yellow-800');
-                    setTimeout(() => {
-                      alert(`Only ${newQuestions.length} questions were generated. Please try again to get a full 10-question quiz.`);
-                    }, 1000);
-                  } else {
-                    button.textContent = '❌ No questions generated';
-                    button.classList.add('bg-red-100', 'text-red-800');
-                    setTimeout(() => {
-                      alert('Failed to generate AI questions. Please try again.');
-                    }, 1000);
-                  }
-                } catch (error: any) {
-                  console.error('Error generating AI questions:', error);
-                  alert('Failed to generate AI questions. Please try again.');
-                } finally {
-                  // Restore button state
-                  if (button) {
-                    button.textContent = originalText;
-                    button.disabled = false;
-                  }
-                }
-              }}
-            >
-              Generate 10 New and Start Quiz
-            </button>
+                }}
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <span className="text-lg">🤖</span>
+                  <span>Generate 10 New AI Questions</span>
+                  <span className="text-sm opacity-75">→</span>
+                </div>
+              </button>
+            </div>
           </div>
 
           {/* Tag Filter */}
