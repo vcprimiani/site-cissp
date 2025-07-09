@@ -93,18 +93,22 @@ Keep your answer:
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Simple Header */}
-      <div className="text-center">
-        <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Brain className="w-8 h-8 text-white" />
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* 1. Hero Header */}
+      <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-100 mb-8">
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+            <Brain className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Casey: Cybersecurity Study Expert</h2>
+            <p className="text-gray-600">Your friendly AI mentor for all things security</p>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Ask Casey</h1>
-        <p className="text-gray-600">Your friendly cybersecurity helper</p>
       </div>
 
       {/* Main Chat Area */}
-      <div className="bg-white rounded-2xl shadow-lg p-6">
+      <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
         {/* Response Display */}
         {response && (
           <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
@@ -115,13 +119,12 @@ Keep your answer:
             <p className="text-gray-800 leading-relaxed">{response}</p>
           </div>
         )}
-
-        {/* Simple Input */}
+        {/* Input */}
         <div className="flex space-x-3">
           <input
             type="text"
             placeholder="Ask Casey anything about cybersecurity..."
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm shadow-sm"
             onKeyPress={(e) => {
               if (e.key === 'Enter' && e.currentTarget.value.trim()) {
                 handleAskCasey(e.currentTarget.value.trim());
@@ -138,7 +141,7 @@ Keep your answer:
               }
             }}
             disabled={loading}
-            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 font-medium flex items-center space-x-2"
+            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl"
           >
             {loading ? (
               <Loader className="w-4 h-4 animate-spin" />
@@ -150,8 +153,8 @@ Keep your answer:
         </div>
       </div>
 
-      {/* Dynamic Quick Questions */}
-      <div className="bg-white rounded-2xl shadow-lg p-6">
+      {/* Quick Questions/Topics */}
+      <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
         <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
           <Sparkles className="w-5 h-5 text-purple-600" />
           <span>Quick Feedback</span>
@@ -159,17 +162,16 @@ Keep your answer:
             <span className="text-sm text-gray-500">(Includes your mistakes)</span>
           )}
         </h2>
-        
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {dynamicTopics.map((topic, index) => (
             <button
               key={index}
               onClick={() => handleAskCasey(topic.question)}
               disabled={loading}
-              className={`p-3 text-left rounded-xl transition-all disabled:opacity-50 text-sm font-medium ${
+              className={`p-3 text-left rounded-xl transition-all duration-200 disabled:opacity-50 text-sm font-medium shadow-sm hover:shadow-md border-2 ${
                 topic.isIncorrect 
-                  ? 'bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-300 text-red-700 hover:text-red-800'
-                  : 'bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 text-gray-700 hover:text-blue-700'
+                  ? 'bg-red-50 hover:bg-red-100 border-red-200 hover:border-red-300 text-red-700 hover:text-red-800'
+                  : 'bg-gray-50 hover:bg-blue-50 border-gray-200 hover:border-blue-300 text-gray-700 hover:text-blue-700'
               }`}
             >
               {topic.displayText}
@@ -178,27 +180,26 @@ Keep your answer:
         </div>
       </div>
 
-      {/* Incorrect Questions Section (if any) */}
+      {/* Review Mistakes Section */}
       {incorrectQuestions.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
             <CheckCircle className="w-5 h-5 text-green-600" />
             <span>Review All Mistakes ({incorrectQuestions.length})</span>
           </h2>
-          
           <div className="space-y-3">
             {incorrectQuestions.map((question, index) => (
               <button
                 key={index}
                 onClick={() => handleIncorrectQuestion(question)}
                 disabled={loading}
-                className="w-full p-4 text-left bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-300 rounded-xl transition-all disabled:opacity-50"
+                className="w-full p-4 text-left bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-300 rounded-xl transition-all duration-200 disabled:opacity-50 shadow-sm hover:shadow-md"
               >
                 <p className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">
                   {question.question}
                 </p>
                 <p className="text-xs text-red-600">
-                  Correct: {question.options[question.correctAnswer]}
+                  {question.options && question.options[question.correctAnswer] ? `Correct: ${question.options[question.correctAnswer]}` : ''}
                 </p>
               </button>
             ))}
@@ -206,27 +207,78 @@ Keep your answer:
         </div>
       )}
 
-      {/* Getting Started */}
-      {incorrectQuestions.length === 0 && (
-        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 border border-green-200">
-          <div className="text-center">
-            <Brain className="w-12 h-12 text-green-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to Learn!</h3>
-            <p className="text-gray-700 mb-4">
-              Take a quiz to get questions for Casey to explain, or ask Casey anything about cybersecurity.
-            </p>
-            <div className="bg-white rounded-xl p-4 text-left max-w-md mx-auto">
-              <h4 className="font-medium text-gray-900 mb-2">💡 How it works:</h4>
-              <ul className="text-gray-700 text-sm space-y-1">
-                <li>• Take quizzes to find questions for Casey</li>
-                <li>• Click any question above to ask Casey</li>
-                <li>• Casey explains things in simple terms</li>
-                <li>• Learn from your mistakes</li>
-              </ul>
+      {/* Tips/Features Section */}
+      <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-blue-200">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-white text-lg">💡</span>
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">Casey Tips & Features</h3>
+            <p className="text-gray-600">Get the most out of your AI study assistant</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-blue-600 text-xs">1</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Simple Explanations</h4>
+                <p className="text-sm text-gray-600">Casey breaks down complex topics into easy-to-understand answers.</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-purple-600 text-xs">2</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Quick Feedback</h4>
+                <p className="text-sm text-gray-600">Get instant answers to your cybersecurity questions and mistakes.</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-green-600 text-xs">3</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Personalized Topics</h4>
+                <p className="text-sm text-gray-600">Casey adapts to your mistakes and interests for targeted learning.</p>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-orange-600 text-xs">4</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Mistake Review</h4>
+                <p className="text-sm text-gray-600">Easily revisit and learn from your past incorrect answers.</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-indigo-600 text-xs">5</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Always Available</h4>
+                <p className="text-sm text-gray-600">Casey is ready to help 24/7—ask anything, anytime.</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-pink-600 text-xs">6</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Encouraging & Friendly</h4>
+                <p className="text-sm text-gray-600">Casey is always positive, supportive, and focused on your growth.</p>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

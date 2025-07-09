@@ -556,7 +556,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                   
                   try {
                     let attempts = 0;
-                    const maxAttempts = 25; // Allow up to 25 attempts to get 10 questions
+                    const maxAttempts = 1000; // Set very high so it never gives up unless cancelled
                     
                     while (newQuestions.length < 10 && attempts < maxAttempts && !isCancelled) {
                       attempts++;
