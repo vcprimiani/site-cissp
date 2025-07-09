@@ -206,21 +206,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
 
   const testimonials = [
     {
-      name: 'Sarah Chen',
+      name: 'Alexandra Thompson',
       role: 'Security Architect',
       company: 'Meridian Technologies',
       content: 'Casey helped me understand complex concepts I was struggling with. The explanations are incredibly detailed and the questions feel just like the real exam. Highly recommend for CISSP study!',
       rating: 5
     },
     {
-      name: 'Michael Rodriguez',
+      name: 'Marcus Williams',
       role: 'IT Security Manager',
       company: 'Pinnacle Financial Group',
       content: 'Best CISSP study tool I\'ve used. The AI question generator creates realistic scenarios, and Casey\'s explanations are game-changing. It\'s like having a personal tutor available 24/7.',
       rating: 5
     },
     {
-      name: 'Jennifer Park',
+      name: 'Priya Patel',
       role: 'Cybersecurity Consultant',
       company: 'Apex Security Solutions',
       content: 'The manager\'s perspective feature is brilliant for leadership questions. The keyword highlighting and bookmark system help me focus on my weak areas. Great study platform!',
