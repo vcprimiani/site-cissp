@@ -215,6 +215,22 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   if (!hasActiveSubscription && !subscriptionLoading) {
     // Unpaid user: show daily quiz only
     const dailyQuizQuestions = getLocalDailyQuizQuestions(questions);
+
+    // Check for persisted results
+    const storedResults = localStorage.getItem('cissp-daily-quiz-results');
+    if (storedResults) {
+      const quizResults = JSON.parse(storedResults);
+      return (
+        <QuizResults
+          results={quizResults}
+          onRetakeQuiz={exitQuiz}
+          onBackToSetup={exitQuiz}
+          isDailyQuiz={true}
+          isUnsubscribed={true}
+        />
+      );
+    }
+
     if (loading) {
       return (
         <div className="bg-white rounded-xl shadow-lg p-8 text-center">
