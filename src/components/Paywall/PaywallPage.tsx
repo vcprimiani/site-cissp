@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Crown, CheckCircle, ArrowRight, Lock, Zap, Shield, Target, Brain, Database, Loader, Tag } from 'lucide-react';
+import { Crown, CheckCircle, ArrowRight, Lock, Zap, Shield, Target, Brain, Database, Loader, Tag, BarChart2 } from 'lucide-react';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
 import { useAuth } from '../../hooks/useAuth';
@@ -88,36 +88,36 @@ export const PaywallPage: React.FC = () => {
   const features = [
     {
       icon: Brain,
-      title: 'Unlimited AI Question Generation',
-      description: 'Generate unlimited CISSP practice questions with advanced AI customization',
+      title: 'AI-Powered Practice',
+      description: 'Endless CISSP questions generated and explained by advanced AI—never run out of fresh material.',
       color: 'text-purple-600',
       bgColor: 'bg-purple-50'
     },
     {
-      icon: Database,
-      title: 'Complete Question Bank Access',
-      description: 'Full access to create, manage, and organize your CISSP question database',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
-    },
-    {
       icon: Target,
-      title: 'Interactive Quiz Mode',
-      description: 'Take unlimited quizzes with detailed scoring and progress tracking',
+      title: 'Smart Quiz Mode',
+      description: 'Unlimited quizzes with instant feedback, detailed results, and progress tracking.',
       color: 'text-green-600',
       bgColor: 'bg-green-50'
     },
     {
+      icon: BarChart2,
+      title: 'Track Your Progress',
+      description: 'Visualize your improvement over time with beautiful charts and performance analytics.',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50'
+    },
+    {
       icon: Shield,
-      title: 'All 8 CISSP Domains',
-      description: 'Comprehensive coverage of all CISSP certification domains',
+      title: 'Full Domain Coverage',
+      description: 'Master all 8 CISSP domains with expertly crafted questions and explanations.',
       color: 'text-indigo-600',
       bgColor: 'bg-indigo-50'
     },
     {
       icon: Zap,
-      title: 'Advanced Customization',
-      description: 'Fine-tune question difficulty, types, and focus areas',
+      title: 'Personalized Study Tools',
+      description: 'Bookmark, review, and focus on your weak areas for efficient, targeted prep.',
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-50'
     }
@@ -161,33 +161,6 @@ export const PaywallPage: React.FC = () => {
             </p>
           </div>
         </div>
-
-        {/* Sample Question Card */}
-        {randomQuestion && (
-          <div className="mb-12 bg-white rounded-2xl shadow-xl p-8 border-2 border-purple-200 max-w-7xl mx-auto">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Try a Sample Question!
-              </h2>
-              <p className="text-gray-600">
-                Here's a taste of the high-quality questions you'll get with a subscription.
-              </p>
-              {keywordsLoading && (
-                <div className="flex items-center justify-center space-x-2 mt-2">
-                  <Loader className="w-4 h-4 animate-spin text-purple-600" />
-                  <span className="text-sm text-purple-600">Analyzing keywords...</span>
-                </div>
-              )}
-            </div>
-            <QuestionCard
-              question={randomQuestion}
-              isExpanded={true}
-              showActions={false}
-              className="pointer-events-none"
-              keywords={questionKeywords}
-            />
-          </div>
-        )}
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
