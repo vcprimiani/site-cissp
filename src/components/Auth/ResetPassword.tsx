@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 
 const ResetPassword: React.FC = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get('code');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+  }, []);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +32,8 @@ const ResetPassword: React.FC = () => {
     else setStatus('Password updated! You can now log in.');
   };
 
-  if (!code) {
-    return <div className="max-w-md mx-auto mt-12 p-6 bg-white rounded-xl shadow">Invalid or expired reset link.</div>;
+  if (!isAuthenticated) {
+    return <div className="max-w-md mx-auto mt-12 p-6 bg-white rounded-xl shadow">Invalid or expired reset link, or session expired. Please request a new password reset.</div>;
   }
 
   return (
