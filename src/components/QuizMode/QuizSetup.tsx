@@ -11,6 +11,7 @@ import { useBookmarks } from '../../hooks/useBookmarks';
 import { getLocalDailyQuizQuestions } from '../../services/dailyQuiz';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
+import { generateAIQuestion } from '../../services/openai';
 
 interface QuizSetupProps {
   onQuizComplete?: (incorrectQuestions: Question[]) => void;
@@ -466,6 +467,106 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
               }}
             >
               10 Hard Random (All Domains)
+            </button>
+            
+            {/* Generate 10 New and Start Quiz Button */}
+            <button
+              type="button"
+              className="mt-2 px-4 py-2 rounded-lg border-2 border-green-500 bg-green-50 text-green-700 font-semibold hover:bg-green-100 transition-colors"
+              onClick={async (event) => {
+                // Check if user has active subscription for AI features
+                if (!hasActiveSubscription) {
+                  alert('AI question generation requires an active subscription. Please upgrade to use this feature.');
+                  return;
+                }
+
+                // Generate 10 new AI questions
+                const newQuestions = [];
+                const existingTerms = availableQuestions.map(q => q.tags).flat();
+                
+                // Show loading state
+                const button = event.target as HTMLButtonElement;
+                const originalText = button.textContent;
+                button.textContent = 'Generating...';
+                button.disabled = true;
+                
+                try {
+                  
+                  for (let i = 0; i < 10; i++) {
+                    try {
+                      // Generate a random topic for variety
+                      const topics = [
+                        'network security', 'access control', 'risk management', 
+                        'incident response', 'cryptography', 'security architecture',
+                        'compliance', 'business continuity', 'vulnerability management',
+                        'identity management', 'data protection', 'security operations'
+                      ];
+                      const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+                      
+                      // Generate question with AI
+                      const response = await generateAIQuestion(
+                        randomTopic,
+                        {
+                          domain: 'Security and Risk Management', // Default domain, AI will adjust
+                          difficulty: 'Medium',
+                          questionType: 'scenario-based',
+                          scenarioType: 'technical',
+                          topic: randomTopic,
+                          includeDistractors: true,
+                          focusArea: ''
+                        },
+                        existingTerms,
+                        true // isBulkRequest
+                      );
+                      
+                      if (response.question) {
+                        const newQuestion = {
+                          ...response.question,
+                          id: `ai-generated-${Date.now()}-${i}`,
+                          createdBy: 'ai',
+                          isActive: true,
+                          createdAt: new Date(),
+                          tags: [...response.question.tags, 'ai-generated']
+                        };
+                        newQuestions.push(newQuestion);
+                      }
+                      
+                      // Add delay between requests
+                      if (i < 9) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                      }
+                    } catch (error: any) {
+                      console.error(`Error generating question ${i + 1}:`, error);
+                      // Continue with remaining questions even if one fails
+                    }
+                  }
+                  
+                  if (newQuestions.length > 0) {
+                    // Mark questions as used and start quiz
+                    markQuestionsAsUsed(newQuestions);
+                    setQuizSession({
+                      questions: newQuestions,
+                      currentIndex: 0,
+                      startTime: new Date(),
+                      isActive: true
+                    });
+                    setQuizMode('quiz');
+                  } else {
+                    alert('Failed to generate AI questions. Please try again.');
+                  }
+                } catch (error: any) {
+                  console.error('Error generating AI questions:', error);
+                  alert('Failed to generate AI questions. Please try again.');
+                } finally {
+                  // Restore button state
+                  if (button) {
+                    button.textContent = originalText;
+                    button.disabled = false;
+                  }
+                }
+              }}
+            >
+              Generate 10 New and Start Quiz
             </button>
           </div>
 
