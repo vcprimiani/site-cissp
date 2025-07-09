@@ -8,6 +8,7 @@ import { useQuizPersistence } from '../../hooks/useQuizPersistence';
 
 interface QuizProps {
   questions: Question[];
+  initialIndex?: number;
   onComplete: (results: QuizResults) => void;
   onExit: () => void;
 }
@@ -24,11 +25,13 @@ interface QuizResults {
   }[];
 }
 
-export const Quiz: React.FC<QuizProps> = ({ questions, onComplete, onExit }) => {
+export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete, onExit }) => {
   const { persistedState, saveQuizState, clearPersistedState, hasPersistedQuiz } = useQuizPersistence();
   
-  // Initialize state from persisted data or defaults
-  const [currentIndex, setCurrentIndex] = useState(persistedState?.currentIndex || 0);
+  // Initialize state from initialIndex, persistedState, or 0
+  const [currentIndex, setCurrentIndex] = useState(
+    typeof initialIndex === 'number' ? initialIndex : (persistedState?.currentIndex || 0)
+  );
   const [userAnswers, setUserAnswers] = useState<(number | null)[]>(
     persistedState?.userAnswers || new Array(questions.length).fill(null)
   );

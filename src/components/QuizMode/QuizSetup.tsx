@@ -261,6 +261,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     return (
       <Quiz
         questions={quizSession.questions}
+        initialIndex={quizSession.currentIndex}
         onComplete={handleQuizComplete}
         onExit={exitQuiz}
       />
