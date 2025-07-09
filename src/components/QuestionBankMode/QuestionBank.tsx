@@ -140,22 +140,67 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
-          <div className="flex items-center space-x-3">
-            <Database className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-            <div>
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Question Bank</h2>
-              <p className="text-xs sm:text-sm text-gray-600">
-                Manage and organize your CISSP practice questions (newest first)
-              </p>
-            </div>
+    <div className="max-w-6xl mx-auto space-y-8">
+      {/* Hero Header */}
+      <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-blue-100 mb-8">
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
+            <Database className="w-6 h-6 text-white" />
           </div>
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Question Bank</h2>
+            <p className="text-gray-600">Manage and organize your CISSP practice questions</p>
+          </div>
+        </div>
+        {/* Quick Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-xs font-medium text-gray-500">Total</span>
+            </div>
+            <div className="text-2xl font-bold text-blue-600">{totalQuestions}</div>
+          </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-xs font-medium text-gray-500">Active</span>
+            </div>
+            <div className="text-2xl font-bold text-green-600">{activeQuestions}</div>
+          </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+              <span className="text-xs font-medium text-gray-500">AI-Generated</span>
+            </div>
+            <div className="text-2xl font-bold text-purple-600">{aiGeneratedQuestions}</div>
+          </div>
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+              <span className="text-xs font-medium text-gray-500">Manual</span>
+            </div>
+            <div className="text-2xl font-bold text-orange-600">{manualQuestions}</div>
+          </div>
+        </div>
+        {/* Per-domain stats (optional, can be a collapsible grid) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {domainStats.map(ds => (
+            <div key={ds.domain} className="bg-gray-50 rounded-lg p-2 text-xs text-gray-700 flex items-center space-x-2">
+              <span className="font-semibold">{ds.count}</span>
+              <span>{ds.domain}</span>
+              <span className="ml-auto text-gray-400">{ds.percent}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Actions & Paywall */}
+      <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+          <div className="flex gap-3">
             <button
-              className={`inline-flex items-center px-3 py-2 rounded-lg border text-sm font-medium shadow-sm transition-colors ${showBookmarksOnly ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'} ${!hasActiveSubscription ? 'opacity-60 cursor-not-allowed' : ''}`}
+              className={`inline-flex items-center px-4 py-2 rounded-xl border-2 text-sm font-semibold shadow-sm transition-all duration-200 ${showBookmarksOnly ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'} ${!hasActiveSubscription ? 'opacity-60 cursor-not-allowed' : ''}`}
               onClick={() => hasActiveSubscription ? setShowBookmarksOnly(v => !v) : null}
               aria-pressed={showBookmarksOnly}
               disabled={!hasActiveSubscription}
@@ -169,154 +214,188 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
               {!hasActiveSubscription && <Lock className="w-4 h-4 ml-2 text-gray-400" />}
             </button>
             <button
-              className="inline-flex items-center px-3 py-2 rounded-lg border text-sm font-medium shadow-sm bg-yellow-100 text-yellow-800 border-yellow-300 cursor-not-allowed opacity-60"
-              disabled
-              title="Add Question is a premium feature. Subscribe to unlock."
+              className="inline-flex items-center px-4 py-2 rounded-xl border-2 text-sm font-semibold shadow-sm bg-green-100 text-green-800 border-green-300 hover:bg-green-200 transition-all duration-200"
+              onClick={() => setShowAddForm(true)}
+              disabled={!hasActiveSubscription}
             >
               <Plus className="w-5 h-5 mr-1" />
               Add Question
-              {!hasActiveSubscription && <Lock className="w-4 h-4 ml-2 text-yellow-500" />}
+              {!hasActiveSubscription && <Lock className="w-4 h-4 ml-2 text-green-500" />}
             </button>
           </div>
-        </div>
-        {/* Paywall Banner for Unsubscribed Users */}
-        {!hasActiveSubscription && (
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-4 mb-6 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Crown className="w-8 h-8 text-blue-600" />
-              <div>
-                <h3 className="text-base font-semibold text-gray-900">Unlock Full Question Bank Features</h3>
-                <p className="text-gray-600 text-sm">Subscribe to add, edit, delete, and bookmark questions. Organize your study and track your progress.</p>
+          {/* Paywall Banner for Unsubscribed Users */}
+          {!hasActiveSubscription && (
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-4 flex items-center justify-between w-full md:w-auto">
+              <div className="flex items-center space-x-3">
+                <Crown className="w-8 h-8 text-blue-600" />
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900">Unlock Full Question Bank Features</h3>
+                  <p className="text-gray-600 text-sm">Subscribe to add, edit, delete, and bookmark questions. Organize your study and track your progress.</p>
+                </div>
               </div>
+              <button
+                onClick={async () => {
+                  const product = stripeProducts[0];
+                  await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
+                }}
+                className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
+              >
+                Upgrade Now
+              </button>
             </div>
-            <button
-              onClick={async () => {
-                const product = stripeProducts[0];
-                await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
-              }}
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
-            >
-              Upgrade Now
-            </button>
-          </div>
-        )}
-
-        {/* Question Bank Statistics */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-blue-600">{totalQuestions}</div>
-              <div className="text-sm text-gray-600">Total Questions</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-green-600">{activeQuestions}</div>
-              <div className="text-sm text-gray-600">Active Questions</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-purple-600">{aiGeneratedQuestions}</div>
-              <div className="text-sm text-gray-600">AI Generated</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-orange-600">{manualQuestions}</div>
-              <div className="text-sm text-gray-600">Manual Added</div>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Filters */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        {/* Search & Filter Controls */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div className="flex items-center bg-gray-50 rounded-xl px-4 py-2 border border-gray-200 shadow-sm w-full md:w-auto">
+            <Search className="w-5 h-5 text-gray-400 mr-2" />
             <input
               type="text"
-              placeholder="Search questions..."
+              placeholder="Search questions or tags..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              onChange={e => setSearchTerm(e.target.value)}
+              className="bg-transparent outline-none flex-1 text-sm text-gray-700"
             />
           </div>
-          {/* Remove domain dropdown, keep difficulty dropdown and stats */}
-          <select
-            value={filterDifficulty}
-            onChange={(e) => setFilterDifficulty(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-          >
-            <option value="">All Difficulties</option>
-            <option value="Easy">Easy</option>
-            <option value="Medium">Medium</option>
-            <option value="Hard">Hard</option>
-          </select>
-          <div className="text-sm text-gray-600 flex items-center">
-            <Filter className="w-4 h-4 mr-2" />
-            {filteredQuestions.length} of {totalQuestions} questions
+          <div className="flex gap-2">
+            <select
+              value={filterDomain}
+              onChange={e => setFilterDomain(e.target.value)}
+              className="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 bg-white shadow-sm"
+            >
+              <option value="">All Domains</option>
+              {domains.map(domain => (
+                <option key={domain} value={domain}>{domain}</option>
+              ))}
+            </select>
+            <select
+              value={filterDifficulty}
+              onChange={e => setFilterDifficulty(e.target.value)}
+              className="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 bg-white shadow-sm"
+            >
+              <option value="">All Difficulties</option>
+              <option value="Easy">Easy</option>
+              <option value="Medium">Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+            {(filterDomain || filterDifficulty || searchTerm) && (
+              <button
+                onClick={() => { setFilterDomain(''); setFilterDifficulty(''); setSearchTerm(''); }}
+                className="px-4 py-2 rounded-lg border border-gray-200 bg-gray-100 text-gray-700 text-sm hover:bg-gray-200 transition-all duration-200"
+              >
+                Clear Filters
+              </button>
+            )}
           </div>
         </div>
-        {/* Domain Pills Row */}
-        <div className="flex flex-wrap gap-2 mb-4">
+
+        {/* ColorKey Legend */}
+        <div className="mb-6">
           <button
-            className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${!filterDomain ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50'}`}
-            onClick={() => setFilterDomain('')}
+            onClick={() => setShowColorKey(v => !v)}
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-all duration-200 font-medium text-sm mb-2"
           >
-            All Domains <span className="ml-2 text-xs font-normal">{totalQuestions}</span>
+            <BookOpen className="w-5 h-5" />
+            <span>Show Color Key</span>
           </button>
-          {domainStats.map(({ domain, count }) => (
-            <button
-              key={domain}
-              className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors flex items-center space-x-2 ${filterDomain === domain ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50'}`}
-              onClick={() => setFilterDomain(domain)}
-            >
-              <span>{domain}</span>
-              <span className="ml-1 text-xs text-gray-400">({count})</span>
-            </button>
-          ))}
+          {showColorKey && <ColorKey />}
         </div>
-      </div>
 
-      {/* Color Key */}
-      {showColorKey && (
-        <ColorKey className="mb-6" />
-      )}
-
-      {/* Questions List */}
-      <div className="space-y-4">
-        {filteredQuestions.length > 0 ? (
-          filteredQuestions.map(question => (
+        {/* Question List */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredQuestions.map(q => (
             <QuestionCard
-              key={question.id}
-              question={question}
-              isExpanded={expandedQuestions.has(question.id)}
-              onToggleExpanded={() => toggleQuestionExpanded(question.id)}
+              key={q.id}
+              question={q}
+              isExpanded={expandedQuestions.has(q.id)}
+              onToggleExpanded={() => toggleQuestionExpanded(q.id)}
+              onDelete={hasActiveSubscription ? () => onDeleteQuestion(q.id) : undefined}
               showActions={hasActiveSubscription}
               hasActiveSubscription={hasActiveSubscription}
               subscriptionLoading={subscriptionLoading}
             />
-          ))
-        ) : (
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-            <Database className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {totalQuestions === 0 ? 'No Questions Yet' : 'No Questions Match Your Filters'}
-            </h3>
-            <p className="text-gray-600 mb-4 text-sm">
-              {totalQuestions === 0 
-                ? 'Start building your question bank by adding questions manually or using the AI Generator.'
-                : 'Try adjusting your search or filter criteria.'
-              }
-            </p>
-            {totalQuestions === 0 && (
-              <div className="bg-blue-50 rounded-lg p-4 text-left max-w-md mx-auto">
-                <h4 className="font-medium text-blue-900 mb-2">💡 Getting Started:</h4>
-                <ul className="text-blue-800 text-sm space-y-1">
-                  <li>• Use the AI Generator tab to create questions automatically</li>
-                  <li>• Add questions manually using the "Add Question" button</li>
-                  <li>• Click questions to expand and view details</li>
-                  <li>• Use the color key to understand the visual organization</li>
-                  <li>• Questions are automatically saved to your secure database</li>
-                </ul>
-              </div>
-            )}
+          ))}
+          {filteredQuestions.length === 0 && (
+            <div className="col-span-full text-center py-12">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Questions Found</h3>
+              <p className="text-gray-600">Try adjusting your filters or search terms.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Tips/Features Section */}
+      <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-blue-200">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-white text-lg">💡</span>
           </div>
-        )}
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">Question Bank Tips & Features</h3>
+            <p className="text-gray-600">Organize, filter, and master your study questions</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-blue-600 text-xs">1</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Powerful Search</h4>
+                <p className="text-sm text-gray-600">Quickly find questions by keyword, tag, domain, or difficulty.</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-purple-600 text-xs">2</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Bookmark Favorites</h4>
+                <p className="text-sm text-gray-600">Save important questions for quick access and review.</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-green-600 text-xs">3</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">AI-Generated Content</h4>
+                <p className="text-sm text-gray-600">Mix your own questions with AI-generated ones for variety.</p>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-orange-600 text-xs">4</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Domain Coverage</h4>
+                <p className="text-sm text-gray-600">See your strengths and gaps across all CISSP domains.</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-indigo-600 text-xs">5</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Easy Editing</h4>
+                <p className="text-sm text-gray-600">Edit, expand, or remove questions to keep your bank up to date.</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-pink-600 text-xs">6</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Premium Experience</h4>
+                <p className="text-sm text-gray-600">Enjoy a beautiful, fast, and intuitive interface for all your study needs.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Add Question Modal */}
