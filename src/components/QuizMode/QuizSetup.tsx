@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Question } from '../../types';
-import { Target, Play, ArrowLeft, ArrowRight, Clock, X, Settings, Filter, RotateCcw, Calendar, RefreshCw, Bookmark } from 'lucide-react';
+import { Target, Play, ArrowLeft, ArrowRight, Clock, X, Settings, Filter, RotateCcw, Calendar, RefreshCw, Bookmark, Brain } from 'lucide-react';
 import { Quiz } from './Quiz';
 import { QuizResults } from './QuizResults';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
@@ -347,116 +347,143 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
         </div>
       )}
 
-      {/* Header */}
-      <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <Target className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
-          <div>
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Quiz</h2>
-            <p className="text-xs sm:text-sm text-gray-600">
-              Take quizzes from your question bank with scoring and detailed results
-            </p>
+      {/* Premium Quiz Interface */}
+      <div className="max-w-6xl mx-auto space-y-6">
+        
+        {/* Hero Header */}
+        <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-100">
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Target className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Quiz Mode</h2>
+              <p className="text-gray-600">Test your knowledge with personalized quizzes</p>
+            </div>
           </div>
-        </div>
 
-        {/* Session Statistics */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4 text-blue-600" />
-              <span className="font-medium text-blue-900">Current Study Session</span>
-            </div>
-            <button
-              onClick={handleResetSession}
-              className="flex items-center space-x-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Reset Session</span>
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div>
-              <div className="text-base font-semibold text-blue-400">{sessionStats.questionsUsed}</div>
-              <div className="text-xs text-gray-500">Questions Used</div>
-            </div>
-            <div>
-              <div className="text-base font-semibold text-purple-400">{filteredQuestions.length}</div>
-              <div className="text-xs text-gray-500">Available Now</div>
-            </div>
-            <div>
-              <div className="text-base font-semibold text-green-400">{questions.length}</div>
-              <div className="text-xs text-gray-500">Total Questions</div>
-            </div>
-            <div>
-              <div className="text-base font-semibold text-orange-400">
-                {formatSessionDuration(sessionStats.sessionDuration)}
+          {/* Quick Stats Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-xs font-medium text-gray-500">Used Today</span>
               </div>
-              <div className="text-xs text-gray-500">Session Duration</div>
+              <div className="text-2xl font-bold text-blue-600">{sessionStats.questionsUsed}</div>
+            </div>
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <span className="text-xs font-medium text-gray-500">Available</span>
+              </div>
+              <div className="text-2xl font-bold text-purple-600">{filteredQuestions.length}</div>
+            </div>
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-xs font-medium text-gray-500">Total</span>
+              </div>
+              <div className="text-2xl font-bold text-green-600">{questions.length}</div>
+            </div>
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                <span className="text-xs font-medium text-gray-500">Duration</span>
+              </div>
+              <div className="text-2xl font-bold text-orange-600">{formatSessionDuration(sessionStats.sessionDuration)}</div>
             </div>
           </div>
-          
+
+          {/* Session Reset */}
           {sessionStats.questionsUsed > 0 && (
-            <div className="mt-3 text-center">
-              <p className="text-sm text-blue-700">
-                Session started: {sessionStats.sessionStartTime.toLocaleString()}
-              </p>
+            <div className="flex items-center justify-between bg-blue-50 rounded-xl p-4 border border-blue-200">
+              <div className="flex items-center space-x-3">
+                <Calendar className="w-5 h-5 text-blue-600" />
+                <div>
+                  <p className="text-sm font-medium text-blue-900">Active Study Session</p>
+                  <p className="text-xs text-blue-700">Started {sessionStats.sessionStartTime.toLocaleString()}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleResetSession}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium text-sm"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Reset Session</span>
+              </button>
             </div>
           )}
         </div>
 
-        {/* Quiz Configuration */}
-        <div className="space-y-6">
-          {/* Number of Questions and Start Quiz */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Number of Questions
-            </label>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="flex space-x-2">
-                  {[5, 10, 25].map(num => (
-                    <button
-                      key={num}
-                      onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
-                      className={`px-4 py-2 rounded-lg border-2 transition-colors font-medium ${
-                        numberOfQuestions === num
-                          ? 'border-purple-500 bg-purple-50 text-purple-700'
-                          : 'border-gray-300 hover:border-purple-300 text-gray-700'
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  ))}
+        {/* Main Quiz Configuration */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+          
+          {/* Quiz Setup Section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+              <Settings className="w-5 h-5 text-purple-600" />
+              <span>Quiz Configuration</span>
+            </h3>
+            
+            {/* Number of Questions and Start Quiz */}
+            <div className="bg-gray-50 rounded-xl p-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Number of Questions
+              </label>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="flex space-x-2">
+                    {[5, 10, 25].map(num => (
+                      <button
+                        key={num}
+                        onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
+                        className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 font-medium ${
+                          numberOfQuestions === num
+                            ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm'
+                            : 'border-gray-300 hover:border-purple-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-500">or</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max={filteredQuestions.length}
+                      value={numberOfQuestions}
+                      onChange={(e) => setNumberOfQuestions(Math.max(1, Math.min(parseInt(e.target.value) || 1, filteredQuestions.length)))}
+                      className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center"
+                    />
+                    <span className="text-sm text-gray-500">
+                      (Max: {filteredQuestions.length})
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-600">or</span>
-                  <input
-                    type="number"
-                    min="1"
-                    max={filteredQuestions.length}
-                    value={numberOfQuestions}
-                    onChange={(e) => setNumberOfQuestions(Math.max(1, Math.min(parseInt(e.target.value) || 1, filteredQuestions.length)))}
-                    className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center"
-                  />
-                  <span className="text-sm text-gray-600">
-                    (Max: {filteredQuestions.length})
-                  </span>
-                </div>
+                
+                {/* Start Quiz Button */}
+                <button
+                  onClick={generateQuiz}
+                  disabled={filteredQuestions.length === 0}
+                  className="flex items-center justify-center space-x-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                >
+                  <Play className="w-4 h-4" />
+                  <span>Start Quiz</span>
+                </button>
               </div>
-              
-              {/* Start Quiz Button */}
-              <button
-                onClick={generateQuiz}
-                disabled={filteredQuestions.length === 0}
-                className="flex items-center justify-center space-x-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-              >
-                <Play className="w-4 h-4" />
-                <span>Start Quiz</span>
-              </button>
             </div>
-            {/* Generate 10 New and Start Quiz Button */}
-            <div className="mt-4 space-y-3">
+          </div>
+
+          {/* AI Generation Section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+              <Brain className="w-5 h-5 text-green-600" />
+              <span>AI-Powered Generation</span>
+            </h3>
+            
+            <div className="space-y-3">
               <button
                 type="button"
                 className="w-full px-6 py-3 rounded-xl border-2 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 font-semibold hover:from-green-100 hover:to-emerald-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
@@ -717,117 +744,245 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
             </div>
           </div>
 
-          {/* Tag Filter */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <label className="block text-sm font-medium text-gray-700">
-                Filter by Tags (Optional)
-              </label>
-              <button
-                onClick={() => setShowSettings(!showSettings)}
-                className="flex items-center space-x-1 text-sm text-purple-600 hover:text-purple-700"
-              >
-                <Filter className="w-4 h-4" />
-                <span>{selectedTags.length > 0 ? `${selectedTags.length} selected` : 'All tags'}</span>
-              </button>
-            </div>
+          {/* Tag Filter Section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+              <Filter className="w-5 h-5 text-purple-600" />
+              <span>Filter by Tags</span>
+            </h3>
+            
+            <div className="bg-gray-50 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-1">Customize Your Quiz</p>
+                  <p className="text-xs text-gray-500">Select specific topics to focus your study</p>
+                </div>
+                <button
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium text-sm"
+                >
+                  <Filter className="w-4 h-4" />
+                  <span>{selectedTags.length > 0 ? `${selectedTags.length} selected` : 'Choose Tags'}</span>
+                </button>
+              </div>
 
-            {showSettings && (
-              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {allTags.map(tag => (
+              {showSettings && (
+                <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {allTags.map(tag => (
+                      <button
+                        key={tag}
+                        onClick={() => toggleTag(tag)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          selectedTags.includes(tag)
+                            ? 'bg-purple-600 text-white shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex justify-between items-center">
                     <button
-                      key={tag}
-                      onClick={() => toggleTag(tag)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                        selectedTags.includes(tag)
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
-                      }`}
+                      onClick={() => setSelectedTags([])}
+                      className="text-sm text-gray-600 hover:text-gray-800 font-medium"
                     >
-                      {tag}
+                      Clear All
                     </button>
-                  ))}
-                </div>
-                <div className="flex justify-between">
-                  <button
-                    onClick={() => setSelectedTags([])}
-                    className="text-sm text-gray-600 hover:text-gray-800"
-                  >
-                    Clear All
-                  </button>
-                  <button
-                    onClick={() => setSelectedTags(allTags)}
-                    className="text-sm text-purple-600 hover:text-purple-700"
-                  >
-                    Select All
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {selectedTags.length > 0 && (
-              <div className="mt-2">
-                <div className="text-xs text-gray-600 mb-2">Selected tags:</div>
-                <div className="flex flex-wrap gap-1">
-                  {selectedTags.map(tag => (
-                    <span
-                      key={tag}
-                      className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs"
+                    <button
+                      onClick={() => setSelectedTags(allTags)}
+                      className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                     >
-                      {tag}
-                    </span>
-                  ))}
+                      Select All
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {selectedTags.length > 0 && (
+                <div className="mt-4 p-4 bg-purple-50 rounded-xl border border-purple-200">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-purple-900">Selected Tags</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedTags.map(tag => (
+                      <span
+                        key={tag}
+                        className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Actions Section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+              <Bookmark className="w-5 h-5 text-blue-600" />
+              <span>Quick Actions</span>
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Start Quiz from Bookmarks */}
+              <button
+                className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${
+                  bookmarkedIds.length === 0 
+                    ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
+                    : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 hover:border-blue-400'
+                }`}
+                onClick={startQuizFromBookmarks}
+                disabled={bookmarkedIds.length === 0 || bookmarksLoading}
+              >
+                <Bookmark className="w-5 h-5" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
+                <div className="text-left">
+                  <div className="font-semibold">Start from Bookmarks</div>
+                  <div className="text-xs opacity-75">
+                    {bookmarkedIds.length > 0 ? `${bookmarkedIds.length} bookmarked questions` : 'No bookmarks yet'}
+                  </div>
+                </div>
+              </button>
+
+              {/* Resume Quiz */}
+              {hasPersistedQuiz() && (
+                <button
+                  className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-green-300 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-400 transition-all duration-200"
+                  onClick={resumeQuiz}
+                >
+                  <ArrowRight className="w-5 h-5" />
+                  <div className="text-left">
+                    <div className="font-semibold">Resume Quiz</div>
+                    <div className="text-xs opacity-75">Continue where you left off</div>
+                  </div>
+                </button>
+              )}
+            </div>
           </div>
 
 
 
-          {/* Start Quiz from Bookmarks Button */}
-          <button
-            className={`w-full flex items-center justify-center space-x-2 px-6 py-3 rounded-lg border text-sm font-medium shadow-sm transition-colors ${bookmarkedIds.length === 0 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200'}`}
-            onClick={startQuizFromBookmarks}
-            disabled={bookmarkedIds.length === 0 || bookmarksLoading}
-            aria-disabled={bookmarkedIds.length === 0 || bookmarksLoading}
-          >
-            <Bookmark className="w-5 h-5 mr-2" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
-            Start Quiz from Bookmarks
-          </button>
 
+
+          {/* No Questions Available */}
           {filteredQuestions.length === 0 && (
-            <div className="text-center py-4">
-              <p className="text-gray-600 text-sm mb-2">
-                {sessionStats.questionsUsed > 0 
-                  ? 'No more questions available with the selected filters in this session.'
-                  : 'No questions available with the selected filters.'
-                }
-              </p>
+            <div className="bg-yellow-50 rounded-xl p-6 border border-yellow-200">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <span className="text-yellow-600 text-sm">⚠️</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-yellow-900">No Questions Available</h4>
+                  <p className="text-sm text-yellow-700">
+                    {sessionStats.questionsUsed > 0 
+                      ? 'All questions with the selected filters have been used in this session.'
+                      : 'No questions match the selected filters.'
+                    }
+                  </p>
+                </div>
+              </div>
               {sessionStats.questionsUsed > 0 && (
-                <p className="text-gray-500 text-xs">
-                  Reset the session or adjust your tag selection to see more questions.
-                </p>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={handleResetSession}
+                    className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors text-sm font-medium"
+                  >
+                    Reset Session
+                  </button>
+                  <button
+                    onClick={() => setSelectedTags([])}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
               )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Tips */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 sm:p-6 border border-blue-200">
-        <h3 className="font-medium text-blue-900 mb-3">💡 Quiz Tips</h3>
-        <ul className="text-blue-800 text-sm space-y-2">
-          <li>• <strong>Quiz Persistence:</strong> Your quiz progress is automatically saved - you can switch tabs and resume later</li>
-          <li>• <strong>Session Tracking:</strong> Questions are tracked per session to avoid repeats</li>
-          <li>• <strong>Keyword Highlighting:</strong> Use the "Highlight Keywords" button to identify key CISSP terms (analyzes once per question)</li>
-          <li>• <strong>Participant Tallies:</strong> Track group responses during study sessions without the word "option"</li>
-          <li>• <strong>Immediate Feedback:</strong> Answer questions with instant feedback and scoring</li>
-          <li>• <strong>Progress Tracking:</strong> See detailed results and explanations after completion</li>
-          <li>• Questions are randomly selected and shuffled for each quiz</li>
-          <li>• Use tag filters to focus on specific topics or domains</li>
-          <li>• Reset the session to make all questions available again</li>
-        </ul>
+      {/* Enhanced Tips Section */}
+      <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-blue-200">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-white text-lg">💡</span>
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">Quiz Tips & Features</h3>
+            <p className="text-gray-600">Make the most of your study sessions</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-blue-600 text-xs">1</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Smart Persistence</h4>
+                <p className="text-sm text-gray-600">Your quiz progress is automatically saved - switch tabs and resume later</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-purple-600 text-xs">2</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Session Tracking</h4>
+                <p className="text-sm text-gray-600">Questions are tracked per session to avoid repeats and ensure variety</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-green-600 text-xs">3</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">AI-Powered Features</h4>
+                <p className="text-sm text-gray-600">Generate fresh questions and get keyword analysis for deeper understanding</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-orange-600 text-xs">4</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Immediate Feedback</h4>
+                <p className="text-sm text-gray-600">Get instant scoring and detailed explanations for every question</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-indigo-600 text-xs">5</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Smart Filtering</h4>
+                <p className="text-sm text-gray-600">Use tags to focus on specific topics or domains for targeted study</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-pink-600 text-xs">6</span>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Progress Analytics</h4>
+                <p className="text-sm text-gray-600">Track your performance with detailed results and improvement insights</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
