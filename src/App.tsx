@@ -13,6 +13,7 @@ import { useSubscription } from './hooks/useSubscription';
 import { BookmarksProvider } from './hooks/useBookmarks';
 import { LandingPage } from './components/Landing/LandingPage';
 import ResetPassword from './components/Auth/ResetPassword';
+import ProgressPage from './components/Progress/ProgressPage';
 
 function App() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -153,6 +154,11 @@ function App() {
   // Show reset password page if the path is /reset-password
   if (currentPath === '/reset-password') {
     return <ResetPassword />;
+  }
+
+  // Show progress page if the path is /progress
+  if (currentPath === '/progress') {
+    return <ProgressPage />;
   }
 
   // Show error if subscription check fails
