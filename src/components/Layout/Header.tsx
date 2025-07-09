@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppMode, User } from '../../types';
-import { Database, Target, LogOut, Crown, Users, CheckCircle, XCircle } from 'lucide-react';
+import { Database, Target, LogOut, Crown, Users, CheckCircle, XCircle, Settings } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 // import { useSubscription } from '../../hooks/useSubscription'; // REMOVE
 import { Avatar } from '../UI/Avatar';
@@ -18,6 +18,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser, onLogout, hasActiveSubscription, subscriptionLoading }) => {
   const { signOut } = useAuth();
   // const { isActive, productName } = useSubscription(); // REMOVE
+  const [showSettings, setShowSettings] = React.useState(false);
 
   const handleLogout = async () => {
     await signOut();
@@ -127,7 +128,7 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser,
             </div>
 
             {/* User Info - Responsive */}
-            <div className="flex items-center space-x-2 sm:space-x-3 bg-gradient-to-r from-blue-50 to-purple-50 px-2 sm:px-4 py-2 rounded-lg">
+            <div className="flex items-center space-x-2 sm:space-x-3 bg-gradient-to-r from-blue-50 to-purple-50 px-2 sm:px-4 py-2 rounded-lg relative">
                 {/* Premium/Unpaid Card Indicator */}
                 <span
                   className={`flex items-center justify-center rounded-lg border shadow-md transition-all duration-200 mr-2 px-2 py-1 ${
@@ -159,6 +160,26 @@ export const Header: React.FC<HeaderProps> = ({ mode, onModeChange, currentUser,
                       <Crown className="w-3 h-3 text-green-600" title="Premium subscriber" />
                     )}
                   </div>
+                </div>
+                {/* Settings Gear */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowSettings(v => !v)}
+                    className="p-2 ml-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                  >
+                    <Settings className="w-5 h-5" />
+                  </button>
+                  {showSettings && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                      <a
+                        href="/progress"
+                        className="block px-4 py-3 text-gray-800 hover:bg-blue-50 rounded-t-lg text-sm font-medium"
+                        onClick={() => setShowSettings(false)}
+                      >
+                        📈 View Progress
+                      </a>
+                    </div>
+                  )}
                 </div>
             </div>
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Trophy, Clock, Target, RotateCcw, ArrowLeft, CheckCircle, XCircle, Share2 } from 'lucide-react';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { SocialShareButtons } from '../UI/SocialShareButtons';
@@ -22,8 +22,21 @@ interface QuizResultsProps {
 }
 
 export const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz, onBackToSetup, isDailyQuiz, isUnsubscribed }) => {
+  const [progressSaved, setProgressSaved] = useState(false);
+
   const percentage = Math.round((results.correctAnswers / results.totalQuestions) * 100);
   const averageTime = Math.round(results.timeSpent / results.totalQuestions);
+
+  const handleTrackProgress = () => {
+    const history = JSON.parse(localStorage.getItem('quiz-progress-history') || '[]');
+    const newEntry = {
+      timestamp: Date.now(),
+      results
+    };
+    localStorage.setItem('quiz-progress-history', JSON.stringify([...history, newEntry]));
+    setProgressSaved(true);
+    setTimeout(() => setProgressSaved(false), 2000);
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -187,6 +200,14 @@ site.cisspstudygroup.com
             >
               <ArrowLeft className="w-4 h-4" />
               <span>New Quiz</span>
+            </button>
+            <button
+              onClick={handleTrackProgress}
+              className="flex items-center justify-center space-x-2 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              disabled={progressSaved}
+            >
+              <Trophy className="w-4 h-4" />
+              <span>{progressSaved ? 'Progress Saved!' : 'Track Progress'}</span>
             </button>
           </div>
 
