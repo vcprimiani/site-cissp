@@ -12,6 +12,7 @@ import { useAuth } from './hooks/useAuth';
 import { useSubscription } from './hooks/useSubscription';
 import { BookmarksProvider } from './hooks/useBookmarks';
 import { LandingPage } from './components/Landing/LandingPage';
+import ResetPassword from './components/Auth/ResetPassword';
 
 function App() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -147,6 +148,11 @@ function App() {
       // This will show the AuthForm component
       setAppState(prev => ({ ...prev, showAuth: true }));
     }} />;
+  }
+
+  // Show reset password page if the path is /reset-password
+  if (currentPath === '/reset-password') {
+    return <ResetPassword />;
   }
 
   // Show error if subscription check fails
