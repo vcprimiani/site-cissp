@@ -66,6 +66,13 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
       //   .then(qs => setDailyQuizQuestions(qs))
       //   .catch(err => setDailyQuizError(err.message || 'Failed to load daily quiz'))
       //   .finally(() => setDailyQuizLoading(false));
+
+      // Check for persisted daily quiz results
+      const storedResults = localStorage.getItem('cissp-daily-quiz-results');
+      if (storedResults) {
+        setQuizResults(JSON.parse(storedResults));
+        setQuizMode('results');
+      }
     }
   }, [hasActiveSubscription, subscriptionLoading]);
 
@@ -123,12 +130,18 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     setQuizSession(null);
     setQuizMode('setup');
     setQuizResults(null);
+    localStorage.removeItem('cissp-daily-quiz-results');
   };
 
   const handleQuizComplete = (results: QuizResults) => {
     setQuizResults(results);
     setQuizMode('results');
-    
+
+    // Persist results for unpaid daily quiz only
+    if (!hasActiveSubscription && dailyQuizQuestions && dailyQuizQuestions.length === 3) {
+      localStorage.setItem('cissp-daily-quiz-results', JSON.stringify(results));
+    }
+
     // Extract incorrect questions and notify parent
     const incorrectQuestions = results.questionResults
       .filter(result => !result.isCorrect)
