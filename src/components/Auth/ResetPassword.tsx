@@ -7,6 +7,7 @@ const ResetPassword: React.FC = () => {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [resetComplete, setResetComplete] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -31,6 +32,7 @@ const ResetPassword: React.FC = () => {
     if (error) setStatus('Error: ' + error.message);
     else {
       setStatus('Password updated! You can now log in. Redirecting...');
+      setResetComplete(true);
       setTimeout(() => {
         window.location.href = '/'; // Redirect to login/landing page
       }, 2000);
@@ -44,7 +46,8 @@ const ResetPassword: React.FC = () => {
   return (
     <div className="max-w-md mx-auto mt-12 p-6 bg-white rounded-xl shadow">
       <h2 className="text-2xl font-bold mb-4">Set a New Password</h2>
-      <form onSubmit={handleReset} className="space-y-4">
+      {status && <div className="mb-4 text-sm text-center text-red-600">{status}</div>}
+      <form onSubmit={handleReset} className="space-y-4" style={{ opacity: resetComplete ? 0.5 : 1, pointerEvents: resetComplete ? 'none' : 'auto' }}>
         <div>
           <label className="block text-sm font-medium mb-1">New Password</label>
           <input
@@ -54,6 +57,7 @@ const ResetPassword: React.FC = () => {
             onChange={e => setNewPassword(e.target.value)}
             minLength={8}
             required
+            disabled={resetComplete}
           />
         </div>
         <div>
@@ -65,16 +69,16 @@ const ResetPassword: React.FC = () => {
             onChange={e => setConfirmPassword(e.target.value)}
             minLength={8}
             required
+            disabled={resetComplete}
           />
         </div>
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 transition"
-          disabled={loading}
+          disabled={loading || resetComplete}
         >
           {loading ? 'Resetting...' : 'Reset Password'}
         </button>
-        {status && <div className="mt-2 text-sm text-center text-red-600">{status}</div>}
       </form>
     </div>
   );
