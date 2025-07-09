@@ -10,7 +10,7 @@ import { Lock, Crown } from 'lucide-react';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
 import { elevenLabsService } from '../../services/elevenlabs';
-import { PlayPauseButton } from './PlayPauseButton';
+import PlayPauseButton from './PlayPauseButton';
 
 interface QuestionCardProps {
   question: Question;
@@ -36,7 +36,6 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   subscriptionLoading
 }) => {
   const [showShareMenu, setShowShareMenu] = React.useState(false);
-  const [isSpeaking, setIsSpeaking] = React.useState(false);
   const domainColor = getDomainColor(question.domain);
   const difficultyColor = getDifficultyColor(question.difficulty);
   const aiColor = getStatusColor('ai-generated');
@@ -78,32 +77,7 @@ Study more at: https://site.cisspstudygroup.com`;
     setShowShareMenu(!showShareMenu);
   };
 
-  const handlePlayAudio = async () => {
-    try {
-      await elevenLabsService.playSpeech(question.question);
-    } catch (error) {
-      console.error('Failed to play speech:', error);
-      // Fallback to browser speech synthesis if ElevenLabs fails
-      const utterance = new window.SpeechSynthesisUtterance(question.question);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-    }
-  };
 
-  const handlePauseAudio = () => {
-    elevenLabsService.pauseSpeech();
-  };
-
-  // Update speaking state when ElevenLabs audio ends
-  React.useEffect(() => {
-    const checkSpeakingStatus = () => {
-      setIsSpeaking(elevenLabsService.isCurrentlyPlaying());
-    };
-
-    const interval = setInterval(checkSpeakingStatus, 100);
-    return () => clearInterval(interval);
-  }, []);
 
   // Add the formatExplanation function from Quiz.tsx
   const formatExplanation = (text: string): JSX.Element[] => {
@@ -235,9 +209,7 @@ Study more at: https://site.cisspstudygroup.com`;
                 {question.question}
               </span>
               <PlayPauseButton
-                onPlay={handlePlayAudio}
-                onPause={handlePauseAudio}
-                isPlaying={isSpeaking}
+                text={question.question}
                 size="sm"
                 className="flex-shrink-0"
               />

@@ -4,6 +4,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 }
 
 interface ElevenLabsRequest {
@@ -28,6 +29,7 @@ serve(async (req) => {
   }
 
   try {
+    // Allow anonymous access - no auth required
     const { text, voice_id = "21m00Tcm4TlvDq8ikWAM", model_id = "eleven_monolingual_v1", voice_settings }: ElevenLabsRequest = await req.json()
 
     if (!text) {
