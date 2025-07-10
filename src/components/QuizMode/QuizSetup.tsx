@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Question } from '../../types';
-import { Target, Play, ArrowLeft, ArrowRight, Clock, X, Settings, Filter, RotateCcw, Calendar, RefreshCw, Bookmark, Brain } from 'lucide-react';
+import { Target, Play, ArrowLeft, ArrowRight, Clock, X, Settings, Filter, RotateCcw, Calendar, RefreshCw, Bookmark, Brain, Crown, CheckCircle, Lock } from 'lucide-react';
 import { Quiz } from './Quiz';
 import { QuizResults } from './QuizResults';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
@@ -39,7 +39,7 @@ interface QuizResults {
 type QuizMode = 'setup' | 'quiz' | 'results';
 
 export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boolean; subscriptionLoading: boolean }> = ({ onQuizComplete, hasActiveSubscription, subscriptionLoading }) => {
-  const { questions, loading } = useQuestions();
+  const { questions, loading, addQuestion, refreshQuestions } = useQuestions();
   const { 
     getAvailableQuestions, 
     markQuestionsAsUsed, 
@@ -58,6 +58,15 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   const [dailyQuizQuestions, setDailyQuizQuestions] = useState<Question[] | null>(null);
   const [dailyQuizLoading, setDailyQuizLoading] = useState(false);
   const [dailyQuizError, setDailyQuizError] = useState<string | null>(null);
+
+  // Add state for AI generation loading and error
+  const [aiGenerating, setAIGenerating] = useState(false);
+  const [aiGenerationError, setAIGenerationError] = useState<string | null>(null);
+
+  // Add state for random generation
+  const [randomGenerating, setRandomGenerating] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [randomGenerationCancelled, setRandomGenerationCancelled] = useState(false);
 
   useEffect(() => {
     if (!hasActiveSubscription && !subscriptionLoading) {
@@ -210,6 +219,35 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
       isActive: true
     });
     setQuizMode('quiz');
+  };
+
+  // Add this function to handle random generation and start quiz
+  const handleRandomGenerateAndStart = async () => {
+    if (!hasActiveSubscription) {
+      setShowUpgradeModal(true);
+      return;
+    }
+    setRandomGenerating(true);
+    setRandomGenerationCancelled(false);
+    const shuffled = [...availableQuestions].sort(() => Math.random() - 0.5);
+    const selected = [];
+    for (let i = 0; i < shuffled.length && selected.length < 10; i++) {
+      if (randomGenerationCancelled) break;
+      selected.push(shuffled[i]);
+      // Simulate async fetch/generation delay for UX (remove in prod if not needed)
+      await new Promise(res => setTimeout(res, 80));
+    }
+    if (selected.length > 0) {
+      markQuestionsAsUsed(selected);
+      setQuizSession({
+        questions: selected,
+        currentIndex: 0,
+        startTime: new Date(),
+        isActive: true
+      });
+      setQuizMode('quiz');
+    }
+    setRandomGenerating(false);
   };
 
   // Quiz Mode
@@ -461,15 +499,71 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                 {hasActiveSubscription && (
                   <button
                     type="button"
-                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 font-semibold hover:from-green-100 hover:to-emerald-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                    onClick={async (event) => {
-                      // ...AI generation logic here (copy from previous version)...
-                      alert('AI question generation coming soon!');
+                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 font-semibold hover:from-green-100 hover:to-emerald-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={async () => {
+                      setAIGenerating(true);
+                      setAIGenerationError(null);
+                      try {
+                        const domains = [
+                          'Security and Risk Management',
+                          'Asset Security',
+                          'Security Architecture and Engineering',
+                          'Communication and Network Security',
+                          'Identity and Access Management (IAM)',
+                          'Security Assessment and Testing',
+                          'Security Operations',
+                          'Software Development Security'
+                        ];
+                        const newQuestions = [];
+                        for (let i = 0; i < 10; i++) {
+                          const domain = domains[Math.floor(Math.random() * domains.length)];
+                          const options = {
+                            domain,
+                            difficulty: 'Medium',
+                            questionType: 'scenario-based',
+                            scenarioType: 'technical',
+                            topic: `general concepts from ${domain}`,
+                            includeDistractors: true,
+                            focusArea: ''
+                          };
+                          const response = await generateAIQuestion(options.topic, options);
+                          if (response && response.question) {
+                            const newQ = {
+                              ...response.question,
+                              isActive: true,
+                              tags: [...response.question.tags, 'ai-generated']
+                            };
+                            await addQuestion(newQ);
+                            newQuestions.push(newQ);
+                          } else if (response && response.error) {
+                            setAIGenerationError(response.error);
+                            break;
+                          }
+                        }
+                        await refreshQuestions();
+                        if (newQuestions.length > 0) {
+                          alert(`Successfully generated and saved ${newQuestions.length} AI questions!`);
+                        } else {
+                          alert('No questions were generated. Please try again.');
+                        }
+                      } catch (err: any) {
+                        setAIGenerationError(err.message || 'Failed to generate questions.');
+                        alert(err.message || 'Failed to generate questions.');
+                      } finally {
+                        setAIGenerating(false);
+                      }
                     }}
+                    disabled={aiGenerating}
                   >
-                    <span className="text-lg">🤖</span>
-                    <span>Generate 10 New AI Questions</span>
-                    <span className="text-sm opacity-75">→</span>
+                    {aiGenerating ? (
+                      <span className="flex items-center space-x-2"><svg className="animate-spin h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg><span>Generating...</span></span>
+                    ) : (
+                      <>
+                        <span className="text-lg">🤖</span>
+                        <span>Generate 10 New AI Questions</span>
+                        <span className="text-sm opacity-75">→</span>
+                      </>
+                    )}
                   </button>
                 )}
                 {/* 10 Hard Random Button */}
@@ -498,6 +592,23 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                   <span className="text-lg">🌶️</span>
                   <span>10 Hard Random (All Domains)</span>
                   <span className="text-sm opacity-75">→</span>
+                </button>
+                {/* Generate 10 Random and Start Quiz */}
+                <button
+                  type="button"
+                  className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-blue-400 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleRandomGenerateAndStart}
+                  disabled={randomGenerating || availableQuestions.length === 0}
+                >
+                  {randomGenerating ? (
+                    <span className="flex items-center space-x-2"><svg className="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg><span>Generating...</span><button type="button" className="ml-3 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300" onClick={e => { e.stopPropagation(); setRandomGenerationCancelled(true); }}>Cancel</button></span>
+                  ) : (
+                    <>
+                      <span className="text-lg">🎲</span>
+                      <span>Generate 10 Random & Start Quiz</span>
+                      <span className="text-sm opacity-75">→</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -641,6 +752,53 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
           </div>
         </div>
       </div>
+      {/* Premium Upgrade Modal (copied from AIGenerator) */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Crown className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Unlock Random Quiz Generation</h3>
+              <p className="text-gray-600 mb-6">
+                Subscribe to generate unlimited random quizzes and unlock all premium features.
+              </p>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center space-x-3 text-left">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">Unlimited random quiz generation</span>
+                </div>
+                <div className="flex items-center space-x-3 text-left">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">All 8 CISSP domains covered</span>
+                </div>
+                <div className="flex items-center space-x-3 text-left">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">Cancel anytime</span>
+                </div>
+              </div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Maybe Later
+                </button>
+                <button
+                  onClick={async () => {
+                    const product = stripeProducts[0];
+                    await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
+                  }}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
+                >
+                  Upgrade Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
