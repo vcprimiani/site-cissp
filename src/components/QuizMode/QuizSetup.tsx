@@ -368,489 +368,277 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     );
   }
 
-  // Quiz Results Mode
-  if (quizMode === 'results' && quizResults) {
-    // If user is not subscribed and just finished the daily quiz, show upsell
-    const isDailyQuiz = !hasActiveSubscription && !!dailyQuizQuestions && dailyQuizQuestions.length === 3;
-    const isUnsubscribed = !hasActiveSubscription;
-    return (
-      <QuizResults
-        results={quizResults}
-        onRetakeQuiz={retakeQuiz}
-        onBackToSetup={exitQuiz}
-        isDailyQuiz={isDailyQuiz}
-        isUnsubscribed={isUnsubscribed}
-      />
-    );
-  }
-
-  // Quiz Mode for paid users
-  if (quizMode === 'quiz' && quizSession) {
-    return (
-      <div className="max-w-6xl mx-auto space-y-8 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Quiz Setup (left, now main question card) */}
-          <div className="md:col-span-2 order-1 md:order-1">
-            <Quiz
-              questions={quizSession.questions}
-              initialIndex={quizSession.currentIndex}
-              onComplete={handleQuizComplete}
-              onExit={exitQuiz}
-              onProgressChange={(current, total) => setQuizProgress({current, total})}
-            />
-          </div>
-          {/* Quick Actions (right) */}
-          <div className="md:col-span-1 order-2 md:order-2">
-            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mb-6 md:mb-0">
-              {/* Progress Bar during quiz */}
-              {quizProgress && (
-                <div className="mb-6">
-                  <div className="text-xs text-gray-500 mb-1 text-center">Progress</div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
-                    <div
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${((quizProgress.current + 1) / quizProgress.total) * 100}%` }}
-                    />
-                  </div>
-                  <div className="text-xs text-gray-700 text-center font-semibold">
-                    Question {quizProgress.current + 1} of {quizProgress.total}
-                  </div>
-                </div>
-              )}
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                <Bookmark className="w-5 h-5 text-blue-600" />
-                <span>Quick Actions</span>
-              </h3>
-              <div className="grid grid-cols-1 gap-4">
-                {/* Start Quiz from Bookmarks */}
-                <button
-                  className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${
-                    bookmarkedIds.length === 0 
-                      ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
-                      : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 hover:border-blue-400'
-                  }`}
-                  onClick={startQuizFromBookmarks}
-                  disabled={bookmarkedIds.length === 0 || bookmarksLoading}
-                >
-                  <Bookmark className="w-5 h-5" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
-                  <div className="text-left">
-                    <div className="font-semibold">Start from Bookmarks</div>
-                    <div className="text-xs opacity-75">
-                      {bookmarkedIds.length > 0 ? `${bookmarkedIds.length} bookmarked questions` : 'No bookmarks yet'}
-                    </div>
-                  </div>
-                </button>
-                {/* Resume Quiz */}
-                {hasPersistedQuiz() && persistedState && (
-                  <button
-                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 bg-green-50 text-green-700 border-green-300 hover:bg-green-100 hover:border-green-400"
-                    onClick={resumeQuiz}
-                  >
-                    <RefreshCw className="w-5 h-5" />
-                    <div className="text-left">
-                      <div className="font-semibold">Resume Previous Quiz</div>
-                      <div className="text-xs opacity-75">
-                        Question {persistedState.currentIndex + 1} of {persistedState.questions.length}
-                      </div>
-                    </div>
-                  </button>
-                )}
-                {/* 10 Hard Random Button */}
-                <button
-                  type="button"
-                  className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 font-semibold hover:from-orange-100 hover:to-amber-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                  onClick={() => {
-                    // Find all hard questions from all domains
-                    const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
-                    if (hardQuestions.length < 10) {
-                      alert('Not enough hard questions available.');
-                      return;
-                    }
-                    // Shuffle and pick 10
-                    const shuffled = [...hardQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
-                    markQuestionsAsUsed(shuffled);
-                    setQuizSession({
-                      questions: shuffled,
-                      currentIndex: 0,
-                      startTime: new Date(),
-                      isActive: true
-                    });
-                    setQuizMode('quiz');
-                  }}
-                >
-                  <span className="text-lg">🌶️</span>
-                  <span>10 Hard Random (All Domains)</span>
-                  <span className="text-sm opacity-75">→</span>
-                </button>
-                {/* Generate 10 Random and Start Quiz */}
-                <button
-                  type="button"
-                  className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-blue-400 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleRandomGenerateAndStart}
-                  disabled={randomGenerating}
-                >
-                  {randomGenerating ? (
-                    <span className="flex items-center space-x-2 w-full">
-                      <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden mr-2">
-                        <div style={{ width: `${(aiRandomProgress/10)*100}%` }} className="h-full bg-blue-400 transition-all duration-300"></div>
-                      </div>
-                      <span className="text-xs font-bold text-blue-700 mr-1">{aiRandomProgress}/10</span>
-                      <span className="text-2xl ml-2">{aiRandomEmoji}</span>
-                      <button type="button" className="ml-3 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300" onClick={e => { e.stopPropagation(); setRandomGenerationCancelled(true); }}>Cancel</button>
-                    </span>
-                  ) : (
-                    <>
-                      <span className="text-lg">🎲</span>
-                      <span>Generate 10 New Quiz Questions</span>
-                      <span className="text-sm opacity-75">→</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Quiz Setup Interface
+  // Main render logic
   return (
-    <div className="space-y-8">
-      {/* Resume Quiz Banner */}
-      {hasPersistedQuiz() && persistedState && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <RefreshCw className="w-5 h-5 text-blue-600" />
-              <div>
-                <h3 className="font-semibold text-blue-900">Resume Previous Quiz</h3>
-                <p className="text-blue-700 text-sm">
-                  You have an unfinished quiz on question {persistedState.currentIndex + 1} of {persistedState.questions.length}
-                </p>
-              </div>
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={discardPersistedQuiz}
-                className="px-4 py-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
-              >
-                Discard
-              </button>
-              <button
-                onClick={resumeQuiz}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-              >
-                Resume Quiz
-              </button>
+    <>
+      {quizMode === 'quiz' && quizSession && (
+        <div className="max-w-6xl mx-auto space-y-8 px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Quiz (left, main question card) */}
+            <div className="md:col-span-2 order-1 md:order-1">
+              <Quiz
+                questions={quizSession.questions}
+                initialIndex={quizSession.currentIndex}
+                onComplete={handleQuizComplete}
+                onExit={exitQuiz}
+                onProgressChange={(current, total) => setQuizProgress({current, total})}
+              />
             </div>
           </div>
         </div>
       )}
-
-      {/* Dashboard Container */}
-      <div className="max-w-6xl mx-auto space-y-8 px-4">
-        {/* Hero Header */}
-        <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-100">
-          <div className="flex items-center space-x-4 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Target className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Quiz Dashboard</h2>
-              <p className="text-gray-600">Test your knowledge with personalized quizzes and track your progress</p>
-            </div>
-          </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-xs font-medium text-gray-500">Used Today</span>
-              </div>
-              <div className="text-2xl font-bold text-blue-600">{sessionStats.questionsUsed}</div>
-            </div>
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span className="text-xs font-medium text-gray-500">Available</span>
-              </div>
-              <div className="text-2xl font-bold text-purple-600">{filteredQuestions.length}</div>
-            </div>
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-xs font-medium text-gray-500">Total</span>
-              </div>
-              <div className="text-2xl font-bold text-green-600">{questions.length}</div>
-            </div>
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span className="text-xs font-medium text-gray-500">Duration</span>
-              </div>
-              <div className="text-2xl font-bold text-orange-600">{formatSessionDuration(sessionStats.sessionDuration)}</div>
-            </div>
-          </div>
-
-          {/* Session Reset */}
-          {sessionStats.questionsUsed > 0 && (
-            <div className="flex items-center justify-between bg-blue-50 rounded-xl p-4 border border-blue-200">
-              <div className="flex items-center space-x-3">
-                <Calendar className="w-5 h-5 text-blue-600" />
-                <div>
-                  <p className="text-sm font-medium text-blue-900">Active Study Session</p>
-                  <p className="text-xs text-blue-700">Started {sessionStats.sessionStartTime.toLocaleString()}</p>
+      {quizMode === 'setup' && (
+        <div className="space-y-8">
+          {/* Resume Quiz Banner */}
+          {hasPersistedQuiz() && persistedState && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <RefreshCw className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <h3 className="font-semibold text-blue-900">Resume Previous Quiz</h3>
+                    <p className="text-blue-700 text-sm">
+                      You have an unfinished quiz on question {persistedState.currentIndex + 1} of {persistedState.questions.length}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={discardPersistedQuiz}
+                    className="px-4 py-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                  >
+                    Discard
+                  </button>
+                  <button
+                    onClick={resumeQuiz}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  >
+                    Resume Quiz
+                  </button>
                 </div>
               </div>
-              <button
-                onClick={handleResetSession}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium text-sm"
-              >
-                <RotateCcw className="w-4 h-4" />
-                <span>Reset Session</span>
-              </button>
             </div>
           )}
-        </div>
 
-        {/* Quiz Setup and Quick Actions Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Quiz Setup (left) */}
-          <div className="md:col-span-2 order-2 md:order-1">
-            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
-              {/* Quiz Setup Section */}
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                  <Settings className="w-5 h-5 text-purple-600" />
-                  <span>Quiz Configuration</span>
-                </h3>
-                <div className="bg-gray-50 rounded-xl p-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Number of Questions
-                  </label>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      {[5, 10, 25].map(num => (
+          {/* Dashboard Container */}
+          <div className="max-w-6xl mx-auto space-y-8 px-4">
+            {/* Hero Header */}
+            <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-100">
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Target className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Quiz Dashboard</h2>
+                  <p className="text-gray-600">Test your knowledge with personalized quizzes and track your progress</p>
+                </div>
+              </div>
+
+              {/* Stats Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-gray-500">Used Today</span>
+                  </div>
+                  <div className="text-2xl font-bold text-blue-600">{sessionStats.questionsUsed}</div>
+                </div>
+                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-gray-500">Available</span>
+                  </div>
+                  <div className="text-2xl font-bold text-purple-600">{filteredQuestions.length}</div>
+                </div>
+                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-gray-500">Total</span>
+                  </div>
+                  <div className="text-2xl font-bold text-green-600">{questions.length}</div>
+                </div>
+                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-gray-500">Duration</span>
+                  </div>
+                  <div className="text-2xl font-bold text-orange-600">{formatSessionDuration(sessionStats.sessionDuration)}</div>
+                </div>
+              </div>
+
+              {/* Session Reset */}
+              {sessionStats.questionsUsed > 0 && (
+                <div className="flex items-center justify-between bg-blue-50 rounded-xl p-4 border border-blue-200">
+                  <div className="flex items-center space-x-3">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-900">Active Study Session</p>
+                      <p className="text-xs text-blue-700">Started {sessionStats.sessionStartTime.toLocaleString()}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleResetSession}
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium text-sm"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Reset Session</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Quiz Setup and Quick Actions Row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Quiz Setup (left) */}
+              <div className="md:col-span-2 order-1">
+                <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+                  {/* Quiz Setup Section */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <Settings className="w-5 h-5 text-purple-600" />
+                      <span>Quiz Configuration</span>
+                    </h3>
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Number of Questions
+                      </label>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          {[5, 10, 25].map(num => (
+                            <button
+                              key={num}
+                              onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
+                              className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 font-medium ${
+                                numberOfQuestions === num
+                                  ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm'
+                                  : 'border-gray-300 hover:border-purple-300 text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              {num}
+                            </button>
+                          ))}
+                        </div>
                         <button
-                          key={num}
-                          onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
-                          className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 font-medium ${
-                            numberOfQuestions === num
-                              ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm'
-                              : 'border-gray-300 hover:border-purple-300 text-gray-700 hover:bg-gray-50'
-                          }`}
+                          onClick={generateQuiz}
+                          disabled={filteredQuestions.length === 0}
+                          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {num}
+                          <Play className="w-5 h-5" />
+                          <span>Start Quiz</span>
                         </button>
-                      ))}
-                    </div>
-                    <button
-                      onClick={generateQuiz}
-                      disabled={filteredQuestions.length === 0}
-                      className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Play className="w-5 h-5" />
-                      <span>Start Quiz</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tag Filter Section */}
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                  <Filter className="w-5 h-5 text-blue-600" />
-                  <span>Add Variety</span>
-                </h3>
-                <div className="relative">
-                  <div className="flex flex-wrap gap-2 pb-1">
-                    {randomizedTags.map(tag => (
-                      <button
-                        key={tag}
-                        onClick={() => toggleTag(tag)}
-                        className={`px-3 py-1 rounded-full text-xs font-medium border-2 transition-all duration-200 whitespace-nowrap ${
-                          selectedTags.includes(tag)
-                            ? 'bg-blue-100 border-blue-400 text-blue-800'
-                            : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-300'
-                        }`}
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                    {randomizedTags.length === 0 && (
-                      <span className="text-gray-400 text-sm">No tags available</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Actions (right) */}
-          {quizMode !== 'quiz' && (
-            <div className="md:col-span-1 order-1 md:order-2">
-              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mb-6 md:mb-0">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                  <Bookmark className="w-5 h-5 text-blue-600" />
-                  <span>Quick Actions</span>
-                </h3>
-                <div className="grid grid-cols-1 gap-4">
-                  {/* Start Quiz from Bookmarks */}
-                  <button
-                    className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${
-                      bookmarkedIds.length === 0 
-                        ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
-                        : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 hover:border-blue-400'
-                    }`}
-                    onClick={startQuizFromBookmarks}
-                    disabled={bookmarkedIds.length === 0 || bookmarksLoading}
-                  >
-                    <Bookmark className="w-5 h-5" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
-                    <div className="text-left">
-                      <div className="font-semibold">Start from Bookmarks</div>
-                      <div className="text-xs opacity-75">
-                        {bookmarkedIds.length > 0 ? `${bookmarkedIds.length} bookmarked questions` : 'No bookmarks yet'}
                       </div>
                     </div>
-                  </button>
-                  {/* Resume Quiz */}
-                  {hasPersistedQuiz() && persistedState && (
+                  </div>
+                </div>
+              </div>
+              {/* Quick Actions (right) */}
+              <div className="md:col-span-1 order-2">
+                <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mb-6 md:mb-0">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                    <Bookmark className="w-5 h-5 text-blue-600" />
+                    <span>Quick Actions</span>
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    {/* Start Quiz from Bookmarks */}
                     <button
-                      className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 bg-green-50 text-green-700 border-green-300 hover:bg-green-100 hover:border-green-400"
-                      onClick={resumeQuiz}
+                      className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${
+                        bookmarkedIds.length === 0 
+                          ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
+                          : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 hover:border-blue-400'
+                      }`}
+                      onClick={startQuizFromBookmarks}
+                      disabled={bookmarkedIds.length === 0 || bookmarksLoading}
                     >
-                      <RefreshCw className="w-5 h-5" />
+                      <Bookmark className="w-5 h-5" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
                       <div className="text-left">
-                        <div className="font-semibold">Resume Previous Quiz</div>
+                        <div className="font-semibold">Start from Bookmarks</div>
                         <div className="text-xs opacity-75">
-                          Question {persistedState.currentIndex + 1} of {persistedState.questions.length}
+                          {bookmarkedIds.length > 0 ? `${bookmarkedIds.length} bookmarked questions` : 'No bookmarks yet'}
                         </div>
                       </div>
                     </button>
-                  )}
-                  {/* 10 Hard Random Button */}
-                  <button
-                    type="button"
-                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 font-semibold hover:from-orange-100 hover:to-amber-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                    onClick={() => {
-                      // Find all hard questions from all domains
-                      const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
-                      if (hardQuestions.length < 10) {
-                        alert('Not enough hard questions available.');
-                        return;
-                      }
-                      // Shuffle and pick 10
-                      const shuffled = [...hardQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
-                      markQuestionsAsUsed(shuffled);
-                      setQuizSession({
-                        questions: shuffled,
-                        currentIndex: 0,
-                        startTime: new Date(),
-                        isActive: true
-                      });
-                      setQuizMode('quiz');
-                    }}
-                  >
-                    <span className="text-lg">🌶️</span>
-                    <span>10 Hard Random (All Domains)</span>
-                    <span className="text-sm opacity-75">→</span>
-                  </button>
-                  {/* Generate 10 Random and Start Quiz */}
-                  <button
-                    type="button"
-                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-blue-400 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleRandomGenerateAndStart}
-                    disabled={randomGenerating}
-                  >
-                    {randomGenerating ? (
-                      <span className="flex items-center space-x-2 w-full">
-                        <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden mr-2">
-                          <div style={{ width: `${(aiRandomProgress/10)*100}%` }} className="h-full bg-blue-400 transition-all duration-300"></div>
+                    {/* Resume Quiz */}
+                    {hasPersistedQuiz() && persistedState && (
+                      <button
+                        className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 bg-green-50 text-green-700 border-green-300 hover:bg-green-100 hover:border-green-400"
+                        onClick={resumeQuiz}
+                      >
+                        <RefreshCw className="w-5 h-5" />
+                        <div className="text-left">
+                          <div className="font-semibold">Resume Previous Quiz</div>
+                          <div className="text-xs opacity-75">
+                            Question {persistedState.currentIndex + 1} of {persistedState.questions.length}
+                          </div>
                         </div>
-                        <span className="text-xs font-bold text-blue-700 mr-1">{aiRandomProgress}/10</span>
-                        <span className="text-2xl ml-2">{aiRandomEmoji}</span>
-                        <button type="button" className="ml-3 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300" onClick={e => { e.stopPropagation(); setRandomGenerationCancelled(true); }}>Cancel</button>
-                      </span>
-                    ) : (
-                      <>
-                        <span className="text-lg">🎲</span>
-                        <span>Generate 10 New Quiz Questions</span>
-                        <span className="text-sm opacity-75">→</span>
-                      </>
+                      </button>
                     )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Tips/Features Section */}
-        <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-blue-200">
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-lg">💡</span>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-900">Quiz Tips & Features</h3>
-              <p className="text-gray-600">Make the most of your study sessions</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-blue-600 text-xs">1</span>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">Smart Persistence</h4>
-                  <p className="text-sm text-gray-600">Your quiz progress is automatically saved - switch tabs and resume later</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-purple-600 text-xs">2</span>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">Session Tracking</h4>
-                  <p className="text-sm text-gray-600">Questions are tracked per session to avoid repeats and ensure variety</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-green-600 text-xs">3</span>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">AI-Powered Features</h4>
-                  <p className="text-sm text-gray-600">Generate fresh questions and get keyword analysis for deeper understanding</p>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-orange-600 text-xs">4</span>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">Immediate Feedback</h4>
-                  <p className="text-sm text-gray-600">Get instant scoring and detailed explanations for every question</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-indigo-600 text-xs">5</span>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">Smart Filtering</h4>
-                  <p className="text-sm text-gray-600">Use tags to focus on specific topics or domains for targeted study</p>
+                    {/* 10 Hard Random Button */}
+                    <button
+                      type="button"
+                      className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 font-semibold hover:from-orange-100 hover:to-amber-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                      onClick={() => {
+                        // Find all hard questions from all domains
+                        const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
+                        if (hardQuestions.length < 10) {
+                          alert('Not enough hard questions available.');
+                          return;
+                        }
+                        // Shuffle and pick 10
+                        const shuffled = [...hardQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
+                        markQuestionsAsUsed(shuffled);
+                        setQuizSession({
+                          questions: shuffled,
+                          currentIndex: 0,
+                          startTime: new Date(),
+                          isActive: true
+                        });
+                        setQuizMode('quiz');
+                      }}
+                    >
+                      <span className="text-lg">🌶️</span>
+                      <span>10 Hard Random (All Domains)</span>
+                      <span className="text-sm opacity-75">→</span>
+                    </button>
+                    {/* Generate 10 Random and Start Quiz */}
+                    <button
+                      type="button"
+                      className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-blue-400 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handleRandomGenerateAndStart}
+                      disabled={randomGenerating}
+                    >
+                      {randomGenerating ? (
+                        <span className="flex items-center space-x-2 w-full">
+                          <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden mr-2">
+                            <div style={{ width: `${(aiRandomProgress/10)*100}%` }} className="h-full bg-blue-400 transition-all duration-300"></div>
+                          </div>
+                          <span className="text-xs font-bold text-blue-700 mr-1">{aiRandomProgress}/10</span>
+                          <span className="text-2xl ml-2">{aiRandomEmoji}</span>
+                          <button type="button" className="ml-3 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300" onClick={e => { e.stopPropagation(); setRandomGenerationCancelled(true); }}>Cancel</button>
+                        </span>
+                      ) : (
+                        <>
+                          <span className="text-lg">🎲</span>
+                          <span>Generate 10 New Quiz Questions</span>
+                          <span className="text-sm opacity-75">→</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+      {quizMode === 'results' && quizResults && (
+        <QuizResults
+          results={quizResults}
+          onRetakeQuiz={retakeQuiz}
+          onBackToSetup={exitQuiz}
+          isDailyQuiz={false}
+          isUnsubscribed={false}
+        />
+      )}
       {/* Premium Upgrade Modal (copied from AIGenerator) */}
       {showUpgradeModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -898,6 +686,6 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
