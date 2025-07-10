@@ -414,112 +414,133 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
           )}
         </div>
 
-        {/* Quiz Setup Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
-          {/* Quiz Setup Section */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-              <Settings className="w-5 h-5 text-purple-600" />
-              <span>Quiz Configuration</span>
-            </h3>
-            <div className="bg-gray-50 rounded-xl p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Number of Questions
-              </label>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  {[5, 10, 25].map(num => (
-                    <button
-                      key={num}
-                      onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
-                      className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 font-medium ${
-                        numberOfQuestions === num
-                          ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm'
-                          : 'border-gray-300 hover:border-purple-300 text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
+        {/* Quiz Setup and Quick Actions Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Quick Actions (left column) */}
+          <div className="md:col-span-1 order-2 md:order-1">
+            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mb-8 md:mb-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                <Bookmark className="w-5 h-5 text-blue-600" />
+                <span>Quick Actions</span>
+              </h3>
+              <div className="grid grid-cols-1 gap-4">
+                {/* Resume Quiz (primary, if available) */}
+                {hasPersistedQuiz() && persistedState && (
+                  <button
+                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 bg-green-50 text-green-700 border-green-300 hover:bg-green-100 hover:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400"
+                    onClick={resumeQuiz}
+                    aria-label="Resume previous quiz"
+                    title="Resume your last unfinished quiz"
+                  >
+                    <RefreshCw className="w-5 h-5" />
+                    <div className="text-left">
+                      <div className="font-semibold">Resume Previous Quiz</div>
+                      <div className="text-xs opacity-75">
+                        Question {persistedState.currentIndex + 1} of {persistedState.questions.length}
+                      </div>
+                    </div>
+                  </button>
+                )}
+                {/* Divider if both actions are present */}
+                {hasPersistedQuiz() && persistedState && <div className="border-t border-gray-200 my-2" />}
+                {/* Start Quiz from Bookmarks */}
                 <button
-                  onClick={generateQuiz}
-                  disabled={filteredQuestions.length === 0}
-                  className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                    bookmarkedIds.length === 0 
+                      ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
+                      : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 hover:border-blue-400'
+                  }`}
+                  onClick={startQuizFromBookmarks}
+                  disabled={bookmarkedIds.length === 0 || bookmarksLoading}
+                  aria-label="Start quiz from bookmarks"
+                  title={bookmarkedIds.length === 0 ? 'No bookmarks available' : 'Start a quiz using your bookmarked questions'}
                 >
-                  <Play className="w-5 h-5" />
-                  <span>Start Quiz</span>
+                  <Bookmark className="w-5 h-5" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
+                  <div className="text-left">
+                    <div className="font-semibold">Start from Bookmarks</div>
+                    <div className="text-xs opacity-75">
+                      {bookmarksLoading ? (
+                        <span className="flex items-center space-x-1"><svg className="animate-spin h-4 w-4 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg> Loading...</span>
+                      ) : (
+                        bookmarkedIds.length > 0 ? `${bookmarkedIds.length} bookmarked questions` : 'No bookmarks yet'
+                      )}
+                    </div>
+                  </div>
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Tag Filter Section */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-              <Filter className="w-5 h-5 text-blue-600" />
-              <span>Filter by Tag</span>
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {allTags.map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium border-2 transition-all duration-200 ${
-                    selectedTags.includes(tag)
-                      ? 'bg-blue-100 border-blue-400 text-blue-800'
-                      : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-300'
-                  }`}
-                >
-                  {tag}
-                </button>
-              ))}
-              {allTags.length === 0 && (
-                <span className="text-gray-400 text-sm">No tags available</span>
-              )}
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-              <Bookmark className="w-5 h-5 text-blue-600" />
-              <span>Quick Actions</span>
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Start Quiz from Bookmarks */}
-              <button
-                className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${
-                  bookmarkedIds.length === 0 
-                    ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
-                    : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 hover:border-blue-400'
-                }`}
-                onClick={startQuizFromBookmarks}
-                disabled={bookmarkedIds.length === 0 || bookmarksLoading}
-              >
-                <Bookmark className="w-5 h-5" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
-                <div className="text-left">
-                  <div className="font-semibold">Start from Bookmarks</div>
-                  <div className="text-xs opacity-75">
-                    {bookmarkedIds.length > 0 ? `${bookmarkedIds.length} bookmarked questions` : 'No bookmarks yet'}
+          {/* Main Quiz Setup (right column) */}
+          <div className="md:col-span-2 order-1 md:order-2">
+            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+              {/* Quiz Setup Section */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                  <Settings className="w-5 h-5 text-purple-600" />
+                  <span>Quiz Configuration</span>
+                </h3>
+                <div className="bg-gray-50 rounded-xl p-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Number of Questions
+                  </label>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      {[5, 10, 25].map(num => (
+                        <button
+                          key={num}
+                          onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
+                          className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 font-medium ${
+                            numberOfQuestions === num
+                              ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm'
+                              : 'border-gray-300 hover:border-purple-300 text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {num}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      onClick={generateQuiz}
+                      disabled={filteredQuestions.length === 0}
+                      className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Play className="w-5 h-5" />
+                      <span>Start Quiz</span>
+                    </button>
                   </div>
                 </div>
-              </button>
-              {/* Resume Quiz */}
-              {hasPersistedQuiz() && persistedState && (
-                <button
-                  className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 bg-green-50 text-green-700 border-green-300 hover:bg-green-100 hover:border-green-400"
-                  onClick={resumeQuiz}
-                >
-                  <RefreshCw className="w-5 h-5" />
-                  <div className="text-left">
-                    <div className="font-semibold">Resume Previous Quiz</div>
-                    <div className="text-xs opacity-75">
-                      Question {persistedState.currentIndex + 1} of {persistedState.questions.length}
-                    </div>
+              </div>
+
+              {/* Tag Filter Section */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                  <Filter className="w-5 h-5 text-blue-600" />
+                  <span>Filter by Tag</span>
+                </h3>
+                <div className="relative">
+                  <div className="flex overflow-x-auto flex-nowrap gap-2 pb-1 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
+                    {allTags.map(tag => (
+                      <button
+                        key={tag}
+                        onClick={() => toggleTag(tag)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium border-2 transition-all duration-200 whitespace-nowrap ${
+                          selectedTags.includes(tag)
+                            ? 'bg-blue-100 border-blue-400 text-blue-800'
+                            : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-300'
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                    {allTags.length === 0 && (
+                      <span className="text-gray-400 text-sm">No tags available</span>
+                    )}
                   </div>
-                </button>
-              )}
+                  {/* Optional: fade effect for scroll hint */}
+                  <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white/90 to-transparent" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
