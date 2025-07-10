@@ -48,15 +48,15 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center space-x-2 min-w-0 flex-shrink-0">
             <img 
               src="/Untitled design-7.png" 
-              alt="CISSP Study Group" 
+              alt="www.CISSP.app" 
               className="w-8 h-8 object-contain rounded-lg"
             />
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-gray-900">CISSP Study Group</h1>
+              <h1 className="text-xl font-bold text-gray-900">www.CISSP.app</h1>
               <p className="text-xs text-gray-600">AI Question Bank & Quiz Platform</p>
             </div>
             <div className="sm:hidden">
-              <h1 className="text-lg font-bold text-gray-900">CISSP</h1>
+              <h1 className="text-lg font-bold text-gray-900">www.CISSP.app</h1>
             </div>
           </div>
 
