@@ -506,7 +506,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Progress Bar */}
       <div className="bg-white shadow-sm border-b border-gray-200 p-4">
-        <div className="w-[90vw] max-w-[1600px] mx-auto">
+        <div className="max-w-6xl w-full mx-auto px-4">
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
               className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
@@ -518,7 +518,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
       {/* Main Content */}
       <div className="flex-1 py-6">
-        <div className="w-[90vw] max-w-[1600px] mx-auto">
+        <div className="max-w-6xl w-full mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Main Question Card */}
             <div className="lg:col-span-3">
