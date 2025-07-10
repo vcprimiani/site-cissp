@@ -228,6 +228,58 @@ Keep the explanation clear, comprehensive, and exam-focused.`;
   return generateAIResponse(prompt, `This is a CISSP exam question from the ${domain} domain.`);
 };
 
+export const enhanceQuestionExplanation = async (
+  question: string,
+  options: string[],
+  correctAnswer: number,
+  currentExplanation: string,
+  domain: string
+): Promise<AIResponse> => {
+  const correctAnswerText = options[correctAnswer];
+  const incorrectOptions = options
+    .map((option, index) => ({ option, index }))
+    .filter((_, index) => index !== correctAnswer);
+
+  const prompt = `Please enhance this CISSP question explanation with better structure and formatting:
+
+Question: ${question}
+Correct Answer: ${correctAnswerText}
+Domain: ${domain}
+Current Explanation: ${currentExplanation}
+
+Please restructure the explanation using this format:
+
+1. Correct Answer:
+- Explain in detail why the chosen option is correct
+- Reference key CISSP concepts and industry standards
+- Provide real-world applications and examples
+
+2. Why Other Options Are Wrong:
+${incorrectOptions.map(({ option, index }) => `- Option ${String.fromCharCode(65 + index)}: Explain why this is incorrect and what misconception it represents`).join('\n')}
+
+3. Key Concepts:
+- List the main CISSP concepts being tested
+- Explain how they relate to real-world security scenarios
+- Connect to other relevant CISSP domains
+
+4. Practical Application:
+- Describe how this knowledge applies in practice
+- Provide examples of when this concept would be used
+- Mention any relevant tools, frameworks, or methodologies
+
+IMPORTANT REQUIREMENTS:
+- Ensure ALL sections are complete and no final questions are missing
+- Each section must have substantive content with bullet points
+- Use clear, structured formatting with proper line breaks
+- Make the explanation comprehensive but well-organized
+- Include specific examples and real-world applications
+- Reference relevant CISSP domains and industry standards
+
+Keep the enhanced explanation comprehensive but well-structured. Use bullet points and clear sections for better readability.`;
+
+  return generateAIResponse(prompt, `This is an explanation enhancement for a CISSP question from the ${domain} domain.`);
+};
+
 export const generateAIQuestion = async (
   topic: string,
   options?: AIGenerationOptions,
@@ -291,7 +343,7 @@ Format as JSON:
   "question": "Your detailed question here",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": 0,
-  "explanation": "STRUCTURE YOUR EXPLANATION AS FOLLOWS:\\n\\n1. Correct Answer:\\n- Explain in detail why the chosen option is correct\\n- Reference key CISSP concepts and industry standards\\n- Provide real-world applications and examples\\n\\n2. Why Other Options Are Wrong:\\n- Option A: Explain why this is incorrect and what misconception it represents\\n- Option B: Explain why this is incorrect and what misconception it represents\\n- Option C: Explain why this is incorrect and what misconception it represents\\n\\n3. Key Concepts:\\n- List the main CISSP concepts being tested\\n- Explain how they relate to real-world security scenarios\\n- Connect to other relevant CISSP domains\\n\\n4. Practical Application:\\n- Describe how this knowledge applies in practice\\n- Provide examples of when this concept would be used\\n- Mention any relevant tools, frameworks, or methodologies",
+  "explanation": "STRUCTURE YOUR EXPLANATION AS FOLLOWS:\\n\\n1. Correct Answer:\\n- Explain in detail why the chosen option is correct\\n- Reference key CISSP concepts and industry standards\\n- Provide real-world applications and examples\\n\\n2. Why Other Options Are Wrong:\\n- Option A: Explain why this is incorrect and what misconception it represents\\n- Option B: Explain why this is incorrect and what misconception it represents\\n- Option C: Explain why this is incorrect and what misconception it represents\\n\\n3. Key Concepts:\\n- List the main CISSP concepts being tested\\n- Explain how they relate to real-world security scenarios\\n- Connect to other relevant CISSP domains\\n\\n4. Practical Application:\\n- Describe how this knowledge applies in practice\\n- Provide examples of when this concept would be used\\n- Mention any relevant tools, frameworks, or methodologies\\n\\nIMPORTANT: Ensure ALL sections are complete and no final questions are missing. Each section must have substantive content.",
   "tags": ["relevant", "tags", "here"]
 }`;
       } else {
@@ -313,7 +365,7 @@ Format your response as JSON with this structure:
   "question": "Your question here?",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": 0,
-  "explanation": "STRUCTURE YOUR EXPLANATION AS FOLLOWS:\\n\\n1. Correct Answer:\\n- Explain in detail why the chosen option is correct\\n- Reference key CISSP concepts and industry standards\\n- Provide real-world applications and examples\\n\\n2. Why Other Options Are Wrong:\\n- Option A: Explain why this is incorrect and what misconception it represents\\n- Option B: Explain why this is incorrect and what misconception it represents\\n- Option C: Explain why this is incorrect and what misconception it represents\\n\\n3. Key Concepts:\\n- List the main CISSP concepts being tested\\n- Explain how they relate to real-world security scenarios\\n- Connect to other relevant CISSP domains\\n\\n4. Practical Application:\\n- Describe how this knowledge applies in practice\\n- Provide examples of when this concept would be used\\n- Mention any relevant tools, frameworks, or methodologies",
+  "explanation": "STRUCTURE YOUR EXPLANATION AS FOLLOWS:\\n\\n1. Correct Answer:\\n- Explain in detail why the chosen option is correct\\n- Reference key CISSP concepts and industry standards\\n- Provide real-world applications and examples\\n\\n2. Why Other Options Are Wrong:\\n- Option A: Explain why this is incorrect and what misconception it represents\\n- Option B: Explain why this is incorrect and what misconception it represents\\n- Option C: Explain why this is incorrect and what misconception it represents\\n\\n3. Key Concepts:\\n- List the main CISSP concepts being tested\\n- Explain how they relate to real-world security scenarios\\n- Connect to other relevant CISSP domains\\n\\n4. Practical Application:\\n- Describe how this knowledge applies in practice\\n- Provide examples of when this concept would be used\\n- Mention any relevant tools, frameworks, or methodologies\\n\\nIMPORTANT: Ensure ALL sections are complete and no final questions are missing. Each section must have substantive content.",
   "tags": ["tag1", "tag2", "tag3"]
 }`;
       }
@@ -323,7 +375,7 @@ Format your response as JSON with this structure:
         messages: [
           {
             role: "system",
-            content: "You are an expert CISSP question writer with deep knowledge of cybersecurity. Create high-quality, exam-realistic questions that test practical understanding and real-world application of security concepts. Your explanations must be comprehensive, breaking down why the correct answer is right and why each incorrect option is wrong, including common misconceptions. Always respond with valid JSON only."
+            content: "You are an expert CISSP question writer with deep knowledge of cybersecurity. Create high-quality, exam-realistic questions that test practical understanding and real-world application of security concepts. Your explanations must be comprehensive, breaking down why the correct answer is right and why each incorrect option is wrong, including common misconceptions. Always respond with valid JSON only. IMPORTANT: Ensure all explanation sections are complete and no final questions are missing."
           },
           {
             role: "user",

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Question } from '../../types';
-import { Clock, CheckCircle, XCircle, ArrowRight, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader, Briefcase } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, ArrowRight, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader, Briefcase, Sparkles } from 'lucide-react';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { analyzeCISSPKeywords, highlightKeywords } from '../../services/keywordAnalysis';
-import { generateManagerPerspective } from '../../services/openai';
+import { generateManagerPerspective, enhanceQuestionExplanation } from '../../services/openai';
 import { useQuizPersistence } from '../../hooks/useQuizPersistence';
+import { isStructuredExplanation } from '../../utils/textFormatting';
 
 interface QuizProps {
   questions: Question[];
@@ -58,6 +59,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   const [loadingManagerPerspective, setLoadingManagerPerspective] = useState(false);
   const [managerPerspectiveError, setManagerPerspectiveError] = useState<string | null>(null);
 
+  // Enhance Explanation state
+  const [isEnhancedExplanation, setIsEnhancedExplanation] = useState(persistedState?.isEnhancedExplanation || false);
+  const [enhancedExplanation, setEnhancedExplanation] = useState<string | null>(persistedState?.enhancedExplanation || null);
+  const [loadingEnhancedExplanation, setLoadingEnhancedExplanation] = useState(false);
+  const [enhancedExplanationError, setEnhancedExplanationError] = useState<string | null>(null);
+
   // Read Aloud state and logic
   const [isSpeaking, setIsSpeaking] = React.useState(false);
   const utteranceRef = React.useRef<SpeechSynthesisUtterance | null>(null);
@@ -95,9 +102,13 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       showTallies,
       keywords: questionKeywords[currentQuestion?.id] || [],
       showKeywords,
-      isActive: true
+      isActive: true,
+      isEnhancedExplanation,
+      enhancedExplanation,
+      loadingEnhancedExplanation,
+      enhancedExplanationError
     });
-  }, [currentIndex, userAnswers, selectedAnswer, showResult, questionStartTime, questionTimes, elapsedTime, tallyCounts, showTallies, questionKeywords, showKeywords]);
+  }, [currentIndex, userAnswers, selectedAnswer, showResult, questionStartTime, questionTimes, elapsedTime, tallyCounts, showTallies, questionKeywords, showKeywords, isEnhancedExplanation, enhancedExplanation, loadingEnhancedExplanation, enhancedExplanationError]);
 
   // Timer effect
   useEffect(() => {
@@ -117,6 +128,10 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     setKeywordError(null);
     setShowManagerPerspective(false);
     setManagerPerspectiveError(null);
+    setIsEnhancedExplanation(false);
+    setEnhancedExplanation(null);
+    setLoadingEnhancedExplanation(false);
+    setEnhancedExplanationError(null);
   }, [currentIndex, userAnswers]);
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -214,6 +229,43 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       setManagerPerspectiveError('Failed to generate manager perspective. Please try again.');
     } finally {
       setLoadingManagerPerspective(false);
+    }
+  };
+
+  const handleEnhanceExplanation = async () => {
+    const questionId = currentQuestion.id;
+    
+    // If we already have an enhanced explanation for this question, just toggle display
+    if (enhancedExplanation) {
+      setIsEnhancedExplanation(!isEnhancedExplanation);
+      return;
+    }
+
+    // If we don't have the enhanced explanation yet, generate it
+    if (loadingEnhancedExplanation) return;
+    
+    setLoadingEnhancedExplanation(true);
+    setEnhancedExplanationError(null);
+    
+    try {
+             const result = await enhanceQuestionExplanation(
+         currentQuestion.question,
+         currentQuestion.options,
+         currentQuestion.correctAnswer,
+         currentQuestion.explanation,
+         currentQuestion.domain
+       );
+      
+             if (result.error) {
+         setEnhancedExplanationError(result.error);
+       } else {
+         setEnhancedExplanation(result.content);
+         setIsEnhancedExplanation(true);
+       }
+    } catch (error: any) {
+      setEnhancedExplanationError('Failed to enhance explanation. Please try again.');
+    } finally {
+      setLoadingEnhancedExplanation(false);
     }
   };
 
@@ -692,9 +744,46 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                       )}
                       <div className="bg-white rounded-lg p-3 border">
                         <h4 className="font-medium text-gray-900 mb-2">Explanation:</h4>
-                        {formatExplanation(currentQuestion.explanation)}
+                                                 {isEnhancedExplanation && enhancedExplanation ? (
+                           formatExplanation(enhancedExplanation)
+                         ) : (
+                           formatExplanation(currentQuestion.explanation)
+                         )}
                       </div>
                     </div>
+
+                                         {/* Enhance Explanation Button */}
+                     {!isEnhancedExplanation && !isStructuredExplanation(currentQuestion.explanation) && (
+                      <div className="mt-4">
+                        <button
+                          onClick={handleEnhanceExplanation}
+                          disabled={loadingEnhancedExplanation}
+                          className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                        >
+                          {loadingEnhancedExplanation ? (
+                            <Loader className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Sparkles className="w-4 h-4" />
+                          )}
+                          <span>
+                            {loadingEnhancedExplanation 
+                              ? 'Enhancing...' 
+                              : 'Enhance Explanation'
+                            }
+                          </span>
+                        </button>
+
+                        {/* Enhanced Explanation Error */}
+                        {enhancedExplanationError && (
+                          <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <div className="flex items-center space-x-2">
+                              <XCircle className="w-4 h-4 text-red-600" />
+                              <span className="text-red-800 text-sm">{enhancedExplanationError}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Manager's Perspective Button */}
                     <div className="mt-4">

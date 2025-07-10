@@ -16,6 +16,10 @@ interface PersistedQuizState {
   keywords: string[];
   showKeywords: boolean;
   isActive: boolean;
+  isEnhancedExplanation?: boolean;
+  enhancedExplanation?: string | null;
+  loadingEnhancedExplanation?: boolean;
+  enhancedExplanationError?: string | null;
 }
 
 const STORAGE_KEY = 'quiz-persistent-state';

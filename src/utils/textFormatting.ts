@@ -66,3 +66,20 @@ export const formatExplanationText = (text: string): string => {
   
   return formattedText;
 };
+
+// Function to detect if explanation uses new structured format
+export const isStructuredExplanation = (explanation: string): boolean => {
+  // Check for numbered sections (1., 2., 3., etc.)
+  const hasNumberedSections = /\n\s*\d+\.\s/.test(explanation);
+  
+  // Check for bullet points
+  const hasBulletPoints = /\n\s*[-•]\s/.test(explanation);
+  
+  // Check for structured keywords
+  const hasStructuredKeywords = /(correct answer|why other options|key concepts|practical application)/i.test(explanation);
+  
+  // Check for multiple line breaks (indicating sections)
+  const hasMultipleSections = (explanation.match(/\n\s*\n/g) || []).length >= 2;
+  
+  return hasNumberedSections || (hasBulletPoints && hasStructuredKeywords) || hasMultipleSections;
+};
