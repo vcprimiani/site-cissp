@@ -506,7 +506,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Progress Bar */}
       <div className="bg-white shadow-sm border-b border-gray-200 p-4">
-        <div className="max-w-6xl mx-auto">
+        <div className="w-[90vw] max-w-[1600px] mx-auto">
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
               className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
@@ -517,12 +517,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="flex-1 py-6">
+        <div className="w-[90vw] max-w-[1600px] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Main Question Card */}
             <div className="lg:col-span-3">
-              <div className="bg-white rounded-2xl shadow-xl p-8">
+              <div className="bg-white rounded-2xl shadow-xl p-6">
                 {/* Keywords Display */}
                 {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 && (
                   <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -554,7 +554,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 )}
 
                 {/* Question Text */}
-                <div className="mb-8">
+                <div className="mb-6">
                   {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 ? (
                     <div 
                       className="text-xl leading-relaxed text-gray-900 font-medium"
@@ -568,13 +568,13 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 </div>
 
                 {/* Answer Options */}
-                <div className="space-y-4 mb-8">
+                <div className="space-y-3 mb-6">
                   {currentQuestion.options.map((option, index) => (
                     <button
                       key={index}
                       onClick={() => handleAnswerSelect(index)}
                       disabled={showResult}
-                      className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
+                      className={`w-full text-left p-3 rounded-lg border-2 transition-all duration-200 ${
                         showResult
                           ? index === currentQuestion.correctAnswer
                             ? 'border-green-500 bg-green-50 cursor-default'
@@ -587,8 +587,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-start space-x-4 flex-1">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0 ${
+                        <div className="flex items-start space-x-3 flex-1">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${
                             showResult && index === currentQuestion.correctAnswer
                               ? 'bg-green-500 text-white'
                               : showResult && selectedAnswer === index && index !== currentQuestion.correctAnswer
@@ -599,35 +599,35 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                           }`}>
                             {String.fromCharCode(65 + index)}
                           </div>
-                          <p className="text-gray-900 leading-relaxed flex-1">
+                          <p className="text-gray-900 leading-relaxed flex-1 text-sm">
                             {option}
                           </p>
                         </div>
                         
                         {/* Inline Tally Controls */}
-                        <div className="flex flex-col items-end gap-1 ml-4">
-                          <div className="flex items-center space-x-2">
+                        <div className="flex flex-col items-end gap-1 ml-3">
+                          <div className="flex items-center space-x-1">
                             <button
                               onClick={e => { e.stopPropagation(); handleTallyChange(index, false); }}
-                              className="w-6 h-6 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition-colors"
+                              className="w-5 h-5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition-colors"
                               disabled={tallyCounts[index] === 0}
                               tabIndex={-1}
                             >
-                              <Minus className="w-3 h-3" />
+                              <Minus className="w-2.5 h-2.5" />
                             </button>
-                            <span className="w-8 text-center font-bold text-lg">{tallyCounts[index]}</span>
+                            <span className="w-6 text-center font-bold text-sm">{tallyCounts[index]}</span>
                             <button
                               onClick={e => { e.stopPropagation(); handleTallyChange(index, true); }}
-                              className="w-6 h-6 rounded-full bg-green-100 text-green-600 hover:bg-green-200 flex items-center justify-center transition-colors"
+                              className="w-5 h-5 rounded-full bg-green-100 text-green-600 hover:bg-green-200 flex items-center justify-center transition-colors"
                               tabIndex={-1}
                             >
-                              <Plus className="w-3 h-3" />
+                              <Plus className="w-2.5 h-2.5" />
                             </button>
                           </div>
                           {/* Progress bar and percentage */}
-                          <div className="w-24 bg-gray-100 rounded-full h-2">
+                          <div className="w-20 bg-gray-100 rounded-full h-1.5">
                             <div
-                              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                              className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
                               style={{
                                 width: getTotalParticipants() > 0 
                                   ? `${(tallyCounts[index] / getTotalParticipants()) * 100}%` 
@@ -635,7 +635,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                               }}
                             />
                           </div>
-                          <div className="text-xs text-gray-500 mt-1 text-right w-24">
+                          <div className="text-xs text-gray-500 mt-0.5 text-right w-20">
                             {getTotalParticipants() > 0 
                               ? `${Math.round((tallyCounts[index] / getTotalParticipants()) * 100)}%`
                               : '0%'}
@@ -648,7 +648,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
                 {/* Result Explanation */}
                 {showResult && (
-                  <div className="mb-6">
+                  <div className="mb-4">
                     <div className={`p-4 rounded-lg border ${
                       selectedAnswer === currentQuestion.correctAnswer
                         ? 'bg-green-50 border-green-200'
