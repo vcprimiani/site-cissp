@@ -566,18 +566,6 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
-      {/* Progress Bar */}
-      <div className="bg-white shadow-sm border-b border-gray-200 p-4">
-        <div className="max-w-6xl w-full mx-auto px-4">
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex-1 py-6">
         <div className="max-w-6xl w-full mx-auto px-4">
@@ -862,9 +850,9 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
             {/* Sidebar Card */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-xl p-6 sticky top-6">
+              <div className="bg-white rounded-2xl shadow-xl p-6 sticky top-6 flex flex-col gap-6">
                 {/* Quiz Header Info */}
-                <div className="mb-6">
+                <div>
                   <div className="flex items-center space-x-2 mb-3">
                     <Target className="w-5 h-5 text-blue-600" />
                     <span className="font-semibold text-gray-900">Quiz</span>
@@ -877,7 +865,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 </div>
 
                 {/* Timers */}
-                <div className="mb-6 space-y-4">
+                <div className="space-y-4">
                   {/* Total Timer */}
                   <div>
                     <div className="text-xs text-gray-500 mb-1">Total Time</div>
@@ -903,8 +891,22 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                   </div>
                 </div>
 
+                {/* Progress Bar (moved here) */}
+                <div className="mb-2">
+                  <div className="text-xs text-gray-500 mb-1 text-center">Progress</div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
+                    />
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1 text-center">
+                    Question {currentIndex + 1} of {questions.length}
+                  </div>
+                </div>
+
                 {/* Domain and Difficulty Badges */}
-                <div className="mb-6 space-y-3">
+                <div className="space-y-3">
                   <span
                     className="px-3 py-2 rounded-lg text-sm font-medium block text-center"
                     style={{
