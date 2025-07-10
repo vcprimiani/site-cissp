@@ -424,13 +424,29 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                 <span>Quick Actions</span>
               </h3>
               <div className="grid grid-cols-1 gap-4">
-                {/* Resume Quiz (primary, if available) */}
+                {/* Start Quiz from Bookmarks */}
+                <button
+                  className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${
+                    bookmarkedIds.length === 0 
+                      ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
+                      : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 hover:border-blue-400'
+                  }`}
+                  onClick={startQuizFromBookmarks}
+                  disabled={bookmarkedIds.length === 0 || bookmarksLoading}
+                >
+                  <Bookmark className="w-5 h-5" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
+                  <div className="text-left">
+                    <div className="font-semibold">Start from Bookmarks</div>
+                    <div className="text-xs opacity-75">
+                      {bookmarkedIds.length > 0 ? `${bookmarkedIds.length} bookmarked questions` : 'No bookmarks yet'}
+                    </div>
+                  </div>
+                </button>
+                {/* Resume Quiz */}
                 {hasPersistedQuiz() && persistedState && (
                   <button
-                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 bg-green-50 text-green-700 border-green-300 hover:bg-green-100 hover:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-400"
+                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 bg-green-50 text-green-700 border-green-300 hover:bg-green-100 hover:border-green-400"
                     onClick={resumeQuiz}
-                    aria-label="Resume previous quiz"
-                    title="Resume your last unfinished quiz"
                   >
                     <RefreshCw className="w-5 h-5" />
                     <div className="text-left">
@@ -441,32 +457,6 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                     </div>
                   </button>
                 )}
-                {/* Divider if both actions are present */}
-                {hasPersistedQuiz() && persistedState && <div className="border-t border-gray-200 my-2" />}
-                {/* Start Quiz from Bookmarks */}
-                <button
-                  className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                    bookmarkedIds.length === 0 
-                      ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
-                      : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 hover:border-blue-400'
-                  }`}
-                  onClick={startQuizFromBookmarks}
-                  disabled={bookmarkedIds.length === 0 || bookmarksLoading}
-                  aria-label="Start quiz from bookmarks"
-                  title={bookmarkedIds.length === 0 ? 'No bookmarks available' : 'Start a quiz using your bookmarked questions'}
-                >
-                  <Bookmark className="w-5 h-5" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
-                  <div className="text-left">
-                    <div className="font-semibold">Start from Bookmarks</div>
-                    <div className="text-xs opacity-75">
-                      {bookmarksLoading ? (
-                        <span className="flex items-center space-x-1"><svg className="animate-spin h-4 w-4 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg> Loading...</span>
-                      ) : (
-                        bookmarkedIds.length > 0 ? `${bookmarkedIds.length} bookmarked questions` : 'No bookmarks yet'
-                      )}
-                    </div>
-                  </div>
-                </button>
               </div>
             </div>
           </div>
