@@ -303,13 +303,13 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     let scrollAmount = 0;
     const scroll = () => {
       if (!tagScrollRef.current) return;
-      scrollAmount += 0.2; // slower scroll
+      scrollAmount += 0.1; // even slower scroll
       if (scrollAmount > tagScrollRef.current.scrollWidth - tagScrollRef.current.clientWidth) {
         scrollAmount = 0;
       }
       tagScrollRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' });
     };
-    const interval = setInterval(scroll, 100); // slower interval
+    const interval = setInterval(scroll, 200); // even slower interval
     return () => clearInterval(interval);
   }, [randomizedTags]);
 
