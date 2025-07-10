@@ -86,43 +86,59 @@ Study more at: https://site.cisspstudygroup.com`;
       .replace(/\*(.*?)\*/g, '$1')
       .replace(/\s+/g, ' ')
       .trim();
+    
     const sections = cleanText.split(/\n\s*\n/).filter(section => section.trim());
     return sections.map((section, index) => {
       const trimmedSection = section.trim();
+      
+      // Check if it's a numbered section (1., 2., 3., etc.)
       if (/^\d+\./.test(trimmedSection)) {
         const [title, ...content] = trimmedSection.split(/[:\-]/);
         return (
-          <div key={index} className="mb-3">
-            <h4 className="font-semibold text-blue-800 mb-1 text-sm">{title.trim()}</h4>
+          <div key={index} className="mb-4">
+            <h4 className="font-semibold text-blue-800 mb-2 text-sm">
+              {title.trim()}
+            </h4>
             {content.length > 0 && (
-              <div className="text-gray-700 text-sm leading-relaxed pl-4">{content.join(':').trim()}</div>
+              <div className="text-gray-700 text-sm leading-relaxed pl-4">
+                {content.join(':').trim()}
+              </div>
             )}
           </div>
         );
       }
+      
+      // Check if it contains bullet points
       if (trimmedSection.includes('- ') || trimmedSection.includes('• ')) {
         const lines = trimmedSection.split('\n');
         const title = lines[0];
         const bullets = lines.slice(1).filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
+        
         return (
-          <div key={index} className="mb-3">
+          <div key={index} className="mb-4">
             {title && !title.startsWith('-') && !title.startsWith('•') && (
-              <h4 className="font-semibold text-blue-800 mb-1 text-sm">{title}</h4>
+              <h4 className="font-semibold text-blue-800 mb-2 text-sm">{title}</h4>
             )}
             <ul className="space-y-1 pl-4">
               {bullets.map((bullet, bIndex) => (
                 <li key={bIndex} className="text-gray-700 text-sm flex items-start">
                   <span className="text-blue-600 mr-2 mt-1">•</span>
-                  <span className="leading-relaxed">{bullet.replace(/^[-•]\s*/, '').trim()}</span>
+                  <span className="leading-relaxed">
+                    {bullet.replace(/^[-•]\s*/, '').trim()}
+                  </span>
                 </li>
               ))}
             </ul>
           </div>
         );
       }
+      
+      // Regular paragraph
       return (
-        <div key={index} className="mb-2">
-          <p className="text-gray-700 text-sm leading-relaxed">{trimmedSection}</p>
+        <div key={index} className="mb-3">
+          <p className="text-gray-700 text-sm leading-relaxed">
+            {trimmedSection}
+          </p>
         </div>
       );
     });

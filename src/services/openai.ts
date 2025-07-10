@@ -229,17 +229,16 @@ Keep the explanation clear, comprehensive, and exam-focused.`;
 };
 
 export const generateAIQuestion = async (
-  topic: string, 
-  options?: AIGenerationOptions, 
+  topic: string,
+  options?: AIGenerationOptions,
   existingTerms?: string[],
-  isBulkRequest: boolean = false
+  isBulkRequest = false
 ): Promise<AIQuestionResponse> => {
   try {
     const result = await secureAIRequest(async () => {
-      let prompt = '';
-      
-      if (options) {
-        // Advanced generation with detailed options
+      let prompt: string;
+
+      if (options && options.questionType) {
         const questionTypeInstructions = {
           'most-likely': 'Create a question asking "Which is MOST likely to..." or "What is the BEST approach to..." requiring selection of the most appropriate answer.',
           'least-likely': 'Create a question asking "Which is LEAST likely to..." or "What would NOT be appropriate..." requiring identification of the incorrect or inappropriate option.',
@@ -292,7 +291,7 @@ Format as JSON:
   "question": "Your detailed question here",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": 0,
-  "explanation": "Provide a comprehensive explanation structured as follows:\\n\\nCorrect Answer: Explain in detail why the chosen option is the correct answer, referencing key CISSP concepts, industry standards, and real-world applications.\\n\\nIncorrect Answers:\\n- Option A: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n- Option B: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n- Option C: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n\\nKey Takeaway: Summarize the main learning point or principle tested by this question and how it applies to real-world security scenarios.",
+  "explanation": "STRUCTURE YOUR EXPLANATION AS FOLLOWS:\\n\\n1. Correct Answer:\\n- Explain in detail why the chosen option is correct\\n- Reference key CISSP concepts and industry standards\\n- Provide real-world applications and examples\\n\\n2. Why Other Options Are Wrong:\\n- Option A: Explain why this is incorrect and what misconception it represents\\n- Option B: Explain why this is incorrect and what misconception it represents\\n- Option C: Explain why this is incorrect and what misconception it represents\\n\\n3. Key Concepts:\\n- List the main CISSP concepts being tested\\n- Explain how they relate to real-world security scenarios\\n- Connect to other relevant CISSP domains\\n\\n4. Practical Application:\\n- Describe how this knowledge applies in practice\\n- Provide examples of when this concept would be used\\n- Mention any relevant tools, frameworks, or methodologies",
   "tags": ["relevant", "tags", "here"]
 }`;
       } else {
@@ -314,7 +313,7 @@ Format your response as JSON with this structure:
   "question": "Your question here?",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": 0,
-  "explanation": "Provide a comprehensive explanation structured as follows:\\n\\nCorrect Answer: Explain in detail why the chosen option is the correct answer, referencing key CISSP concepts, industry standards, and real-world applications.\\n\\nIncorrect Answers:\\n- Option A: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n- Option B: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n- Option C: Explain clearly why this option is wrong and what common misconceptions it might represent.\\n\\nKey Takeaway: Summarize the main learning point or principle tested by this question and how it applies to real-world security scenarios.",
+  "explanation": "STRUCTURE YOUR EXPLANATION AS FOLLOWS:\\n\\n1. Correct Answer:\\n- Explain in detail why the chosen option is correct\\n- Reference key CISSP concepts and industry standards\\n- Provide real-world applications and examples\\n\\n2. Why Other Options Are Wrong:\\n- Option A: Explain why this is incorrect and what misconception it represents\\n- Option B: Explain why this is incorrect and what misconception it represents\\n- Option C: Explain why this is incorrect and what misconception it represents\\n\\n3. Key Concepts:\\n- List the main CISSP concepts being tested\\n- Explain how they relate to real-world security scenarios\\n- Connect to other relevant CISSP domains\\n\\n4. Practical Application:\\n- Describe how this knowledge applies in practice\\n- Provide examples of when this concept would be used\\n- Mention any relevant tools, frameworks, or methodologies",
   "tags": ["tag1", "tag2", "tag3"]
 }`;
       }

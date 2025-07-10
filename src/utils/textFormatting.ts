@@ -2,8 +2,14 @@ export const formatExplanationText = (text: string): string => {
   // Replace newlines with <br> tags
   let formattedText = text.replace(/\n/g, '<br>');
   
-  // Basic handling for bullet points (e.g., - item or • item)
+  // Handle numbered sections (1., 2., 3., etc.)
+  formattedText = formattedText.replace(/\n\s*(\d+)\.\s*(.*?)(?=\n\s*\d+\.|$)/g, '\n<h4>$1. $2</h4>');
+  
+  // Handle bullet points (e.g., - item or • item)
   formattedText = formattedText.replace(/\n\s*[-•]\s*(.*?)(?=\n|$)/g, '\n<li>$1</li>');
+  
+  // Handle sub-bullets (indented with spaces)
+  formattedText = formattedText.replace(/\n\s{2,}[-•]\s*(.*?)(?=\n|$)/g, '\n<li class="ml-4">$1</li>');
   
   // If we have list items, wrap them in ul tags
   if (formattedText.includes('<li>')) {
@@ -19,7 +25,7 @@ export const formatExplanationText = (text: string): string => {
         for (const line of lines) {
           if (line.includes('<li>')) {
             if (!inList) {
-              result += '<ul>';
+              result += '<ul class="space-y-1 pl-4">';
               inList = true;
             }
             result += line;
@@ -49,6 +55,9 @@ export const formatExplanationText = (text: string): string => {
   
   // Handle bolding (e.g., **text**)
   formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+  // Handle italic (e.g., *text*)
+  formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
   
   // Clean up extra <br> tags
   formattedText = formattedText.replace(/<br><br><br>/g, '<br><br>');
