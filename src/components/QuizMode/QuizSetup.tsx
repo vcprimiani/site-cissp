@@ -457,6 +457,48 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                     </div>
                   </button>
                 )}
+                {/* Generate 10 New AI Questions (Premium only) */}
+                {hasActiveSubscription && (
+                  <button
+                    type="button"
+                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 font-semibold hover:from-green-100 hover:to-emerald-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                    onClick={async (event) => {
+                      // ...AI generation logic here (copy from previous version)...
+                      alert('AI question generation coming soon!');
+                    }}
+                  >
+                    <span className="text-lg">🤖</span>
+                    <span>Generate 10 New AI Questions</span>
+                    <span className="text-sm opacity-75">→</span>
+                  </button>
+                )}
+                {/* 10 Hard Random Button */}
+                <button
+                  type="button"
+                  className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 font-semibold hover:from-orange-100 hover:to-amber-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                  onClick={() => {
+                    // Find all hard questions from all domains
+                    const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
+                    if (hardQuestions.length < 10) {
+                      alert('Not enough hard questions available.');
+                      return;
+                    }
+                    // Shuffle and pick 10
+                    const shuffled = [...hardQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
+                    markQuestionsAsUsed(shuffled);
+                    setQuizSession({
+                      questions: shuffled,
+                      currentIndex: 0,
+                      startTime: new Date(),
+                      isActive: true
+                    });
+                    setQuizMode('quiz');
+                  }}
+                >
+                  <span className="text-lg">🌶️</span>
+                  <span>10 Hard Random (All Domains)</span>
+                  <span className="text-sm opacity-75">→</span>
+                </button>
               </div>
             </div>
           </div>
