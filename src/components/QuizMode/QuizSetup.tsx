@@ -68,6 +68,11 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [randomGenerationCancelled, setRandomGenerationCancelled] = useState(false);
 
+  // Add state for AI random generation progress and emoji
+  const [aiRandomProgress, setAIRandomProgress] = useState(0);
+  const aiRandomEmojis = ['🤔','🧐','🤓','😎','🦾','🧠','🔒','💡','🚀','🎯','✅'];
+  const [aiRandomEmoji, setAIRandomEmoji] = useState(aiRandomEmojis[0]);
+
   useEffect(() => {
     if (!hasActiveSubscription && !subscriptionLoading) {
       setDailyQuizLoading(true);
@@ -229,18 +234,49 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     }
     setRandomGenerating(true);
     setRandomGenerationCancelled(false);
-    const shuffled = [...availableQuestions].sort(() => Math.random() - 0.5);
-    const selected = [];
-    for (let i = 0; i < shuffled.length && selected.length < 10; i++) {
+    setAIRandomProgress(0);
+    setAIRandomEmoji(aiRandomEmojis[0]);
+    const domains = [
+      'Security and Risk Management',
+      'Asset Security',
+      'Security Architecture and Engineering',
+      'Communication and Network Security',
+      'Identity and Access Management (IAM)',
+      'Security Assessment and Testing',
+      'Security Operations',
+      'Software Development Security'
+    ];
+    const newQuestions = [];
+    for (let i = 0; i < 10; i++) {
       if (randomGenerationCancelled) break;
-      selected.push(shuffled[i]);
-      // Simulate async fetch/generation delay for UX (remove in prod if not needed)
-      await new Promise(res => setTimeout(res, 80));
+      const domain = domains[Math.floor(Math.random() * domains.length)];
+      const options = {
+        domain,
+        difficulty: 'Medium',
+        questionType: 'scenario-based',
+        scenarioType: 'technical',
+        topic: `general concepts from ${domain}`,
+        includeDistractors: true,
+        focusArea: ''
+      };
+      const response = await generateAIQuestion(options.topic, options, [], true);
+      if (response && response.question) {
+        const newQ = {
+          ...response.question,
+          isActive: true,
+          tags: [...response.question.tags, 'ai-generated']
+        };
+        await addQuestion(newQ);
+        newQuestions.push(newQ);
+      }
+      setAIRandomProgress(i + 1);
+      setAIRandomEmoji(aiRandomEmojis[(i + 1) % aiRandomEmojis.length]);
     }
-    if (selected.length > 0) {
-      markQuestionsAsUsed(selected);
+    await refreshQuestions();
+    if (newQuestions.length > 0) {
+      markQuestionsAsUsed(newQuestions);
       setQuizSession({
-        questions: selected,
+        questions: newQuestions,
         currentIndex: 0,
         startTime: new Date(),
         isActive: true
@@ -249,6 +285,30 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     }
     setRandomGenerating(false);
   };
+
+  // For tag pills: randomize order, rename section, and add auto-scroll
+  const [randomizedTags, setRandomizedTags] = useState<string[]>([]);
+  useEffect(() => {
+    if (allTags.length > 0) {
+      setRandomizedTags([...allTags].sort(() => Math.random() - 0.5));
+    }
+  }, [allTags]);
+  // Auto-scroll effect
+  const tagScrollRef = React.useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!tagScrollRef.current) return;
+    let scrollAmount = 0;
+    const scroll = () => {
+      if (!tagScrollRef.current) return;
+      scrollAmount += 0.5;
+      if (scrollAmount > tagScrollRef.current.scrollWidth - tagScrollRef.current.clientWidth) {
+        scrollAmount = 0;
+      }
+      tagScrollRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+    };
+    const interval = setInterval(scroll, 50);
+    return () => clearInterval(interval);
+  }, [randomizedTags]);
 
   // Quiz Mode
   if (!hasActiveSubscription && !subscriptionLoading) {
@@ -598,14 +658,20 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                   type="button"
                   className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-blue-400 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleRandomGenerateAndStart}
-                  disabled={randomGenerating || availableQuestions.length === 0}
+                  disabled={randomGenerating}
                 >
                   {randomGenerating ? (
-                    <span className="flex items-center space-x-2"><svg className="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg><span>Generating...</span><button type="button" className="ml-3 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300" onClick={e => { e.stopPropagation(); setRandomGenerationCancelled(true); }}>Cancel</button></span>
+                    <span className="flex items-center space-x-2 w-full">
+                      <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden mr-2">
+                        <div style={{ width: `${(aiRandomProgress/10)*100}%` }} className="h-full bg-blue-400 transition-all duration-300"></div>
+                      </div>
+                      <span className="text-2xl ml-2">{aiRandomEmoji}</span>
+                      <button type="button" className="ml-3 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300" onClick={e => { e.stopPropagation(); setRandomGenerationCancelled(true); }}>Cancel</button>
+                    </span>
                   ) : (
                     <>
                       <span className="text-lg">🎲</span>
-                      <span>Generate 10 Random & Start Quiz</span>
+                      <span>Generate 10 New Quiz Questions</span>
                       <span className="text-sm opacity-75">→</span>
                     </>
                   )}
@@ -659,11 +725,11 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
               <div className="mb-8">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                   <Filter className="w-5 h-5 text-blue-600" />
-                  <span>Filter by Tag</span>
+                  <span>Add Variety</span>
                 </h3>
                 <div className="relative">
-                  <div className="flex overflow-x-auto flex-nowrap gap-2 pb-1 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
-                    {allTags.map(tag => (
+                  <div ref={tagScrollRef} className="flex overflow-x-auto flex-nowrap gap-2 pb-1 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
+                    {randomizedTags.map(tag => (
                       <button
                         key={tag}
                         onClick={() => toggleTag(tag)}
@@ -676,7 +742,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                         {tag}
                       </button>
                     ))}
-                    {allTags.length === 0 && (
+                    {randomizedTags.length === 0 && (
                       <span className="text-gray-400 text-sm">No tags available</span>
                     )}
                   </div>
