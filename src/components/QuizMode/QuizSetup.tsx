@@ -507,56 +507,6 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
           </div>
         </div>
       </div>
-      {/* Premium Upgrade Modal (copied from AIGenerator) */}
-      {showUpgradeModal && 
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Crown className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Unlock Random Quiz Generation</h3>
-              <p className="text-gray-600 mb-6">
-                Subscribe to generate unlimited random quizzes and unlock all premium features.
-              </p>
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center space-x-3 text-left">
-                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">Unlimited random quiz generation</span>
-                </div>
-                <div className="flex items-center space-x-3 text-left">
-                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">All 8 CISSP domains covered</span>
-                </div>
-                <div className="flex items-center space-x-3 text-left">
-                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">Cancel anytime</span>
-                </div>
-              </div>
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => setShowUpgradeModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  Maybe Later
-                </button>
-                <button
-                  onClick={async () => {
-                    const product = stripeProducts[0];
-                    await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
-                  }}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
-                >
-                  Upgrade Now
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-  }
 
   if (loading) {
     return (
