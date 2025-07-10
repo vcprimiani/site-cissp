@@ -489,50 +489,8 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
 
             {/* Quiz Setup and Quick Actions Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Quiz Setup (left) */}
-              <div className="md:col-span-2 order-1">
-                <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
-                  {/* Quiz Setup Section */}
-                  <div className="mb-8">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                      <Settings className="w-5 h-5 text-purple-600" />
-                      <span>Quiz Configuration</span>
-                    </h3>
-                    <div className="bg-gray-50 rounded-xl p-6">
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
-                        Number of Questions
-                      </label>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          {[5, 10, 25].map(num => (
-                            <button
-                              key={num}
-                              onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
-                              className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 font-medium ${
-                                numberOfQuestions === num
-                                  ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm'
-                                  : 'border-gray-300 hover:border-purple-300 text-gray-700 hover:bg-gray-50'
-                              }`}
-                            >
-                              {num}
-                            </button>
-                          ))}
-                        </div>
-                        <button
-                          onClick={generateQuiz}
-                          disabled={filteredQuestions.length === 0}
-                          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Play className="w-5 h-5" />
-                          <span>Start Quiz</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* Quick Actions (right) */}
-              <div className="md:col-span-1 order-2">
+              {/* Quick Actions (left) */}
+              <div className="md:col-span-1 order-1">
                 <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mb-6 md:mb-0">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                     <Bookmark className="w-5 h-5 text-blue-600" />
@@ -623,6 +581,48 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                         </>
                       )}
                     </button>
+                  </div>
+                </div>
+              </div>
+              {/* Quiz Configuration (right) */}
+              <div className="md:col-span-2 order-2">
+                <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+                  {/* Quiz Setup Section */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <Settings className="w-5 h-5 text-purple-600" />
+                      <span>Quiz Configuration</span>
+                    </h3>
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Number of Questions
+                      </label>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          {[5, 10, 25].map(num => (
+                            <button
+                              key={num}
+                              onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
+                              className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 font-medium ${
+                                numberOfQuestions === num
+                                  ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm'
+                                  : 'border-gray-300 hover:border-purple-300 text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              {num}
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          onClick={generateQuiz}
+                          disabled={filteredQuestions.length === 0}
+                          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Play className="w-5 h-5" />
+                          <span>Start Quiz</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
