@@ -178,7 +178,7 @@ export const generateManagerPerspective = async (
   correctAnswer: number,
   domain: string
 ): Promise<AIResponse> => {
-  const prompt = `As a senior cybersecurity manager and CISSP professional, explain how to think through this question from a strategic management perspective:
+  const prompt = `As a senior cybersecurity manager and CISSP professional, provide a clear, concise, exam-focused explanation for this question. Directly explain why the correct answer is correct, and why the other options are not as appropriate. Use bullet points or short paragraphs for clarity.
 
 Question: ${question}
 
@@ -188,23 +188,16 @@ ${options.map((option, index) => `${String.fromCharCode(65 + index)}. ${option}`
 Correct Answer: ${String.fromCharCode(65 + correctAnswer)}. ${options[correctAnswer]}
 Domain: ${domain}
 
-Provide a manager's strategic perspective that covers:
+Please address:
 
-1. **Strategic Context**: How does this question relate to business objectives and organizational risk management?
+- **Why is the correct answer the best choice?**
+- **Why are the other options less appropriate?**
+- **Strategic Context**: How does this relate to business objectives and risk management?
+- **Decision Framework**: What management principles or frameworks apply?
+- **Stakeholder Considerations**: Who is affected and what are their concerns?
+- **Risk vs. Business Impact**: How should a manager balance security and business needs?
 
-2. **Decision Framework**: What management principles and frameworks should guide the thinking process?
-
-3. **Stakeholder Considerations**: Who are the key stakeholders affected by this decision and what are their concerns?
-
-4. **Risk vs. Business Impact**: How should a manager balance security requirements with business needs and operational efficiency?
-
-5. **Implementation Perspective**: What practical considerations would a manager need to think about when implementing this solution?
-
-6. **Long-term Implications**: What are the strategic and long-term consequences of this decision?
-
-Keep the response focused on management thinking patterns, strategic decision-making, and business alignment rather than just technical details. Help the reader understand how senior security professionals approach these types of decisions in real-world scenarios.
-
-Limit response to 300 words and focus on actionable management insights.`;
+Be direct, actionable, and exam-focused. Format for easy reading.`;
 
   return generateAIResponse(prompt, `This is a CISSP management perspective analysis for the ${domain} domain.`);
 };

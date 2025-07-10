@@ -129,6 +129,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   // Per-question timer effect
   useEffect(() => {
+    // Only run timer if not showing result (i.e., not in review mode)
     if (showResult) return; // Pause timer when showing explanation
     const interval = setInterval(() => {
       const newQuestionElapsedTime = Math.floor((Date.now() - questionStartTime) / 1000);
@@ -141,6 +142,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   useEffect(() => {
     setSelectedAnswer(userAnswers[currentIndex]);
     setShowResult(false);
+    // Only reset timer when moving to a new question, not when just showing result
     setQuestionStartTime(Date.now());
     setQuestionElapsedTime(0); // Reset per-question timer
     setTallyCounts([0, 0, 0, 0]); // Reset tallies for new question
@@ -160,6 +162,35 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       onExit();
     }
   }, [hasPersistedQuiz, persistedState, onExit]);
+
+  // Always generate manager perspective when question changes
+  useEffect(() => {
+    const questionId = currentQuestion.id;
+    if (!managerPerspectives[questionId]) {
+      setLoadingManagerPerspective(true);
+      setManagerPerspectiveError(null);
+      generateManagerPerspective(
+        currentQuestion.question,
+        currentQuestion.options,
+        currentQuestion.correctAnswer,
+        currentQuestion.domain
+      ).then(result => {
+        if (result.error) {
+          setManagerPerspectiveError(result.error);
+        } else {
+          setManagerPerspectives(prev => ({
+            ...prev,
+            [questionId]: result.content
+          }));
+        }
+      }).catch(() => {
+        setManagerPerspectiveError('Failed to generate manager perspective. Please try again.');
+      }).finally(() => {
+        setLoadingManagerPerspective(false);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, currentQuestion.id]);
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (showResult) return; // Prevent selection after showing result
@@ -702,13 +733,23 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                           The correct answer is: <strong>{currentQuestion.options[currentQuestion.correctAnswer]}</strong>
                         </p>
                       )}
-                      <div className="bg-white rounded-lg p-3 border">
+                      <div className="bg-white rounded-lg p-3 border mb-4">
                         <h4 className="font-medium text-gray-900 mb-2">Explanation:</h4>
                         {isEnhancedExplanation && enhancedExplanation ? (
                           formatExplanation(enhancedExplanation)
                         ) : (
                           formatExplanation(currentQuestion.explanation)
                         )}
+                      </div>
+                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                        <h4 className="font-medium text-blue-900 mb-2">Manager's Perspective</h4>
+                        {loadingManagerPerspective ? (
+                          <div className="flex items-center space-x-2 text-blue-700"><Loader className="w-4 h-4 animate-spin" /> Generating manager's perspective...</div>
+                        ) : managerPerspectiveError ? (
+                          <div className="text-red-600 text-sm">{managerPerspectiveError}</div>
+                        ) : managerPerspectives[currentQuestion.id] ? (
+                          formatManagerPerspective(managerPerspectives[currentQuestion.id])
+                        ) : null}
                       </div>
                     </div>
 

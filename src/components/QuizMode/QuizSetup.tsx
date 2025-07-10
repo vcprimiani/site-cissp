@@ -289,29 +289,17 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     setRandomGenerating(false);
   };
 
-  // For tag pills: randomize order, rename section, and add auto-scroll
+  // For tag pills: show only 10 random tags
   const [randomizedTags, setRandomizedTags] = useState<string[]>([]);
   useEffect(() => {
-    if (allTags.length > 0) {
-      setRandomizedTags([...allTags].sort(() => Math.random() - 0.5));
+    if (allTags.length === 0) {
+      setRandomizedTags([]);
+      return;
     }
+    // Shuffle and pick 10
+    const shuffled = [...allTags].sort(() => Math.random() - 0.5).slice(0, 10);
+    setRandomizedTags(shuffled);
   }, [allTags]);
-  // Auto-scroll effect
-  const tagScrollRef = React.useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!tagScrollRef.current) return;
-    let scrollAmount = 0;
-    const scroll = () => {
-      if (!tagScrollRef.current) return;
-      scrollAmount += 0.1; // even slower scroll
-      if (scrollAmount > tagScrollRef.current.scrollWidth - tagScrollRef.current.clientWidth) {
-        scrollAmount = 0;
-      }
-      tagScrollRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' });
-    };
-    const interval = setInterval(scroll, 200); // even slower interval
-    return () => clearInterval(interval);
-  }, [randomizedTags]);
 
   // Quiz Mode
   if (!hasActiveSubscription && !subscriptionLoading) {
@@ -520,7 +508,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
         </div>
       </div>
       {/* Premium Upgrade Modal (copied from AIGenerator) */}
-      {showUpgradeModal && (
+      {showUpgradeModal && 
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
             <div className="text-center">
@@ -731,7 +719,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                   <span>Add Variety</span>
                 </h3>
                 <div className="relative">
-                  <div ref={tagScrollRef} className="flex overflow-x-auto flex-nowrap gap-2 pb-1 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
+                  <div className="flex overflow-x-auto flex-nowrap gap-2 pb-1 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
                     {randomizedTags.map(tag => (
                       <button
                         key={tag}
