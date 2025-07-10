@@ -39,8 +39,13 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   );
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(persistedState?.selectedAnswer || null);
   const [showResult, setShowResult] = useState(persistedState?.showResult || false);
-  const [startTime] = useState(persistedState?.startTime || Date.now());
-  const [questionStartTime, setQuestionStartTime] = useState(persistedState?.questionStartTime || Date.now());
+  // Always restore startTime and questionStartTime from persistedState if available
+  const [startTime] = useState(
+    persistedState?.startTime ? persistedState.startTime : Date.now()
+  );
+  const [questionStartTime, setQuestionStartTime] = useState(
+    persistedState?.questionStartTime ? persistedState.questionStartTime : Date.now()
+  );
   const [questionTimes, setQuestionTimes] = useState<number[]>(persistedState?.questionTimes || []);
   const [elapsedTime, setElapsedTime] = useState(persistedState?.elapsedTime || 0);
   const [questionElapsedTime, setQuestionElapsedTime] = useState(persistedState?.questionElapsedTime || 0);
@@ -124,12 +129,13 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   // Per-question timer effect
   useEffect(() => {
+    if (showResult) return; // Pause timer when showing explanation
     const interval = setInterval(() => {
       const newQuestionElapsedTime = Math.floor((Date.now() - questionStartTime) / 1000);
       setQuestionElapsedTime(newQuestionElapsedTime);
     }, 1000);
     return () => clearInterval(interval);
-  }, [questionStartTime]);
+  }, [questionStartTime, showResult]);
 
   // Reset selected answer and tallies when question changes
   useEffect(() => {
@@ -146,6 +152,14 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     setLoadingEnhancedExplanation(false);
     setEnhancedExplanationError(null);
   }, [currentIndex, userAnswers]);
+
+  // Error handling for missing/corrupted persisted state
+  useEffect(() => {
+    if (hasPersistedQuiz() && !persistedState) {
+      alert('Quiz session could not be restored. Returning to setup.');
+      onExit();
+    }
+  }, [hasPersistedQuiz, persistedState, onExit]);
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (showResult) return; // Prevent selection after showing result

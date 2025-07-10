@@ -24,8 +24,10 @@ interface QuizResultsProps {
 export const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz, onBackToSetup, isDailyQuiz, isUnsubscribed }) => {
   const [progressSaved, setProgressSaved] = useState(false);
 
-  const percentage = Math.round((results.correctAnswers / results.totalQuestions) * 100);
-  const averageTime = Math.round(results.timeSpent / results.totalQuestions);
+  // Safeguard: Only calculate score if answers and questions match
+  const validResults = results.questionResults.length === results.totalQuestions;
+  const percentage = validResults ? Math.round((results.correctAnswers / results.totalQuestions) * 100) : 0;
+  const averageTime = validResults ? Math.round(results.timeSpent / results.totalQuestions) : 0;
 
   const handleTrackProgress = () => {
     const history = JSON.parse(localStorage.getItem('quiz-progress-history') || '[]');
@@ -124,6 +126,12 @@ site.cisspstudygroup.com
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
+        {/* Warning for mismatched results */}
+        {!validResults && (
+          <div className="bg-red-100 border border-red-300 text-red-800 rounded-xl p-4 mb-6 text-center">
+            <strong>Warning:</strong> There was a problem restoring your quiz results. The score may be inaccurate.
+          </div>
+        )}
         {/* Daily Quiz Upsell for Unsubscribed Users */}
         {isDailyQuiz && isUnsubscribed && (
           <div className="bg-gradient-to-r from-yellow-100 to-pink-100 border-2 border-yellow-300 rounded-2xl shadow-xl p-8 mb-8 text-center animate-fade-in">

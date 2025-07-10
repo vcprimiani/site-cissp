@@ -36,7 +36,7 @@ interface QuizResults {
   }[];
 }
 
-type QuizMode = 'setup' | 'quiz' | 'results';
+type QuizMode = 'setup' | 'quiz' | 'results'; //comment
 
 export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boolean; subscriptionLoading: boolean }> = ({ onQuizComplete, hasActiveSubscription, subscriptionLoading }) => {
   const { questions, loading, addQuestion, refreshQuestions } = useQuestions();
