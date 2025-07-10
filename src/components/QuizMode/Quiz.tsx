@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Question } from '../../types';
 import { Clock, CheckCircle, XCircle, ArrowRight, ArrowLeft, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader, Briefcase, Sparkles } from 'lucide-react';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
@@ -502,6 +502,16 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     });
   };
 
+  // Ref for the main question card
+  const questionCardRef = useRef<HTMLDivElement | null>(null);
+
+  // Scroll question card into view on question change
+  useEffect(() => {
+    if (questionCardRef.current) {
+      questionCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [currentIndex]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Progress Bar */}
@@ -522,7 +532,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Main Question Card */}
             <div className="lg:col-span-3">
-              <div className="bg-white rounded-2xl shadow-xl p-6">
+              <div ref={questionCardRef} className="bg-white rounded-2xl shadow-xl p-6">
                 {/* Keywords Display */}
                 {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 && (
                   <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
