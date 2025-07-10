@@ -567,12 +567,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Main Content */}
-      <div className="flex-1 py-6 flex justify-center items-start">
-        <div className="w-full" style={{ maxWidth: '1200px', width: '80%' }}>
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="flex-1 py-8 flex justify-center items-start">
+        <div className="w-[90vw] max-w-[1600px] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-[3fr_1fr] gap-8">
             {/* Main Question Card */}
-            <div className="lg:col-span-3">
-              <div ref={questionCardRef} className="bg-white rounded-2xl shadow-xl p-6">
+            <div>
+              <div ref={questionCardRef} className="bg-white rounded-2xl shadow-xl p-8">
                 {/* Keywords Display */}
                 {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 && (
                   <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
