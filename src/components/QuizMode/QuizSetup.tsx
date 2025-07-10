@@ -249,15 +249,15 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
       'Security Operations',
       'Software Development Security'
     ];
-    const newQuestions = [];
+    const newQuestionsData = [];
     for (let i = 0; i < 10; i++) {
       if (randomGenerationCancelled) break;
       const domain = domains[Math.floor(Math.random() * domains.length)];
       const options = {
         domain,
-        difficulty: 'Medium',
-        questionType: 'scenario-based',
-        scenarioType: 'technical',
+        difficulty: 'Medium' as 'Medium',
+        questionType: 'scenario-based' as 'scenario-based',
+        scenarioType: 'technical' as 'technical',
         topic: `general concepts from ${domain}`,
         includeDistractors: true,
         focusArea: ''
@@ -269,17 +269,21 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
           isActive: true,
           tags: [...response.question.tags, 'ai-generated']
         };
-        await addQuestion(newQ);
-        newQuestions.push(newQ);
+        await addQuestion(newQ); // addQuestion will handle createdBy and createdAt
+        newQuestionsData.push(newQ);
       }
       setAIRandomProgress(i + 1);
       setAIRandomEmoji(aiRandomEmojis[(i + 1) % aiRandomEmojis.length]);
     }
     await refreshQuestions();
-    if (newQuestions.length > 0) {
-      markQuestionsAsUsed(newQuestions);
+    // Find the 10 most recent ai-generated questions
+    const aiGeneratedQuestions = questions
+      .filter(q => q.tags.includes('ai-generated') && q.isActive)
+      .slice(0, 10);
+    if (aiGeneratedQuestions.length > 0) {
+      markQuestionsAsUsed(aiGeneratedQuestions);
       setQuizSession({
-        questions: newQuestions,
+        questions: aiGeneratedQuestions,
         currentIndex: 0,
         startTime: new Date(),
         isActive: true
@@ -506,14 +510,6 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
             </div>
           </div>
         </div>
-      </div>
-
-  if (loading) {
-    return (
-      <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Questions</h3>
-        <p className="text-gray-600">Fetching your question bank from the database...</p>
       </div>
     );
   }
