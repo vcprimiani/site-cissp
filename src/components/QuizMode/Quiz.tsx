@@ -12,6 +12,7 @@ interface QuizProps {
   initialIndex?: number;
   onComplete: (results: QuizResults) => void;
   onExit: () => void;
+  onProgressChange?: (current: number, total: number) => void;
 }
 
 interface QuizResults {
@@ -26,7 +27,7 @@ interface QuizResults {
   }[];
 }
 
-export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete, onExit }) => {
+export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete, onExit, onProgressChange }) => {
   const { persistedState, saveQuizState, clearPersistedState, hasPersistedQuiz } = useQuizPersistence();
   
   // Initialize state from initialIndex, persistedState, or 0
@@ -512,6 +513,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     }
   }, [currentIndex]);
 
+  useEffect(() => {
+    if (onProgressChange) {
+      onProgressChange(currentIndex, questions.length);
+    }
+  }, [currentIndex, questions.length, onProgressChange]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Progress Bar */}
@@ -806,9 +813,6 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                   <div className="flex items-center space-x-2 mb-3">
                     <Target className="w-5 h-5 text-blue-600" />
                     <span className="font-semibold text-gray-900">Quiz</span>
-                  </div>
-                  <div className="text-sm text-gray-600 mb-2">
-                    Question {currentIndex + 1} of {questions.length}
                   </div>
                   {hasPersistedQuiz() && (
                     <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block">

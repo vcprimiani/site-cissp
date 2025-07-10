@@ -73,6 +73,9 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   const aiRandomEmojis = ['🤔','🧐','🤓','😎','🦾','🧠','🔒','💡','🚀','🎯','✅'];
   const [aiRandomEmoji, setAIRandomEmoji] = useState(aiRandomEmojis[0]);
 
+  // Add state for quiz progress
+  const [quizProgress, setQuizProgress] = useState<{current: number, total: number} | null>(null);
+
   useEffect(() => {
     if (!hasActiveSubscription && !subscriptionLoading) {
       setDailyQuizLoading(true);
@@ -300,13 +303,13 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     let scrollAmount = 0;
     const scroll = () => {
       if (!tagScrollRef.current) return;
-      scrollAmount += 0.5;
+      scrollAmount += 0.2; // slower scroll
       if (scrollAmount > tagScrollRef.current.scrollWidth - tagScrollRef.current.clientWidth) {
         scrollAmount = 0;
       }
       tagScrollRef.current.scrollTo({ left: scrollAmount, behavior: 'smooth' });
     };
-    const interval = setInterval(scroll, 50);
+    const interval = setInterval(scroll, 100); // slower interval
     return () => clearInterval(interval);
   }, [randomizedTags]);
 
@@ -392,13 +395,179 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   // Quiz Mode for paid users
   if (quizMode === 'quiz' && quizSession) {
     return (
-      <Quiz
-        questions={quizSession.questions}
-        initialIndex={quizSession.currentIndex}
-        onComplete={handleQuizComplete}
-        onExit={exitQuiz}
-      />
-    );
+      <div className="max-w-6xl mx-auto space-y-8 px-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Quiz Setup (left, now main question card) */}
+          <div className="md:col-span-2 order-1 md:order-1">
+            <Quiz
+              questions={quizSession.questions}
+              initialIndex={quizSession.currentIndex}
+              onComplete={handleQuizComplete}
+              onExit={exitQuiz}
+              onProgressChange={(current, total) => setQuizProgress({current, total})}
+            />
+          </div>
+          {/* Quick Actions (right) */}
+          <div className="md:col-span-1 order-2 md:order-2">
+            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mb-6 md:mb-0">
+              {/* Progress Bar during quiz */}
+              {quizProgress && (
+                <div className="mb-6">
+                  <div className="text-xs text-gray-500 mb-1 text-center">Progress</div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
+                    <div
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${((quizProgress.current + 1) / quizProgress.total) * 100}%` }}
+                    />
+                  </div>
+                  <div className="text-xs text-gray-700 text-center font-semibold">
+                    Question {quizProgress.current + 1} of {quizProgress.total}
+                  </div>
+                </div>
+              )}
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                <Bookmark className="w-5 h-5 text-blue-600" />
+                <span>Quick Actions</span>
+              </h3>
+              <div className="grid grid-cols-1 gap-4">
+                {/* Start Quiz from Bookmarks */}
+                <button
+                  className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${
+                    bookmarkedIds.length === 0 
+                      ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
+                      : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 hover:border-blue-400'
+                  }`}
+                  onClick={startQuizFromBookmarks}
+                  disabled={bookmarkedIds.length === 0 || bookmarksLoading}
+                >
+                  <Bookmark className="w-5 h-5" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
+                  <div className="text-left">
+                    <div className="font-semibold">Start from Bookmarks</div>
+                    <div className="text-xs opacity-75">
+                      {bookmarkedIds.length > 0 ? `${bookmarkedIds.length} bookmarked questions` : 'No bookmarks yet'}
+                    </div>
+                  </div>
+                </button>
+                {/* Resume Quiz */}
+                {hasPersistedQuiz() && persistedState && (
+                  <button
+                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 bg-green-50 text-green-700 border-green-300 hover:bg-green-100 hover:border-green-400"
+                    onClick={resumeQuiz}
+                  >
+                    <RefreshCw className="w-5 h-5" />
+                    <div className="text-left">
+                      <div className="font-semibold">Resume Previous Quiz</div>
+                      <div className="text-xs opacity-75">
+                        Question {persistedState.currentIndex + 1} of {persistedState.questions.length}
+                      </div>
+                    </div>
+                  </button>
+                )}
+                {/* 10 Hard Random Button */}
+                <button
+                  type="button"
+                  className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 font-semibold hover:from-orange-100 hover:to-amber-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                  onClick={() => {
+                    // Find all hard questions from all domains
+                    const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
+                    if (hardQuestions.length < 10) {
+                      alert('Not enough hard questions available.');
+                      return;
+                    }
+                    // Shuffle and pick 10
+                    const shuffled = [...hardQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
+                    markQuestionsAsUsed(shuffled);
+                    setQuizSession({
+                      questions: shuffled,
+                      currentIndex: 0,
+                      startTime: new Date(),
+                      isActive: true
+                    });
+                    setQuizMode('quiz');
+                  }}
+                >
+                  <span className="text-lg">🌶️</span>
+                  <span>10 Hard Random (All Domains)</span>
+                  <span className="text-sm opacity-75">→</span>
+                </button>
+                {/* Generate 10 Random and Start Quiz */}
+                <button
+                  type="button"
+                  className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-blue-400 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleRandomGenerateAndStart}
+                  disabled={randomGenerating}
+                >
+                  {randomGenerating ? (
+                    <span className="flex items-center space-x-2 w-full">
+                      <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden mr-2">
+                        <div style={{ width: `${(aiRandomProgress/10)*100}%` }} className="h-full bg-blue-400 transition-all duration-300"></div>
+                      </div>
+                      <span className="text-xs font-bold text-blue-700 mr-1">{aiRandomProgress}/10</span>
+                      <span className="text-2xl ml-2">{aiRandomEmoji}</span>
+                      <button type="button" className="ml-3 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300" onClick={e => { e.stopPropagation(); setRandomGenerationCancelled(true); }}>Cancel</button>
+                    </span>
+                  ) : (
+                    <>
+                      <span className="text-lg">🎲</span>
+                      <span>Generate 10 New Quiz Questions</span>
+                      <span className="text-sm opacity-75">→</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Premium Upgrade Modal (copied from AIGenerator) */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Crown className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Unlock Random Quiz Generation</h3>
+              <p className="text-gray-600 mb-6">
+                Subscribe to generate unlimited random quizzes and unlock all premium features.
+              </p>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center space-x-3 text-left">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">Unlimited random quiz generation</span>
+                </div>
+                <div className="flex items-center space-x-3 text-left">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">All 8 CISSP domains covered</span>
+                </div>
+                <div className="flex items-center space-x-3 text-left">
+                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">Cancel anytime</span>
+                </div>
+              </div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Maybe Later
+                </button>
+                <button
+                  onClick={async () => {
+                    const product = stripeProducts[0];
+                    await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
+                  }}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
+                >
+                  Upgrade Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
   }
 
   if (loading) {
@@ -514,174 +683,8 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
 
         {/* Quiz Setup and Quick Actions Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Quick Actions (left) */}
-          <div className="md:col-span-1 order-2 md:order-1">
-            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mb-6 md:mb-0">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                <Bookmark className="w-5 h-5 text-blue-600" />
-                <span>Quick Actions</span>
-              </h3>
-              <div className="grid grid-cols-1 gap-4">
-                {/* Start Quiz from Bookmarks */}
-                <button
-                  className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${
-                    bookmarkedIds.length === 0 
-                      ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
-                      : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 hover:border-blue-400'
-                  }`}
-                  onClick={startQuizFromBookmarks}
-                  disabled={bookmarkedIds.length === 0 || bookmarksLoading}
-                >
-                  <Bookmark className="w-5 h-5" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
-                  <div className="text-left">
-                    <div className="font-semibold">Start from Bookmarks</div>
-                    <div className="text-xs opacity-75">
-                      {bookmarkedIds.length > 0 ? `${bookmarkedIds.length} bookmarked questions` : 'No bookmarks yet'}
-                    </div>
-                  </div>
-                </button>
-                {/* Resume Quiz */}
-                {hasPersistedQuiz() && persistedState && (
-                  <button
-                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 bg-green-50 text-green-700 border-green-300 hover:bg-green-100 hover:border-green-400"
-                    onClick={resumeQuiz}
-                  >
-                    <RefreshCw className="w-5 h-5" />
-                    <div className="text-left">
-                      <div className="font-semibold">Resume Previous Quiz</div>
-                      <div className="text-xs opacity-75">
-                        Question {persistedState.currentIndex + 1} of {persistedState.questions.length}
-                      </div>
-                    </div>
-                  </button>
-                )}
-                {/* Generate 10 New AI Questions (Premium only) */}
-                {hasActiveSubscription && (
-                  <button
-                    type="button"
-                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 font-semibold hover:from-green-100 hover:to-emerald-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={async () => {
-                      setAIGenerating(true);
-                      setAIGenerationError(null);
-                      try {
-                        const domains = [
-                          'Security and Risk Management',
-                          'Asset Security',
-                          'Security Architecture and Engineering',
-                          'Communication and Network Security',
-                          'Identity and Access Management (IAM)',
-                          'Security Assessment and Testing',
-                          'Security Operations',
-                          'Software Development Security'
-                        ];
-                        const newQuestions = [];
-                        for (let i = 0; i < 10; i++) {
-                          const domain = domains[Math.floor(Math.random() * domains.length)];
-                          const options = {
-                            domain,
-                            difficulty: 'Medium',
-                            questionType: 'scenario-based',
-                            scenarioType: 'technical',
-                            topic: `general concepts from ${domain}`,
-                            includeDistractors: true,
-                            focusArea: ''
-                          };
-                          const response = await generateAIQuestion(options.topic, options);
-                          if (response && response.question) {
-                            const newQ = {
-                              ...response.question,
-                              isActive: true,
-                              tags: [...response.question.tags, 'ai-generated']
-                            };
-                            await addQuestion(newQ);
-                            newQuestions.push(newQ);
-                          } else if (response && response.error) {
-                            setAIGenerationError(response.error);
-                            break;
-                          }
-                        }
-                        await refreshQuestions();
-                        if (newQuestions.length > 0) {
-                          alert(`Successfully generated and saved ${newQuestions.length} AI questions!`);
-                        } else {
-                          alert('No questions were generated. Please try again.');
-                        }
-                      } catch (err: any) {
-                        setAIGenerationError(err.message || 'Failed to generate questions.');
-                        alert(err.message || 'Failed to generate questions.');
-                      } finally {
-                        setAIGenerating(false);
-                      }
-                    }}
-                    disabled={aiGenerating}
-                  >
-                    {aiGenerating ? (
-                      <span className="flex items-center space-x-2"><svg className="animate-spin h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg><span>Generating...</span></span>
-                    ) : (
-                      <>
-                        <span className="text-lg">🤖</span>
-                        <span>Generate 10 New AI Questions</span>
-                        <span className="text-sm opacity-75">→</span>
-                      </>
-                    )}
-                  </button>
-                )}
-                {/* 10 Hard Random Button */}
-                <button
-                  type="button"
-                  className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 font-semibold hover:from-orange-100 hover:to-amber-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                  onClick={() => {
-                    // Find all hard questions from all domains
-                    const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
-                    if (hardQuestions.length < 10) {
-                      alert('Not enough hard questions available.');
-                      return;
-                    }
-                    // Shuffle and pick 10
-                    const shuffled = [...hardQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
-                    markQuestionsAsUsed(shuffled);
-                    setQuizSession({
-                      questions: shuffled,
-                      currentIndex: 0,
-                      startTime: new Date(),
-                      isActive: true
-                    });
-                    setQuizMode('quiz');
-                  }}
-                >
-                  <span className="text-lg">🌶️</span>
-                  <span>10 Hard Random (All Domains)</span>
-                  <span className="text-sm opacity-75">→</span>
-                </button>
-                {/* Generate 10 Random and Start Quiz */}
-                <button
-                  type="button"
-                  className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-blue-400 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleRandomGenerateAndStart}
-                  disabled={randomGenerating}
-                >
-                  {randomGenerating ? (
-                    <span className="flex items-center space-x-2 w-full">
-                      <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden mr-2">
-                        <div style={{ width: `${(aiRandomProgress/10)*100}%` }} className="h-full bg-blue-400 transition-all duration-300"></div>
-                      </div>
-                      <span className="text-2xl ml-2">{aiRandomEmoji}</span>
-                      <button type="button" className="ml-3 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300" onClick={e => { e.stopPropagation(); setRandomGenerationCancelled(true); }}>Cancel</button>
-                    </span>
-                  ) : (
-                    <>
-                      <span className="text-lg">🎲</span>
-                      <span>Generate 10 New Quiz Questions</span>
-                      <span className="text-sm opacity-75">→</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Quiz Setup (right) */}
-          <div className="md:col-span-2 order-1 md:order-2">
+          {/* Quiz Setup (left) */}
+          <div className="md:col-span-2 order-2 md:order-1">
             <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
               {/* Quiz Setup Section */}
               <div className="mb-8">
@@ -749,6 +752,102 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                   {/* Optional: fade effect for scroll hint */}
                   <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white/90 to-transparent" />
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions (right) */}
+          <div className="md:col-span-1 order-1 md:order-2">
+            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mb-6 md:mb-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                <Bookmark className="w-5 h-5 text-blue-600" />
+                <span>Quick Actions</span>
+              </h3>
+              <div className="grid grid-cols-1 gap-4">
+                {/* Start Quiz from Bookmarks */}
+                <button
+                  className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 ${
+                    bookmarkedIds.length === 0 
+                      ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
+                      : 'bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100 hover:border-blue-400'
+                  }`}
+                  onClick={startQuizFromBookmarks}
+                  disabled={bookmarkedIds.length === 0 || bookmarksLoading}
+                >
+                  <Bookmark className="w-5 h-5" fill={bookmarkedIds.length > 0 ? 'currentColor' : 'none'} />
+                  <div className="text-left">
+                    <div className="font-semibold">Start from Bookmarks</div>
+                    <div className="text-xs opacity-75">
+                      {bookmarkedIds.length > 0 ? `${bookmarkedIds.length} bookmarked questions` : 'No bookmarks yet'}
+                    </div>
+                  </div>
+                </button>
+                {/* Resume Quiz */}
+                {hasPersistedQuiz() && persistedState && (
+                  <button
+                    className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 bg-green-50 text-green-700 border-green-300 hover:bg-green-100 hover:border-green-400"
+                    onClick={resumeQuiz}
+                  >
+                    <RefreshCw className="w-5 h-5" />
+                    <div className="text-left">
+                      <div className="font-semibold">Resume Previous Quiz</div>
+                      <div className="text-xs opacity-75">
+                        Question {persistedState.currentIndex + 1} of {persistedState.questions.length}
+                      </div>
+                    </div>
+                  </button>
+                )}
+                {/* 10 Hard Random Button */}
+                <button
+                  type="button"
+                  className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 font-semibold hover:from-orange-100 hover:to-amber-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                  onClick={() => {
+                    // Find all hard questions from all domains
+                    const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
+                    if (hardQuestions.length < 10) {
+                      alert('Not enough hard questions available.');
+                      return;
+                    }
+                    // Shuffle and pick 10
+                    const shuffled = [...hardQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
+                    markQuestionsAsUsed(shuffled);
+                    setQuizSession({
+                      questions: shuffled,
+                      currentIndex: 0,
+                      startTime: new Date(),
+                      isActive: true
+                    });
+                    setQuizMode('quiz');
+                  }}
+                >
+                  <span className="text-lg">🌶️</span>
+                  <span>10 Hard Random (All Domains)</span>
+                  <span className="text-sm opacity-75">→</span>
+                </button>
+                {/* Generate 10 Random and Start Quiz */}
+                <button
+                  type="button"
+                  className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-blue-400 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleRandomGenerateAndStart}
+                  disabled={randomGenerating}
+                >
+                  {randomGenerating ? (
+                    <span className="flex items-center space-x-2 w-full">
+                      <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden mr-2">
+                        <div style={{ width: `${(aiRandomProgress/10)*100}%` }} className="h-full bg-blue-400 transition-all duration-300"></div>
+                      </div>
+                      <span className="text-xs font-bold text-blue-700 mr-1">{aiRandomProgress}/10</span>
+                      <span className="text-2xl ml-2">{aiRandomEmoji}</span>
+                      <button type="button" className="ml-3 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300" onClick={e => { e.stopPropagation(); setRandomGenerationCancelled(true); }}>Cancel</button>
+                    </span>
+                  ) : (
+                    <>
+                      <span className="text-lg">🎲</span>
+                      <span>Generate 10 New Quiz Questions</span>
+                      <span className="text-sm opacity-75">→</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
