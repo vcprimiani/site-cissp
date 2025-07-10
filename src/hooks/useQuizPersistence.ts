@@ -11,6 +11,7 @@ interface PersistedQuizState {
   questionStartTime: number;
   questionTimes: number[];
   elapsedTime: number;
+  questionElapsedTime?: number;
   tallyCounts: number[];
   showTallies: boolean;
   keywords: string[];

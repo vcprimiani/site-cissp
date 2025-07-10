@@ -104,7 +104,6 @@ export const QuestionBankMode: React.FC<QuestionBankModeProps> = ({ appState, on
             questions={questions}
             loading={loading}
             currentUser={appState.currentUser!}
-            onAddQuestion={addQuestion}
             onUpdateQuestion={updateQuestion}
             onDeleteQuestion={deleteQuestion}
             hasActiveSubscription={hasActiveSubscription}
@@ -118,8 +117,6 @@ export const QuestionBankMode: React.FC<QuestionBankModeProps> = ({ appState, on
             currentUser={appState.currentUser!}
             onAddQuestion={addQuestion}
             onNavigateToQuestionBank={handleNavigateToQuestionBank}
-            hasActiveSubscription={hasActiveSubscription}
-            subscriptionLoading={subscriptionLoading}
           />
         )}
       </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Question } from '../../types';
-import { Clock, CheckCircle, XCircle, ArrowRight, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader, Briefcase, Sparkles } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, ArrowRight, ArrowLeft, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader, Briefcase, Sparkles } from 'lucide-react';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { analyzeCISSPKeywords, highlightKeywords } from '../../services/keywordAnalysis';
 import { generateManagerPerspective, enhanceQuestionExplanation } from '../../services/openai';
@@ -42,6 +42,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   const [questionStartTime, setQuestionStartTime] = useState(persistedState?.questionStartTime || Date.now());
   const [questionTimes, setQuestionTimes] = useState<number[]>(persistedState?.questionTimes || []);
   const [elapsedTime, setElapsedTime] = useState(persistedState?.elapsedTime || 0);
+  const [questionElapsedTime, setQuestionElapsedTime] = useState(persistedState?.questionElapsedTime || 0);
   
   // Tally tracking for participant responses
   const [tallyCounts, setTallyCounts] = useState<number[]>(persistedState?.tallyCounts || [0, 0, 0, 0]);
@@ -98,6 +99,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       questionStartTime,
       questionTimes,
       elapsedTime,
+      questionElapsedTime,
       tallyCounts,
       showTallies,
       keywords: questionKeywords[currentQuestion?.id] || [],
@@ -108,7 +110,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       loadingEnhancedExplanation,
       enhancedExplanationError
     });
-  }, [currentIndex, userAnswers, selectedAnswer, showResult, questionStartTime, questionTimes, elapsedTime, tallyCounts, showTallies, questionKeywords, showKeywords, isEnhancedExplanation, enhancedExplanation, loadingEnhancedExplanation, enhancedExplanationError]);
+  }, [currentIndex, userAnswers, selectedAnswer, showResult, questionStartTime, questionTimes, elapsedTime, questionElapsedTime, tallyCounts, showTallies, questionKeywords, showKeywords, isEnhancedExplanation, enhancedExplanation, loadingEnhancedExplanation, enhancedExplanationError]);
 
   // Timer effect
   useEffect(() => {
@@ -119,11 +121,21 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     return () => clearInterval(interval);
   }, [startTime]);
 
+  // Per-question timer effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newQuestionElapsedTime = Math.floor((Date.now() - questionStartTime) / 1000);
+      setQuestionElapsedTime(newQuestionElapsedTime);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [questionStartTime]);
+
   // Reset selected answer and tallies when question changes
   useEffect(() => {
     setSelectedAnswer(userAnswers[currentIndex]);
     setShowResult(false);
     setQuestionStartTime(Date.now());
+    setQuestionElapsedTime(0); // Reset per-question timer
     setTallyCounts([0, 0, 0, 0]); // Reset tallies for new question
     setKeywordError(null);
     setShowManagerPerspective(false);
@@ -271,9 +283,11 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   const handleNextQuestion = () => {
     if (selectedAnswer === null) return;
-
-    // Record time spent on this question
-    const timeSpent = Date.now() - questionStartTime;
+    
+    // Calculate time spent on current question
+    const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
+    
+    // Update question times
     setQuestionTimes(prev => {
       const newTimes = [...prev];
       newTimes[currentIndex] = timeSpent;
@@ -313,6 +327,32 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       setSelectedAnswer(null);
       setShowResult(false);
     }
+  };
+
+  const handlePreviousQuestion = () => {
+    if (currentIndex === 0) return; // Can't go back from first question
+    
+    // Calculate time spent on current question
+    const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
+    
+    // Update question times
+    setQuestionTimes(prev => {
+      const newTimes = [...prev];
+      newTimes[currentIndex] = timeSpent;
+      return newTimes;
+    });
+
+    // Save current answer if selected
+    if (selectedAnswer !== null) {
+      const newAnswers = [...userAnswers];
+      newAnswers[currentIndex] = selectedAnswer;
+      setUserAnswers(newAnswers);
+    }
+
+    // Go to previous question
+    setCurrentIndex(prev => prev - 1);
+    setSelectedAnswer(null);
+    setShowResult(false);
   };
 
   const handleShowResult = () => {
@@ -464,68 +504,9 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
-      {/* Header */}
+      {/* Progress Bar */}
       <div className="bg-white shadow-sm border-b border-gray-200 p-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Target className="w-5 h-5 text-blue-600" />
-              <span className="font-semibold text-gray-900">Quiz</span>
-            </div>
-            <div className="text-sm text-gray-600">
-              Question {currentIndex + 1} of {questions.length}
-            </div>
-            {hasPersistedQuiz() && (
-              <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                Resumed
-              </div>
-            )}
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            {/* Keyword Analysis Button */}
-            <button
-              onClick={handleToggleKeywords}
-              disabled={loadingKeywords}
-              className={`flex items-center space-x-2 px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                showKeywords 
-                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' 
-                  : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-              }`}
-            >
-              {loadingKeywords ? (
-                <Loader className="w-4 h-4 animate-spin" />
-              ) : (
-                <Lightbulb className="w-4 h-4" />
-              )}
-              <span>
-                {loadingKeywords 
-                  ? 'Analyzing...' 
-                  : showKeywords 
-                  ? 'Hide Keywords' 
-                  : 'Highlight Keywords'
-                }
-              </span>
-            </button>
-
-            {/* Tally Toggle */}
-            {/* Remove the Tally Toggle button from the quiz header */}
-            
-            <div className="flex items-center space-x-2 text-gray-600">
-              <Clock className="w-4 h-4" />
-              <span className="font-mono text-sm">{formatTime(elapsedTime)}</span>
-            </div>
-            <button
-              onClick={handleExit}
-              className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
-            >
-              Exit
-            </button>
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="max-w-6xl mx-auto mt-4">
+        <div className="max-w-6xl mx-auto">
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
               className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
@@ -536,42 +517,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="max-w-7xl w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Tally Panel */}
-            {/* Remove the Tally Panel (showTallies && ...) */}
-
-            {/* Question Card */}
-            <div className={showTallies ? "lg:col-span-9" : "lg:col-span-12"}>
+      <div className="flex-1 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Main Question Card */}
+            <div className="lg:col-span-3">
               <div className="bg-white rounded-2xl shadow-xl p-8">
-                {/* Question Header */}
-                <div className="flex flex-wrap items-center justify-between mb-6">
-                  <div className="flex flex-wrap gap-3">
-                    <span
-                      className="px-3 py-1 rounded-full text-sm font-medium"
-                      style={{
-                        backgroundColor: domainColor.primary,
-                        color: 'white'
-                      }}
-                    >
-                      🏛️ {currentQuestion.domain}
-                    </span>
-                    <span
-                      className="px-3 py-1 rounded-full text-sm font-medium"
-                      style={{
-                        backgroundColor: difficultyColor.primary,
-                        color: 'white'
-                      }}
-                    >
-                      {currentQuestion.difficulty === 'Easy' && '🟢'}
-                      {currentQuestion.difficulty === 'Medium' && '🟡'}
-                      {currentQuestion.difficulty === 'Hard' && '🔴'}
-                      {currentQuestion.difficulty}
-                    </span>
-                  </div>
-                </div>
-
                 {/* Keywords Display */}
                 {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 && (
                   <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -602,8 +553,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                   </div>
                 )}
 
-                {/* Question Text and Read Aloud Button */}
-                <div className="mb-8 flex items-center gap-2">
+                {/* Question Text */}
+                <div className="mb-8">
                   {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 ? (
                     <div 
                       className="text-xl leading-relaxed text-gray-900 font-medium"
@@ -614,28 +565,6 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                       {currentQuestion.question}
                     </span>
                   )}
-                  <button
-                    type="button"
-                    onClick={handleReadAloud}
-                    className={`ml-2 p-1 rounded-full border border-blue-200 shadow-md hover:bg-blue-100 transition-colors ${isSpeaking ? 'bg-blue-200' : 'bg-white'}`}
-                    title={isSpeaking ? 'Pause reading' : 'Read question aloud'}
-                    style={{ boxShadow: '0 2px 8px 0 rgba(80, 120, 255, 0.10)' }}
-                  >
-                    {isSpeaking ? (
-                      // Modern Pause icon
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 32 32" className="w-7 h-7 text-blue-600">
-                        <rect x="9" y="7" width="4" height="18" rx="2" />
-                        <rect x="19" y="7" width="4" height="18" rx="2" />
-                      </svg>
-                    ) : (
-                      // Modern Speaker with sound waves icon
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 32 32" className="w-7 h-7 text-blue-600">
-                        <path d="M14 8.5v15l-6-5.5H4v-4h4l6-5.5z" />
-                        <path d="M20.5 11.5a1 1 0 0 1 1.4 0c2.7 2.7 2.7 7.3 0 10a1 1 0 1 1-1.4-1.4c2-2 2-5.2 0-7.2a1 1 0 0 1 0-1.4z" />
-                        <path d="M24.5 7.5a1 1 0 0 1 1.4 0c5.1 5.1 5.1 13.4 0 18.5a1 1 0 1 1-1.4-1.4c4.3-4.3 4.3-11.4 0-15.7a1 1 0 0 1 0-1.4z" />
-                      </svg>
-                    )}
-                  </button>
                 </div>
 
                 {/* Answer Options */}
@@ -744,16 +673,16 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                       )}
                       <div className="bg-white rounded-lg p-3 border">
                         <h4 className="font-medium text-gray-900 mb-2">Explanation:</h4>
-                                                 {isEnhancedExplanation && enhancedExplanation ? (
-                           formatExplanation(enhancedExplanation)
-                         ) : (
-                           formatExplanation(currentQuestion.explanation)
-                         )}
+                        {isEnhancedExplanation && enhancedExplanation ? (
+                          formatExplanation(enhancedExplanation)
+                        ) : (
+                          formatExplanation(currentQuestion.explanation)
+                        )}
                       </div>
                     </div>
 
-                                         {/* Enhance Explanation Button */}
-                     {!isEnhancedExplanation && !isStructuredExplanation(currentQuestion.explanation) && (
+                    {/* Enhance Explanation Button */}
+                    {!isEnhancedExplanation && !isStructuredExplanation(currentQuestion.explanation) && (
                       <div className="mt-4">
                         <button
                           onClick={handleEnhanceExplanation}
@@ -855,6 +784,158 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                       {isLastQuestion && <Trophy className="w-4 h-4" />}
                     </button>
                   )}
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar Card */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-2xl shadow-xl p-6 sticky top-6">
+                {/* Quiz Header Info */}
+                <div className="mb-6">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <Target className="w-5 h-5 text-blue-600" />
+                    <span className="font-semibold text-gray-900">Quiz</span>
+                  </div>
+                  <div className="text-sm text-gray-600 mb-2">
+                    Question {currentIndex + 1} of {questions.length}
+                  </div>
+                  {hasPersistedQuiz() && (
+                    <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block">
+                      Resumed
+                    </div>
+                  )}
+                </div>
+
+                {/* Timers */}
+                <div className="mb-6 space-y-4">
+                  {/* Total Timer */}
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Total Time</div>
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <Clock className="w-4 h-4" />
+                      <span className="font-mono text-lg font-semibold">{formatTime(elapsedTime)}</span>
+                    </div>
+                  </div>
+
+                  {/* Per-Question Timer */}
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Question Time</div>
+                    <div className="flex items-center space-x-2">
+                      <RotateCcw className="w-4 h-4" />
+                      <span 
+                        className={`font-mono text-lg font-semibold ${
+                          questionElapsedTime >= 85 ? 'text-red-600' : 'text-gray-600'
+                        }`}
+                      >
+                        {formatTime(questionElapsedTime)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Domain and Difficulty Badges */}
+                <div className="mb-6 space-y-3">
+                  <span
+                    className="px-3 py-2 rounded-lg text-sm font-medium block text-center"
+                    style={{
+                      backgroundColor: domainColor.primary,
+                      color: 'white'
+                    }}
+                  >
+                    🏛️ {currentQuestion.domain}
+                  </span>
+                  <span
+                    className="px-3 py-2 rounded-lg text-sm font-medium block text-center"
+                    style={{
+                      backgroundColor: difficultyColor.primary,
+                      color: 'white'
+                    }}
+                  >
+                    {currentQuestion.difficulty === 'Easy' && '🟢'}
+                    {currentQuestion.difficulty === 'Medium' && '🟡'}
+                    {currentQuestion.difficulty === 'Hard' && '🔴'}
+                    {currentQuestion.difficulty}
+                  </span>
+                </div>
+
+                {/* Voice/Read Aloud Button */}
+                <div className="mb-6">
+                  <button
+                    type="button"
+                    onClick={handleReadAloud}
+                    className={`w-full p-3 rounded-lg border border-blue-200 shadow-md hover:bg-blue-100 transition-colors ${
+                      isSpeaking ? 'bg-blue-200' : 'bg-white'
+                    }`}
+                    title={isSpeaking ? 'Pause reading' : 'Read question aloud'}
+                    style={{ boxShadow: '0 2px 8px 0 rgba(80, 120, 255, 0.10)' }}
+                  >
+                    {isSpeaking ? (
+                      // Modern Pause icon
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 32 32" className="w-6 h-6 text-blue-600 mx-auto">
+                        <rect x="9" y="7" width="4" height="18" rx="2" />
+                        <rect x="19" y="7" width="4" height="18" rx="2" />
+                      </svg>
+                    ) : (
+                      // Modern Speaker with sound waves icon
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 32 32" className="w-6 h-6 text-blue-600 mx-auto">
+                        <path d="M14 8.5v15l-6-5.5H4v-4h4l6-5.5z" />
+                        <path d="M20.5 11.5a1 1 0 0 1 1.4 0c2.7 2.7 2.7 7.3 0 10a1 1 0 1 1-1.4-1.4c2-2 2-5.2 0-7.2a1 1 0 0 1 0-1.4z" />
+                        <path d="M24.5 7.5a1 1 0 0 1 1.4 0c5.1 5.1 5.1 13.4 0 18.5a1 1 0 1 1-1.4-1.4c4.3-4.3 4.3-11.4 0-15.7a1 1 0 0 1 0-1.4z" />
+                      </svg>
+                    )}
+                    <div className="text-xs text-gray-600 mt-1 text-center">
+                      {isSpeaking ? 'Pause' : 'Read Aloud'}
+                    </div>
+                  </button>
+                </div>
+
+                {/* Highlight Keywords Button */}
+                <div className="mb-6">
+                  <button
+                    onClick={handleToggleKeywords}
+                    disabled={loadingKeywords}
+                    className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      showKeywords 
+                        ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' 
+                        : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                    }`}
+                  >
+                    {loadingKeywords ? (
+                      <Loader className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Lightbulb className="w-4 h-4" />
+                    )}
+                    <span>
+                      {loadingKeywords 
+                        ? 'Analyzing...' 
+                        : showKeywords 
+                        ? 'Hide Keywords' 
+                        : 'Highlight Keywords'
+                      }
+                    </span>
+                  </button>
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="space-y-3">
+                  {/* Back Button */}
+                  <button
+                    onClick={handlePreviousQuestion}
+                    disabled={currentIndex === 0}
+                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Previous</span>
+                  </button>
+
+                  {/* Exit Button */}
+                  <button
+                    onClick={handleExit}
+                    className="w-full px-4 py-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                  >
+                    Exit Quiz
+                  </button>
                 </div>
               </div>
             </div>
