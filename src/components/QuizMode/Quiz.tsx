@@ -567,8 +567,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Main Content */}
-      <div className="flex-1 py-6">
-        <div className="max-w-6xl w-full mx-auto px-4">
+      <div className="flex-1 py-6 flex justify-center items-start">
+        <div className="w-full" style={{ maxWidth: '1200px', width: '80%' }}>
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Main Question Card */}
             <div className="lg:col-span-3">
