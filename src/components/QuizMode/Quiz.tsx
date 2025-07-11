@@ -120,12 +120,14 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   // Timer effect
   useEffect(() => {
+    // Only run timer if not showing result (i.e., not in review mode)
+    if (showResult) return; // Pause timer when showing explanation
     const interval = setInterval(() => {
       const newElapsedTime = Math.floor((Date.now() - startTime) / 1000);
       setElapsedTime(newElapsedTime);
     }, 1000);
     return () => clearInterval(interval);
-  }, [startTime]);
+  }, [startTime, showResult]);
 
   // Per-question timer effect
   useEffect(() => {

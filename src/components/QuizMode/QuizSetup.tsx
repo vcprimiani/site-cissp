@@ -373,17 +373,14 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     <>
       {quizMode === 'quiz' && quizSession && (
         <div className="max-w-6xl mx-auto space-y-8 px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Quiz (left, main question card) */}
-            <div className="md:col-span-2 order-1 md:order-1">
-              <Quiz
-                questions={quizSession.questions}
-                initialIndex={quizSession.currentIndex}
-                onComplete={handleQuizComplete}
-                onExit={exitQuiz}
-                onProgressChange={(current, total) => setQuizProgress({current, total})}
-              />
-            </div>
+          <div>
+            <Quiz
+              questions={quizSession.questions}
+              initialIndex={quizSession.currentIndex}
+              onComplete={handleQuizComplete}
+              onExit={exitQuiz}
+              onProgressChange={(current, total) => setQuizProgress({current, total})}
+            />
           </div>
         </div>
       )}
