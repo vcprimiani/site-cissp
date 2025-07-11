@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Trophy, Clock, Target, RotateCcw, ArrowLeft, CheckCircle, XCircle, Share2 } from 'lucide-react';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { SocialShareButtons } from '../UI/SocialShareButtons';
+import { useAuth } from '../../hooks/useAuth';
+import { saveQuizProgress } from '../../services/progress';
 
 interface QuizResultsProps {
   results: {
@@ -23,19 +25,32 @@ interface QuizResultsProps {
 
 export const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz, onBackToSetup, isDailyQuiz, isUnsubscribed }) => {
   const [progressSaved, setProgressSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   // Safeguard: Only calculate score if answers and questions match
   const validResults = results.questionResults.length === results.totalQuestions;
   const percentage = validResults ? Math.round((results.correctAnswers / results.totalQuestions) * 100) : 0;
   const averageTime = validResults ? Math.round(results.timeSpent / results.totalQuestions) : 0;
 
-  const handleTrackProgress = () => {
+  const handleTrackProgress = async () => {
+    // Save to localStorage for offline support
     const history = JSON.parse(localStorage.getItem('quiz-progress-history') || '[]');
     const newEntry = {
       timestamp: Date.now(),
       results
     };
     localStorage.setItem('quiz-progress-history', JSON.stringify([...history, newEntry]));
+
+    // Save to Supabase if user is logged in
+    setSaveError(null);
+    if (user && user.id) {
+      try {
+        await saveQuizProgress({ user_id: user.id, results, dev_mode: true });
+      } catch (err: any) {
+        setSaveError('Failed to save progress to cloud.');
+      }
+    }
     setProgressSaved(true);
     setTimeout(() => setProgressSaved(false), 2000);
   };
@@ -130,6 +145,11 @@ site.cisspstudygroup.com
         {!validResults && (
           <div className="bg-red-100 border border-red-300 text-red-800 rounded-xl p-4 mb-6 text-center">
             <strong>Warning:</strong> There was a problem restoring your quiz results. The score may be inaccurate.
+          </div>
+        )}
+        {saveError && (
+          <div className="bg-red-100 border border-red-300 text-red-800 rounded-xl p-4 mb-4 text-center">
+            {saveError}
           </div>
         )}
         {/* Daily Quiz Upsell for Unsubscribed Users */}
