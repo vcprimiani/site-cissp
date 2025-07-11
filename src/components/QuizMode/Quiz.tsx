@@ -568,446 +568,328 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Main Content */}
       <div className="flex-1 py-8 flex justify-center items-start">
-        <div className="w-[90vw] max-w-[1600px] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-[3fr_1fr] gap-8">
-            {/* Main Question Card */}
-            <div>
-              <div ref={questionCardRef} className="bg-white rounded-2xl shadow-xl p-8">
-                {/* Keywords Display */}
-                {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 && (
-                  <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Lightbulb className="w-4 h-4 text-yellow-600" />
-                      <span className="font-medium text-yellow-800">Key CISSP Terms:</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {questionKeywords[currentQuestion.id].map((keyword, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-medium"
-                        >
-                          {keyword}
-                        </span>
-                      ))}
-                    </div>
+        <div className="w-[90vw] max-w-[1000px] mx-auto">
+          <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col lg:flex-row gap-8">
+            {/* Main Question Content */}
+            <div className="flex-1 min-w-0">
+              {/* Keywords Display */}
+              {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 && (
+                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Lightbulb className="w-4 h-4 text-yellow-600" />
+                    <span className="font-medium text-yellow-800">Key CISSP Terms:</span>
                   </div>
-                )}
-
-                {/* Keyword Error */}
-                {keywordError && (
-                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <XCircle className="w-4 h-4 text-red-600" />
-                      <span className="text-red-800 text-sm">{keywordError}</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Question Text */}
-                <div className="mb-6">
-                  {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 ? (
-                    <div 
-                      className="text-xl leading-relaxed text-gray-900 font-medium"
-                      dangerouslySetInnerHTML={{ __html: getHighlightedQuestionText() }}
-                    />
-                  ) : (
-                    <span className="text-xl leading-relaxed text-gray-900 font-medium">
-                      {currentQuestion.question}
-                    </span>
-                  )}
-                </div>
-
-                {/* Answer Options */}
-                <div className="space-y-3 mb-6">
-                  {currentQuestion.options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleAnswerSelect(index)}
-                      disabled={showResult}
-                      className={`w-full text-left p-3 rounded-lg border-2 transition-all duration-200 ${
-                        showResult
-                          ? index === currentQuestion.correctAnswer
-                            ? 'border-green-500 bg-green-50 cursor-default'
-                            : selectedAnswer === index && index !== currentQuestion.correctAnswer
-                            ? 'border-red-500 bg-red-50 cursor-default'
-                            : 'border-gray-200 bg-gray-50 cursor-default'
-                          : selectedAnswer === index
-                          ? 'border-blue-500 bg-blue-50 cursor-pointer'
-                          : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-start space-x-3 flex-1">
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${
-                            showResult && index === currentQuestion.correctAnswer
-                              ? 'bg-green-500 text-white'
-                              : showResult && selectedAnswer === index && index !== currentQuestion.correctAnswer
-                              ? 'bg-red-500 text-white'
-                              : selectedAnswer === index
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-gray-200 text-gray-700'
-                          }`}>
-                            {String.fromCharCode(65 + index)}
-                          </div>
-                          <p className="text-gray-900 leading-relaxed flex-1 text-sm">
-                            {option}
-                          </p>
-                        </div>
-                        
-                        {/* Inline Tally Controls */}
-                        <div className="flex flex-col items-end gap-1 ml-3">
-                          <div className="flex items-center space-x-1">
-                            <button
-                              onClick={e => { e.stopPropagation(); handleTallyChange(index, false); }}
-                              className="w-5 h-5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition-colors"
-                              disabled={tallyCounts[index] === 0}
-                              tabIndex={-1}
-                            >
-                              <Minus className="w-2.5 h-2.5" />
-                            </button>
-                            <span className="w-6 text-center font-bold text-sm">{tallyCounts[index]}</span>
-                            <button
-                              onClick={e => { e.stopPropagation(); handleTallyChange(index, true); }}
-                              className="w-5 h-5 rounded-full bg-green-100 text-green-600 hover:bg-green-200 flex items-center justify-center transition-colors"
-                              tabIndex={-1}
-                            >
-                              <Plus className="w-2.5 h-2.5" />
-                            </button>
-                          </div>
-                          {/* Progress bar and percentage */}
-                          <div className="w-20 bg-gray-100 rounded-full h-1.5">
-                            <div
-                              className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
-                              style={{
-                                width: getTotalParticipants() > 0 
-                                  ? `${(tallyCounts[index] / getTotalParticipants()) * 100}%` 
-                                  : '0%'
-                              }}
-                            />
-                          </div>
-                          <div className="text-xs text-gray-500 mt-0.5 text-right w-20">
-                            {getTotalParticipants() > 0 
-                              ? `${Math.round((tallyCounts[index] / getTotalParticipants()) * 100)}%`
-                              : '0%'}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Result Explanation */}
-                {showResult && (
-                  <div className="mb-4">
-                    <div className={`p-4 rounded-lg border ${
-                      selectedAnswer === currentQuestion.correctAnswer
-                        ? 'bg-green-50 border-green-200'
-                        : 'bg-red-50 border-red-200'
-                    }`}>
-                      <div className="flex items-center space-x-2 mb-2">
-                        {selectedAnswer === currentQuestion.correctAnswer ? (
-                          <CheckCircle className="w-5 h-5 text-green-600" />
-                        ) : (
-                          <XCircle className="w-5 h-5 text-red-600" />
-                        )}
-                        <span className={`font-medium ${
-                          selectedAnswer === currentQuestion.correctAnswer ? 'text-green-800' : 'text-red-800'
-                        }`}>
-                          {selectedAnswer === currentQuestion.correctAnswer ? 'Correct!' : 'Incorrect'}
-                        </span>
-                      </div>
-                      {selectedAnswer !== currentQuestion.correctAnswer && (
-                        <p className="text-gray-700 text-sm mb-3">
-                          The correct answer is: <strong>{currentQuestion.options[currentQuestion.correctAnswer]}</strong>
-                        </p>
-                      )}
-                      <div className="bg-white rounded-lg p-3 border mb-4">
-                        <h4 className="font-medium text-gray-900 mb-2">Explanation:</h4>
-                        {isEnhancedExplanation && enhancedExplanation ? (
-                          formatExplanation(enhancedExplanation)
-                        ) : (
-                          formatExplanation(currentQuestion.explanation)
-                        )}
-                      </div>
-                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                        <h4 className="font-medium text-blue-900 mb-2">Manager's Perspective</h4>
-                        {loadingManagerPerspective ? (
-                          <div className="flex items-center space-x-2 text-blue-700"><Loader className="w-4 h-4 animate-spin" /> Generating manager's perspective...</div>
-                        ) : managerPerspectiveError ? (
-                          <div className="text-red-600 text-sm">{managerPerspectiveError}</div>
-                        ) : managerPerspectives[currentQuestion.id] ? (
-                          formatManagerPerspective(managerPerspectives[currentQuestion.id])
-                        ) : null}
-                      </div>
-                    </div>
-
-                    {/* Enhance Explanation Button */}
-                    {!isEnhancedExplanation && !isStructuredExplanation(currentQuestion.explanation) && (
-                      <div className="mt-4">
-                        <button
-                          onClick={handleEnhanceExplanation}
-                          disabled={loadingEnhancedExplanation}
-                          className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                        >
-                          {loadingEnhancedExplanation ? (
-                            <Loader className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Sparkles className="w-4 h-4" />
-                          )}
-                          <span>
-                            {loadingEnhancedExplanation 
-                              ? 'Enhancing...' 
-                              : 'Enhance Explanation'
-                            }
-                          </span>
-                        </button>
-
-                        {/* Enhanced Explanation Error */}
-                        {enhancedExplanationError && (
-                          <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                            <div className="flex items-center space-x-2">
-                              <XCircle className="w-4 h-4 text-red-600" />
-                              <span className="text-red-800 text-sm">{enhancedExplanationError}</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Manager's Perspective Button */}
-                    <div className="mt-4">
-                      <button
-                        onClick={handleManagerPerspective}
-                        disabled={loadingManagerPerspective}
-                        className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  <div className="flex flex-wrap gap-2">
+                    {questionKeywords[currentQuestion.id].map((keyword, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-medium"
                       >
-                        {loadingManagerPerspective ? (
-                          <Loader className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Briefcase className="w-4 h-4" />
-                        )}
-                        <span>
-                          {loadingManagerPerspective 
-                            ? 'Generating...' 
-                            : showManagerPerspective 
-                            ? 'Hide Manager\'s Perspective' 
-                            : 'Manager\'s Perspective'
-                          }
-                        </span>
-                      </button>
-
-                      {/* Manager Perspective Error */}
-                      {managerPerspectiveError && (
-                        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                          <div className="flex items-center space-x-2">
-                            <XCircle className="w-4 h-4 text-red-600" />
-                            <span className="text-red-800 text-sm">{managerPerspectiveError}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Manager Perspective Content */}
-                      {showManagerPerspective && managerPerspectives[currentQuestion.id] && (
-                        <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                          <div className="flex items-center space-x-2 mb-3">
-                            <Briefcase className="w-4 h-4 text-blue-600" />
-                            <span className="font-medium text-blue-900 text-sm">Manager's Strategic Perspective</span>
-                          </div>
-                          <div className="max-w-none">
-                            {formatManagerPerspective(managerPerspectives[currentQuestion.id])}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                        {keyword}
+                      </span>
+                    ))}
                   </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex justify-between">
-                  {!showResult ? (
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={handleShowResult}
-                        disabled={selectedAnswer === null}
-                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                      >
-                        Submit Answer
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={handleNextQuestion}
-                      className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
-                    >
-                      <span>{isLastQuestion ? 'Complete Quiz' : 'Next Question'}</span>
-                      {!isLastQuestion && <ArrowRight className="w-4 h-4" />}
-                      {isLastQuestion && <Trophy className="w-4 h-4" />}
-                    </button>
-                  )}
                 </div>
+              )}
+
+              {/* Keyword Error */}
+              {keywordError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <XCircle className="w-4 h-4 text-red-600" />
+                    <span className="text-red-800 text-sm">{keywordError}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Question Text */}
+              <div className="mb-6">
+                {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 ? (
+                  <div 
+                    className="text-xl leading-relaxed text-gray-900 font-medium"
+                    dangerouslySetInnerHTML={{ __html: getHighlightedQuestionText() }}
+                  />
+                ) : (
+                  <span className="text-xl leading-relaxed text-gray-900 font-medium">
+                    {currentQuestion.question}
+                  </span>
+                )}
               </div>
+
+              {/* Answer Options */}
+              <div className="space-y-3 mb-6">
+                {currentQuestion.options.map((option, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswerSelect(index)}
+                    disabled={showResult}
+                    className={`w-full text-left p-3 rounded-lg border-2 transition-all duration-200 ${
+                      showResult
+                        ? index === currentQuestion.correctAnswer
+                          ? 'border-green-500 bg-green-50 cursor-default'
+                          : selectedAnswer === index && index !== currentQuestion.correctAnswer
+                          ? 'border-red-500 bg-red-50 cursor-default'
+                          : 'border-gray-200 bg-gray-50 cursor-default'
+                        : selectedAnswer === index
+                        ? 'border-blue-500 bg-blue-50 cursor-pointer'
+                        : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start space-x-3 flex-1">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${
+                          showResult && index === currentQuestion.correctAnswer
+                            ? 'bg-green-500 text-white'
+                            : showResult && selectedAnswer === index && index !== currentQuestion.correctAnswer
+                            ? 'bg-red-500 text-white'
+                            : selectedAnswer === index
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-200 text-gray-700'
+                        }`}>
+                          {String.fromCharCode(65 + index)}
+                        </div>
+                        <p className="text-gray-900 leading-relaxed flex-1 text-sm">
+                          {option}
+                        </p>
+                      </div>
+                      {/* Inline Tally Controls */}
+                      <div className="flex flex-col items-end gap-1 ml-3">
+                        <div className="flex items-center space-x-1">
+                          <button
+                            onClick={e => { e.stopPropagation(); handleTallyChange(index, false); }}
+                            className="w-5 h-5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition-colors"
+                            disabled={tallyCounts[index] === 0}
+                            tabIndex={-1}
+                          >
+                            <Minus className="w-2.5 h-2.5" />
+                          </button>
+                          <span className="w-6 text-center font-bold text-sm">{tallyCounts[index]}</span>
+                          <button
+                            onClick={e => { e.stopPropagation(); handleTallyChange(index, true); }}
+                            className="w-5 h-5 rounded-full bg-green-100 text-green-600 hover:bg-green-200 flex items-center justify-center transition-colors"
+                            tabIndex={-1}
+                          >
+                            <Plus className="w-2.5 h-2.5" />
+                          </button>
+                        </div>
+                        {/* Progress bar and percentage */}
+                        <div className="w-20 bg-gray-100 rounded-full h-1.5">
+                          <div
+                            className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
+                            style={{
+                              width: getTotalParticipants() > 0 
+                                ? `${(tallyCounts[index] / getTotalParticipants()) * 100}%` 
+                                : '0%'
+                            }}
+                          />
+                        </div>
+                        <div className="text-xs text-gray-500 mt-0.5 text-right w-20">
+                          {getTotalParticipants() > 0 
+                            ? `${Math.round((tallyCounts[index] / getTotalParticipants()) * 100)}%`
+                            : '0%'}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-between">
+                {!showResult ? (
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={handleShowResult}
+                      disabled={selectedAnswer === null}
+                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      Submit Answer
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleNextQuestion}
+                    className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
+                  >
+                    <span>{isLastQuestion ? 'Complete Quiz' : 'Next Question'}</span>
+                    {!isLastQuestion && <ArrowRight className="w-4 h-4" />}
+                    {isLastQuestion && <Trophy className="w-4 h-4" />}
+                  </button>
+                )}
+              </div>
+
+              {/* Manager Perspective Content */}
+              {showManagerPerspective && managerPerspectives[currentQuestion.id] && (
+                <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <Briefcase className="w-4 h-4 text-blue-600" />
+                    <span className="font-medium text-blue-900 text-sm">Manager's Strategic Perspective</span>
+                  </div>
+                  <div className="max-w-none">
+                    {formatManagerPerspective(managerPerspectives[currentQuestion.id])}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Sidebar Card */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-xl p-6 sticky top-6 flex flex-col gap-6">
-                {/* Quiz Header Info */}
+            {/* Quick Actions (formerly sidebar) */}
+            <div className="w-full lg:w-80 flex-shrink-0 flex flex-col gap-6">
+              {/* Quiz Header Info */}
+              <div>
+                <div className="flex items-center space-x-2 mb-3">
+                  <Target className="w-5 h-5 text-blue-600" />
+                  <span className="font-semibold text-gray-900">Quiz</span>
+                </div>
+                {hasPersistedQuiz() && (
+                  <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block">
+                    Resumed
+                  </div>
+                )}
+              </div>
+
+              {/* Timers */}
+              <div className="space-y-4">
+                {/* Total Timer */}
                 <div>
-                  <div className="flex items-center space-x-2 mb-3">
-                    <Target className="w-5 h-5 text-blue-600" />
-                    <span className="font-semibold text-gray-900">Quiz</span>
-                  </div>
-                  {hasPersistedQuiz() && (
-                    <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block">
-                      Resumed
-                    </div>
-                  )}
-                </div>
-
-                {/* Timers */}
-                <div className="space-y-4">
-                  {/* Total Timer */}
-                  <div>
-                    <div className="text-xs text-gray-500 mb-1">Total Time</div>
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <Clock className="w-4 h-4" />
-                      <span className="font-mono text-lg font-semibold">{formatTime(elapsedTime)}</span>
-                    </div>
-                  </div>
-
-                  {/* Per-Question Timer */}
-                  <div>
-                    <div className="text-xs text-gray-500 mb-1">Question Time</div>
-                    <div className="flex items-center space-x-2">
-                      <RotateCcw className="w-4 h-4" />
-                      <span 
-                        className={`font-mono text-lg font-semibold ${
-                          questionElapsedTime >= 85 ? 'text-red-600' : 'text-gray-600'
-                        }`}
-                      >
-                        {formatTime(questionElapsedTime)}
-                      </span>
-                    </div>
+                  <div className="text-xs text-gray-500 mb-1">Total Time</div>
+                  <div className="flex items-center space-x-2 text-gray-600">
+                    <Clock className="w-4 h-4" />
+                    <span className="font-mono text-lg font-semibold">{formatTime(elapsedTime)}</span>
                   </div>
                 </div>
 
-                {/* Progress Bar (moved here) */}
-                <div className="mb-2">
-                  <div className="text-xs text-gray-500 mb-1 text-center">Progress</div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
-                    />
-                  </div>
-                  <div className="text-xs text-gray-600 mt-1 text-center">
-                    Question {currentIndex + 1} of {questions.length}
-                  </div>
-                </div>
-
-                {/* Domain and Difficulty Badges */}
-                <div className="space-y-3">
-                  <span
-                    className="px-3 py-2 rounded-lg text-sm font-medium block text-center"
-                    style={{
-                      backgroundColor: domainColor.primary,
-                      color: 'white'
-                    }}
-                  >
-                    🏛️ {currentQuestion.domain}
-                  </span>
-                  <span
-                    className="px-3 py-2 rounded-lg text-sm font-medium block text-center"
-                    style={{
-                      backgroundColor: difficultyColor.primary,
-                      color: 'white'
-                    }}
-                  >
-                    {currentQuestion.difficulty === 'Easy' && '🟢'}
-                    {currentQuestion.difficulty === 'Medium' && '🟡'}
-                    {currentQuestion.difficulty === 'Hard' && '🔴'}
-                    {currentQuestion.difficulty}
-                  </span>
-                </div>
-
-                {/* Voice/Read Aloud Button */}
-                <div className="mb-6">
-                  <button
-                    type="button"
-                    onClick={handleReadAloud}
-                    className={`w-full p-3 rounded-lg border border-blue-200 shadow-md hover:bg-blue-100 transition-colors ${
-                      isSpeaking ? 'bg-blue-200' : 'bg-white'
-                    }`}
-                    title={isSpeaking ? 'Pause reading' : 'Read question aloud'}
-                    style={{ boxShadow: '0 2px 8px 0 rgba(80, 120, 255, 0.10)' }}
-                  >
-                    {isSpeaking ? (
-                      // Modern Pause icon
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 32 32" className="w-6 h-6 text-blue-600 mx-auto">
-                        <rect x="9" y="7" width="4" height="18" rx="2" />
-                        <rect x="19" y="7" width="4" height="18" rx="2" />
-                      </svg>
-                    ) : (
-                      // Modern Speaker with sound waves icon
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 32 32" className="w-6 h-6 text-blue-600 mx-auto">
-                        <path d="M14 8.5v15l-6-5.5H4v-4h4l6-5.5z" />
-                        <path d="M20.5 11.5a1 1 0 0 1 1.4 0c2.7 2.7 2.7 7.3 0 10a1 1 0 1 1-1.4-1.4c2-2 2-5.2 0-7.2a1 1 0 0 1 0-1.4z" />
-                        <path d="M24.5 7.5a1 1 0 0 1 1.4 0c5.1 5.1 5.1 13.4 0 18.5a1 1 0 1 1-1.4-1.4c4.3-4.3 4.3-11.4 0-15.7a1 1 0 0 1 0-1.4z" />
-                      </svg>
-                    )}
-                    <div className="text-xs text-gray-600 mt-1 text-center">
-                      {isSpeaking ? 'Pause' : 'Read Aloud'}
-                    </div>
-                  </button>
-                </div>
-
-                {/* Highlight Keywords Button */}
-                <div className="mb-6">
-                  <button
-                    onClick={handleToggleKeywords}
-                    disabled={loadingKeywords}
-                    className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      showKeywords 
-                        ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' 
-                        : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                    }`}
-                  >
-                    {loadingKeywords ? (
-                      <Loader className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Lightbulb className="w-4 h-4" />
-                    )}
-                    <span>
-                      {loadingKeywords 
-                        ? 'Analyzing...' 
-                        : showKeywords 
-                        ? 'Hide Keywords' 
-                        : 'Highlight Keywords'
-                      }
+                {/* Per-Question Timer */}
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Question Time</div>
+                  <div className="flex items-center space-x-2">
+                    <RotateCcw className="w-4 h-4" />
+                    <span 
+                      className={`font-mono text-lg font-semibold ${
+                        questionElapsedTime >= 85 ? 'text-red-600' : 'text-gray-600'
+                      }`}
+                    >
+                      {formatTime(questionElapsedTime)}
                     </span>
-                  </button>
+                  </div>
                 </div>
+              </div>
 
-                {/* Navigation Buttons */}
-                <div className="space-y-3">
-                  {/* Back Button */}
-                  <button
-                    onClick={handlePreviousQuestion}
-                    disabled={currentIndex === 0}
-                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>Previous</span>
-                  </button>
-
-                  {/* Exit Button */}
-                  <button
-                    onClick={handleExit}
-                    className="w-full px-4 py-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
-                  >
-                    Exit Quiz
-                  </button>
+              {/* Progress Bar */}
+              <div className="mb-2">
+                <div className="text-xs text-gray-500 mb-1 text-center">Progress</div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
+                  />
                 </div>
+                <div className="text-xs text-gray-600 mt-1 text-center">
+                  Question {currentIndex + 1} of {questions.length}
+                </div>
+              </div>
+
+              {/* Domain and Difficulty Badges */}
+              <div className="space-y-3">
+                <span
+                  className="px-3 py-2 rounded-lg text-sm font-medium block text-center"
+                  style={{
+                    backgroundColor: domainColor.primary,
+                    color: 'white'
+                  }}
+                >
+                  🏛️ {currentQuestion.domain}
+                </span>
+                <span
+                  className="px-3 py-2 rounded-lg text-sm font-medium block text-center"
+                  style={{
+                    backgroundColor: difficultyColor.primary,
+                    color: 'white'
+                  }}
+                >
+                  {currentQuestion.difficulty === 'Easy' && '🟢'}
+                  {currentQuestion.difficulty === 'Medium' && '🟡'}
+                  {currentQuestion.difficulty === 'Hard' && '🔴'}
+                  {currentQuestion.difficulty}
+                </span>
+              </div>
+
+              {/* Voice/Read Aloud Button */}
+              <div>
+                <button
+                  type="button"
+                  onClick={handleReadAloud}
+                  className={`w-full p-3 rounded-lg border border-blue-200 shadow-md hover:bg-blue-100 transition-colors ${
+                    isSpeaking ? 'bg-blue-200' : 'bg-white'
+                  }`}
+                  title={isSpeaking ? 'Pause reading' : 'Read question aloud'}
+                  style={{ boxShadow: '0 2px 8px 0 rgba(80, 120, 255, 0.10)' }}
+                >
+                  {isSpeaking ? (
+                    // Modern Pause icon
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 32 32" className="w-6 h-6 text-blue-600 mx-auto">
+                      <rect x="9" y="7" width="4" height="18" rx="2" />
+                      <rect x="19" y="7" width="4" height="18" rx="2" />
+                    </svg>
+                  ) : (
+                    // Modern Speaker with sound waves icon
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 32 32" className="w-6 h-6 text-blue-600 mx-auto">
+                      <path d="M14 8.5v15l-6-5.5H4v-4h4l6-5.5z" />
+                      <path d="M20.5 11.5a1 1 0 0 1 1.4 0c2.7 2.7 2.7 7.3 0 10a1 1 0 1 1-1.4-1.4c2-2 2-5.2 0-7.2a1 1 0 0 1 0-1.4z" />
+                      <path d="M24.5 7.5a1 1 0 0 1 1.4 0c5.1 5.1 5.1 13.4 0 18.5a1 1 0 1 1-1.4-1.4c4.3-4.3 4.3-11.4 0-15.7a1 1 0 0 1 0-1.4z" />
+                    </svg>
+                  )}
+                  <div className="text-xs text-gray-600 mt-1 text-center">
+                    {isSpeaking ? 'Pause' : 'Read Aloud'}
+                  </div>
+                </button>
+              </div>
+
+              {/* Highlight Keywords Button */}
+              <div>
+                <button
+                  onClick={handleToggleKeywords}
+                  disabled={loadingKeywords}
+                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    showKeywords 
+                      ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' 
+                      : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                  }`}
+                >
+                  {loadingKeywords ? (
+                    <Loader className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Lightbulb className="w-4 h-4" />
+                  )}
+                  <span>
+                    {loadingKeywords 
+                      ? 'Analyzing...' 
+                      : showKeywords 
+                      ? 'Hide Keywords' 
+                      : 'Highlight Keywords'
+                    }
+                  </span>
+                </button>
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="space-y-3">
+                {/* Back Button */}
+                <button
+                  onClick={handlePreviousQuestion}
+                  disabled={currentIndex === 0}
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Previous</span>
+                </button>
+
+                {/* Exit Button */}
+                <button
+                  onClick={handleExit}
+                  className="w-full px-4 py-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                >
+                  Exit Quiz
+                </button>
               </div>
             </div>
           </div>
