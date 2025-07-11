@@ -7,6 +7,7 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { AppState } from '../../types';
 import { PaywallPage } from '../Paywall/PaywallPage';
 import { BookmarksProvider } from '../../hooks/useBookmarks';
+import { fetchQuizProgress } from '../../services/progress';
 
 interface ProgressEntry {
   timestamp: number;
@@ -35,8 +36,8 @@ const formatTime = (seconds: number) => {
 };
 
 const ProgressPage: React.FC = () => {
-  // Only use useAuth for possible future use, but don't destructure unused values
   const { isActive: hasActiveSubscription, loading: subscriptionLoading } = useSubscription();
+  const { user } = useAuth();
   const [appState] = useLocalStorage<AppState>('cissp-study-app', {
     mode: 'quiz',
     currentUser: null,
@@ -62,17 +63,42 @@ const ProgressPage: React.FC = () => {
     avatar_url: ''
   };
   const [history, setHistory] = useState<ProgressEntry[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem('quiz-progress-history');
-    if (stored) {
-      try {
-        setHistory(JSON.parse(stored));
-      } catch {
-        setHistory([]);
+    const loadHistory = async () => {
+      setLoading(true);
+      setError(null);
+      if (user && user.id) {
+        try {
+          const cloudHistory = await fetchQuizProgress({ user_id: user.id, dev_mode: true });
+          // Map Supabase results to ProgressEntry[]
+          setHistory(cloudHistory.map(entry => ({
+            timestamp: new Date(entry.timestamp).getTime(),
+            results: entry.results
+          })));
+        } catch (err: any) {
+          setError('Failed to load progress from cloud.');
+          setHistory([]);
+        }
+      } else {
+        // Fallback to localStorage
+        const stored = localStorage.getItem('quiz-progress-history');
+        if (stored) {
+          try {
+            setHistory(JSON.parse(stored));
+          } catch {
+            setHistory([]);
+          }
+        } else {
+          setHistory([]);
+        }
       }
-    }
-  }, []);
+      setLoading(false);
+    };
+    loadHistory();
+  }, [user]);
 
   const clearHistory = () => {
     localStorage.removeItem('quiz-progress-history');
@@ -104,6 +130,12 @@ const ProgressPage: React.FC = () => {
           hasActiveSubscription={hasActiveSubscription}
           subscriptionLoading={subscriptionLoading}
         />
+        {loading && (
+          <div className="text-center text-gray-500 py-8">Loading progress...</div>
+        )}
+        {error && (
+          <div className="bg-red-100 border border-red-300 text-red-800 rounded-xl p-4 mb-4 text-center">{error}</div>
+        )}
         {hasActiveSubscription ? (
           <div className="max-w-4xl mx-auto px-4 pt-6">
             {/* Back Button */}
