@@ -570,7 +570,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Main Content */}
       <div className="flex-1 py-8 flex justify-center items-start">
-        <div className="w-full max-w-[1600px] mx-auto">
+        <div className="w-full max-w-[1920px] mx-auto">
           <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col lg:flex-row gap-8 w-full">
             {/* Main Question Content */}
             <div className="flex-1 min-w-0">
