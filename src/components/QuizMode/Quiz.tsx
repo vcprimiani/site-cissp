@@ -696,6 +696,16 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 ))}
               </div>
 
+              {/* Explanation (show after submit) */}
+              {showResult && (
+                <div className="bg-white rounded-lg p-4 border mb-6">
+                  <h4 className="font-medium text-gray-900 mb-2">Explanation:</h4>
+                  {isEnhancedExplanation && enhancedExplanation
+                    ? formatExplanation(enhancedExplanation)
+                    : formatExplanation(currentQuestion.explanation)}
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="flex justify-between">
                 {!showResult ? (
