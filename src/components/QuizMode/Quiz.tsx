@@ -568,8 +568,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Main Content */}
       <div className="flex-1 py-8 flex justify-center items-start">
-        <div className="w-[90vw] max-w-[1000px] mx-auto">
-          <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col lg:flex-row gap-8">
+        <div className="w-full max-w-[1600px] mx-auto">
+          <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col lg:flex-row gap-8 w-full">
             {/* Main Question Content */}
             <div className="flex-1 min-w-0">
               {/* Keywords Display */}
@@ -733,7 +733,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
             </div>
 
             {/* Quick Actions (formerly sidebar) */}
-            <div className="w-full lg:w-80 flex-shrink-0 flex flex-col gap-6">
+            <div className="flex-1 w-full max-w-xs lg:max-w-sm flex-shrink-0 flex flex-col gap-6">
               {/* Quiz Header Info */}
               <div>
                 <div className="flex items-center space-x-2 mb-3">
