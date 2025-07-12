@@ -718,29 +718,35 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 </div>
 
                 {/* Text Size Controls */}
-                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 ml-4">
-                  <div className="text-xs text-gray-600 mb-2 text-center font-medium">Text Size</div>
-                  <div className="flex items-center justify-center space-x-2">
+                <div
+                  className="backdrop-blur bg-white/70 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg px-6 py-4 flex flex-col items-center min-w-[170px]"
+                  style={{ boxShadow: '0 4px 24px 0 rgba(80,120,255,0.08)' }}
+                >
+                  <div className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3 tracking-wide select-none" style={{letterSpacing: '0.01em'}}>Text Size</div>
+                  <div className="flex items-center gap-3">
                     <button
                       onClick={() => handleTextSizeChange('decrease')}
                       disabled={currentTextSizeIndex === 0}
-                      className="w-7 h-7 rounded-lg bg-white border border-gray-300 hover:border-blue-400 hover:bg-blue-50 flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
                       title="Decrease text size"
+                      style={{ boxShadow: '0 2px 8px 0 rgba(80,120,255,0.06)' }}
                     >
-                      <Minus className="w-3 h-3 text-gray-600" />
+                      <Minus className="w-5 h-5" />
                     </button>
-                    <div className="flex items-center space-x-1 px-2 py-1 bg-white rounded-lg border border-gray-300 min-w-[50px] justify-center">
-                      <span className="text-xs font-medium text-gray-700">
-                        {Math.round(textSize * 100)}%
-                      </span>
-                    </div>
+                    <span
+                      className="font-bold text-2xl text-gray-900 dark:text-white transition-all duration-200 select-none"
+                      style={{ minWidth: 56, display: 'inline-block', textAlign: 'center' }}
+                    >
+                      {Math.round(textSize * 100)}%
+                    </span>
                     <button
                       onClick={() => handleTextSizeChange('increase')}
                       disabled={currentTextSizeIndex === textSizeOptions.length - 1}
-                      className="w-7 h-7 rounded-lg bg-white border border-gray-300 hover:border-blue-400 hover:bg-blue-50 flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
                       title="Increase text size"
+                      style={{ boxShadow: '0 2px 8px 0 rgba(80,120,255,0.06)' }}
                     >
-                      <Plus className="w-3 h-3 text-gray-600" />
+                      <Plus className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
