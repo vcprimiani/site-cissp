@@ -388,29 +388,34 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
         <div className="space-y-8">
           {/* Resume Quiz Banner */}
           {hasPersistedQuiz() && persistedState && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6 shadow-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <RefreshCw className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <RefreshCw className="w-5 h-5 text-white" />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-blue-900">Resume Previous Quiz</h3>
+                    <h3 className="font-bold text-blue-900 text-lg">⏸️ Quiz Paused</h3>
                     <p className="text-blue-700 text-sm">
                       You have an unfinished quiz on question {persistedState.currentIndex + 1} of {persistedState.questions.length}
+                    </p>
+                    <p className="text-blue-600 text-xs mt-1 font-medium">
+                      Complete or discard this quiz to start a new one
                     </p>
                   </div>
                 </div>
                 <div className="flex space-x-3">
                   <button
                     onClick={discardPersistedQuiz}
-                    className="px-4 py-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    className="px-4 py-2 text-red-600 hover:text-red-700 text-sm font-medium border border-red-200 hover:bg-red-50 rounded-lg transition-colors"
                   >
-                    Discard
+                    Discard Quiz
                   </button>
                   <button
                     onClick={resumeQuiz}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg"
                   >
-                    Resume Quiz
+                    ▶️ Resume Quiz
                   </button>
                 </div>
               </div>
@@ -530,8 +535,13 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                     {/* 10 Hard Random Button */}
                     <button
                       type="button"
-                      className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-orange-400 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 font-semibold hover:from-orange-100 hover:to-amber-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                      className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-300 shadow-lg ${
+                        hasPersistedQuiz() && persistedState
+                          ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'border-orange-400 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 font-semibold hover:from-orange-100 hover:to-amber-100 hover:shadow-xl transform hover:scale-[1.02]'
+                      }`}
                       onClick={() => {
+                        if (hasPersistedQuiz() && persistedState) return;
                         // Find all hard questions from all domains
                         const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
                         if (hardQuestions.length < 10) {
@@ -549,17 +559,26 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                         });
                         setQuizMode('quiz');
                       }}
+                      disabled={hasPersistedQuiz() && persistedState}
                     >
                       <span className="text-lg">🌶️</span>
                       <span>10 Hard Random (All Domains)</span>
-                      <span className="text-sm opacity-75">→</span>
+                      {hasPersistedQuiz() && persistedState ? (
+                        <span className="text-xs text-gray-500">⏸️ Quiz Paused</span>
+                      ) : (
+                        <span className="text-sm opacity-75">→</span>
+                      )}
                     </button>
                     {/* Generate 10 Random and Start Quiz */}
                     <button
                       type="button"
-                      className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 border-blue-400 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-300 shadow-lg ${
+                        hasPersistedQuiz() && persistedState
+                          ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'border-blue-400 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold hover:from-blue-100 hover:to-cyan-100 hover:shadow-xl transform hover:scale-[1.02]'
+                      }`}
                       onClick={handleRandomGenerateAndStart}
-                      disabled={randomGenerating}
+                      disabled={randomGenerating || (hasPersistedQuiz() && persistedState)}
                     >
                       {randomGenerating ? (
                         <span className="flex items-center space-x-2 w-full">
@@ -574,7 +593,11 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                         <>
                           <span className="text-lg">🎲</span>
                           <span>Generate 10 New Quiz Questions</span>
-                          <span className="text-sm opacity-75">→</span>
+                          {hasPersistedQuiz() && persistedState ? (
+                            <span className="text-xs text-gray-500">⏸️ Quiz Paused</span>
+                          ) : (
+                            <span className="text-sm opacity-75">→</span>
+                          )}
                         </>
                       )}
                     </button>
@@ -591,6 +614,16 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                       <span>Quiz Configuration</span>
                     </h3>
                     <div className="bg-gray-50 rounded-xl p-6">
+                      {hasPersistedQuiz() && persistedState && (
+                        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-yellow-600">⚠️</span>
+                            <span className="text-sm text-yellow-800 font-medium">
+                              Quiz paused - complete or discard the paused quiz to start a new one
+                            </span>
+                          </div>
+                        </div>
+                      )}
                       <label className="block text-sm font-medium text-gray-700 mb-3">
                         Number of Questions
                       </label>
@@ -600,8 +633,11 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                             <button
                               key={num}
                               onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
+                              disabled={hasPersistedQuiz() && persistedState}
                               className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 font-medium ${
-                                numberOfQuestions === num
+                                hasPersistedQuiz() && persistedState
+                                  ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
+                                  : numberOfQuestions === num
                                   ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm'
                                   : 'border-gray-300 hover:border-purple-300 text-gray-700 hover:bg-gray-50'
                               }`}
@@ -612,11 +648,15 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                         </div>
                         <button
                           onClick={generateQuiz}
-                          disabled={filteredQuestions.length === 0}
-                          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={filteredQuestions.length === 0 || (hasPersistedQuiz() && persistedState)}
+                          className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 font-medium ${
+                            hasPersistedQuiz() && persistedState
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'
+                          }`}
                         >
                           <Play className="w-5 h-5" />
-                          <span>Start Quiz</span>
+                          <span>{hasPersistedQuiz() && persistedState ? 'Quiz Paused' : 'Start Quiz'}</span>
                         </button>
                       </div>
                     </div>

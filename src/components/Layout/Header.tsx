@@ -198,6 +198,15 @@ export const Header: React.FC<HeaderProps> = ({
                       >
                         🔊 Voice Settings
                       </button>
+                      <button
+                        onClick={() => {
+                          setShowSettings(false);
+                          window.location.href = '/admin';
+                        }}
+                        className="block w-full text-left px-4 py-3 text-gray-800 hover:bg-red-50 text-sm font-medium border-t border-gray-100"
+                      >
+                        🛡️ Admin Panel
+                      </button>
                     </div>
                   )}
                 </div>

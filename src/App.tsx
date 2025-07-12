@@ -14,6 +14,7 @@ import { BookmarksProvider } from './hooks/useBookmarks';
 import { LandingPage } from './components/Landing/LandingPage';
 import ResetPassword from './components/Auth/ResetPassword';
 import ProgressPage from './components/Progress/ProgressPage';
+import { AdminAccess } from './components/Admin/AdminAccess';
 
 function App() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
@@ -159,6 +160,28 @@ function App() {
   // Show progress page if the path is /progress
   if (currentPath === '/progress') {
     return <ProgressPage />;
+  }
+
+  // Show admin page if the path is /admin
+  if (currentPath === '/admin') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Header
+          mode={appState.mode}
+          onModeChange={handleModeChange}
+          currentUser={appState.currentUser}
+          onLogout={() => {}} // Logout is handled by the useAuth hook
+          hasActiveSubscription={hasActiveSubscription}
+          subscriptionLoading={subscriptionLoading}
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <AdminAccess 
+            hasActiveSubscription={hasActiveSubscription}
+            subscriptionLoading={subscriptionLoading}
+          />
+        </div>
+      </div>
+    );
   }
 
   // Show error if subscription check fails
