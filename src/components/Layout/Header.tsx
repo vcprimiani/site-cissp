@@ -52,15 +52,21 @@ export const Header: React.FC<HeaderProps> = ({
     }
     // Identify user when SDK is loaded and user is present
     if (currentUser && window.Canny) {
+      const cannyUser = {
+        email: currentUser.email,
+        name: currentUser.name,
+        id: currentUser.id,
+        avatarURL: currentUser.avatarURL,
+      };
+      if (currentUser.created) {
+        const createdDate = new Date(currentUser.created);
+        if (!isNaN(createdDate.getTime())) {
+          cannyUser.created = createdDate.toISOString();
+        }
+      }
       window.Canny('identify', {
         appID: '6871aeb0cf5e2ff8c43cef94',
-        user: {
-          email: currentUser.email,
-          name: currentUser.name,
-          id: currentUser.id,
-          avatarURL: currentUser.avatarURL,
-          created: new Date(currentUser.created).toISOString(),
-        },
+        user: cannyUser,
       });
     }
   }, [currentUser]);
