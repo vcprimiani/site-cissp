@@ -54,11 +54,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   const [tallyCounts, setTallyCounts] = useState<number[]>(persistedState?.tallyCounts || [0, 0, 0, 0]);
   const [showTallies, setShowTallies] = useState(persistedState?.showTallies || false);
 
-  // Keyword highlighting - store keywords per question
-  const [questionKeywords, setQuestionKeywords] = useState<Record<string, string[]>>({});
-  const [showKeywords, setShowKeywords] = useState(persistedState?.showKeywords || false);
-  const [loadingKeywords, setLoadingKeywords] = useState(false);
-  const [keywordError, setKeywordError] = useState<string | null>(null);
+
 
   // Manager's perspective feature
   const [managerPerspectives, setManagerPerspectives] = useState<Record<string, string>>({});
@@ -105,8 +101,6 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       questionElapsedTime,
       tallyCounts,
       showTallies,
-      keywords: questionKeywords[currentQuestion?.id] || [],
-      showKeywords,
       isActive: true,
       isEnhancedExplanation,
       enhancedExplanation,
@@ -114,7 +108,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       enhancedExplanationError,
       textSize
     });
-  }, [currentIndex, userAnswers, selectedAnswer, showResult, questionStartTime, questionTimes, elapsedTime, questionElapsedTime, tallyCounts, showTallies, questionKeywords, showKeywords, isEnhancedExplanation, enhancedExplanation, loadingEnhancedExplanation, enhancedExplanationError, textSize]);
+  }, [currentIndex, userAnswers, selectedAnswer, showResult, questionStartTime, questionTimes, elapsedTime, questionElapsedTime, tallyCounts, showTallies, isEnhancedExplanation, enhancedExplanation, loadingEnhancedExplanation, enhancedExplanationError, textSize]);
 
   // Timer effect
   useEffect(() => {
@@ -146,7 +140,6 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     setQuestionStartTime(Date.now());
     setQuestionElapsedTime(0); // Reset per-question timer
     setTallyCounts([0, 0, 0, 0]); // Reset tallies for new question
-    setKeywordError(null);
     setShowManagerPerspective(false);
     setManagerPerspectiveError(null);
     setIsEnhancedExplanation(false);
@@ -217,39 +210,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     return tallyCounts.reduce((sum, count) => sum + count, 0);
   };
 
-  const handleToggleKeywords = async () => {
-    const questionId = currentQuestion.id;
-    
-    // If we already have keywords for this question, just toggle display
-    if (questionKeywords[questionId]) {
-      setShowKeywords(!showKeywords);
-      return;
-    }
 
-    // If we don't have keywords yet, analyze them
-    if (loadingKeywords) return;
-    
-    setLoadingKeywords(true);
-    setKeywordError(null);
-    
-    try {
-      const result = await analyzeCISSPKeywords(currentQuestion.question);
-      
-      if (result.error) {
-        setKeywordError(result.error);
-      } else {
-        setQuestionKeywords(prev => ({
-          ...prev,
-          [questionId]: result.keywords
-        }));
-        setShowKeywords(true);
-      }
-    } catch (error: any) {
-      setKeywordError('Failed to analyze keywords. Please try again.');
-    } finally {
-      setLoadingKeywords(false);
-    }
-  };
 
   const handleManagerPerspective = async () => {
     const questionId = currentQuestion.id;
@@ -420,14 +381,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   const domainColor = getDomainColor(currentQuestion.domain);
   const difficultyColor = getDifficultyColor(currentQuestion.difficulty);
 
-  // Get highlighted question text
-  const getHighlightedQuestionText = () => {
-    const keywords = questionKeywords[currentQuestion.id] || [];
-    if (showKeywords && keywords.length > 0) {
-      return highlightKeywords(currentQuestion.question, keywords);
-    }
-    return currentQuestion.question;
-  };
+
 
   // Format manager perspective response for better readability
   const formatManagerPerspective = (text: string): JSX.Element[] => {
@@ -572,52 +526,15 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
           <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col lg:flex-row gap-8 w-full">
             {/* Main Question Content */}
             <div className="flex-1 min-w-0">
-              {/* Keywords Display */}
-              {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 && (
-                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Lightbulb className="w-4 h-4 text-yellow-600" />
-                    <span className="font-medium text-yellow-800">Key CISSP Terms:</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {questionKeywords[currentQuestion.id].map((keyword, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-medium"
-                      >
-                        {keyword}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Keyword Error */}
-              {keywordError && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <XCircle className="w-4 h-4 text-red-600" />
-                    <span className="text-red-800 text-sm">{keywordError}</span>
-                  </div>
-                </div>
-              )}
 
               {/* Question Text */}
               <div className="mb-6">
-                {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 ? (
-                  <div 
-                    className="leading-relaxed text-gray-900 font-medium"
-                    style={{ fontSize: `${textSize * 1.25}rem` }}
-                    dangerouslySetInnerHTML={{ __html: getHighlightedQuestionText() }}
-                  />
-                ) : (
-                  <span 
-                    className="leading-relaxed text-gray-900 font-medium"
-                    style={{ fontSize: `${textSize * 1.25}rem` }}
-                  >
-                    {currentQuestion.question}
-                  </span>
-                )}
+                <span 
+                  className="leading-relaxed text-gray-900 font-medium"
+                  style={{ fontSize: `${textSize * 1.25}rem` }}
+                >
+                  {currentQuestion.question}
+                </span>
               </div>
 
               {/* Answer Options */}
@@ -771,29 +688,60 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 )}
               </div>
 
-              {/* Timers */}
-              <div className="space-y-4">
-                {/* Total Timer */}
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">Total Time</div>
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <Clock className="w-4 h-4" />
-                    <span className="font-mono text-lg font-semibold">{formatTime(elapsedTime)}</span>
+              {/* Timers and Text Size Controls */}
+              <div className="flex items-start justify-between">
+                {/* Timers */}
+                <div className="space-y-4 flex-1">
+                  {/* Total Timer */}
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Total Time</div>
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <Clock className="w-4 h-4" />
+                      <span className="font-mono text-lg font-semibold">{formatTime(elapsedTime)}</span>
+                    </div>
+                  </div>
+
+                  {/* Per-Question Timer */}
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Question Time</div>
+                    <div className="flex items-center space-x-2">
+                      <RotateCcw className="w-4 h-4" />
+                      <span 
+                        className={`font-mono text-lg font-semibold ${
+                          questionElapsedTime >= 85 ? 'text-red-600' : 'text-gray-600'
+                        }`}
+                      >
+                        {formatTime(questionElapsedTime)}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Per-Question Timer */}
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">Question Time</div>
-                  <div className="flex items-center space-x-2">
-                    <RotateCcw className="w-4 h-4" />
-                    <span 
-                      className={`font-mono text-lg font-semibold ${
-                        questionElapsedTime >= 85 ? 'text-red-600' : 'text-gray-600'
-                      }`}
+                {/* Text Size Controls */}
+                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 ml-4">
+                  <div className="text-xs text-gray-600 mb-2 text-center font-medium">Text Size</div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <button
+                      onClick={() => handleTextSizeChange('decrease')}
+                      disabled={currentTextSizeIndex === 0}
+                      className="w-7 h-7 rounded-lg bg-white border border-gray-300 hover:border-blue-400 hover:bg-blue-50 flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Decrease text size"
                     >
-                      {formatTime(questionElapsedTime)}
-                    </span>
+                      <Minus className="w-3 h-3 text-gray-600" />
+                    </button>
+                    <div className="flex items-center space-x-1 px-2 py-1 bg-white rounded-lg border border-gray-300 min-w-[50px] justify-center">
+                      <span className="text-xs font-medium text-gray-700">
+                        {Math.round(textSize * 100)}%
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleTextSizeChange('increase')}
+                      disabled={currentTextSizeIndex === textSizeOptions.length - 1}
+                      className="w-7 h-7 rounded-lg bg-white border border-gray-300 hover:border-blue-400 hover:bg-blue-50 flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Increase text size"
+                    >
+                      <Plus className="w-3 h-3 text-gray-600" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -837,62 +785,11 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 </span>
               </div>
 
-              {/* Text Size Controls */}
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <div className="text-xs text-gray-600 mb-3 text-center font-medium">Text Size</div>
-                <div className="flex items-center justify-center space-x-2">
-                  <button
-                    onClick={() => handleTextSizeChange('decrease')}
-                    disabled={currentTextSizeIndex === 0}
-                    className="w-8 h-8 rounded-lg bg-white border border-gray-300 hover:border-blue-400 hover:bg-blue-50 flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Decrease text size"
-                  >
-                    <Minus className="w-4 h-4 text-gray-600" />
-                  </button>
-                  <div className="flex items-center space-x-1 px-3 py-1 bg-white rounded-lg border border-gray-300 min-w-[60px] justify-center">
-                    <span className="text-sm font-medium text-gray-700">
-                      {Math.round(textSize * 100)}%
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => handleTextSizeChange('increase')}
-                    disabled={currentTextSizeIndex === textSizeOptions.length - 1}
-                    className="w-8 h-8 rounded-lg bg-white border border-gray-300 hover:border-blue-400 hover:bg-blue-50 flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Increase text size"
-                  >
-                    <Plus className="w-4 h-4 text-gray-600" />
-                  </button>
-                </div>
-              </div>
 
 
 
-              {/* Highlight Keywords Button */}
-              <div>
-                <button
-                  onClick={handleToggleKeywords}
-                  disabled={loadingKeywords}
-                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    showKeywords 
-                      ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' 
-                      : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                  }`}
-                >
-                  {loadingKeywords ? (
-                    <Loader className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Lightbulb className="w-4 h-4" />
-                  )}
-                  <span>
-                    {loadingKeywords 
-                      ? 'Analyzing...' 
-                      : showKeywords 
-                      ? 'Hide Keywords' 
-                      : 'Highlight Keywords'
-                    }
-                  </span>
-                </button>
-              </div>
+
+
 
               {/* Navigation Buttons */}
               <div className="space-y-3">
