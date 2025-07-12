@@ -74,6 +74,9 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   const [loadingEnhancedExplanation, setLoadingEnhancedExplanation] = useState(false);
   const [enhancedExplanationError, setEnhancedExplanationError] = useState<string | null>(null);
 
+  // Get current question - add safety check
+  const currentQuestion = questions && questions.length > 0 ? questions[currentIndex] || questions[0] : null;
+
   // Read Aloud state and logic
   const [isSpeaking, setIsSpeaking] = React.useState(false);
   const utteranceRef = React.useRef<SpeechSynthesisUtterance | null>(null);
@@ -105,8 +108,6 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       setShowFlagModal(true);
     }
   };
-
-  const currentQuestion = questions[currentIndex];
 
   const handleFlagSubmit = async (reason: string, customReason?: string) => {
     try {
@@ -589,6 +590,19 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       onProgressChange(currentIndex, questions.length);
     }
   }, [currentIndex, questions.length, onProgressChange]);
+
+  // Early return if no current question
+  if (!currentQuestion) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-red-700 font-semibold text-lg mb-2">No questions available</p>
+          <p className="text-gray-600">Please try refreshing the page or contact support if the problem persists.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">

@@ -353,7 +353,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
             </button>
           </div>
           <Quiz
-            questions={dailyQuizQuestions}
+            questions={dailyQuizQuestions || []}
             onComplete={handleQuizComplete}
             onExit={() => window.location.reload()}
           />
@@ -371,7 +371,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   // Main render logic
   return (
     <>
-      {quizMode === 'quiz' && quizSession && (
+      {quizMode === 'quiz' && quizSession && quizSession.questions && quizSession.questions.length > 0 && (
         <div className="max-w-6xl mx-auto space-y-8 px-4">
           <div>
             <Quiz
