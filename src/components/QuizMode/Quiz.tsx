@@ -719,34 +719,34 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
                 {/* Text Size Controls */}
                 <div
-                  className="backdrop-blur bg-white/70 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg px-6 py-4 flex flex-col items-center min-w-[170px]"
-                  style={{ boxShadow: '0 4px 24px 0 rgba(80,120,255,0.08)' }}
+                  className="backdrop-blur bg-white/70 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-xl shadow px-3 py-2 flex flex-col items-center min-w-[110px]"
+                  style={{ boxShadow: '0 2px 12px 0 rgba(80,120,255,0.06)' }}
                 >
-                  <div className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3 tracking-wide select-none" style={{letterSpacing: '0.01em'}}>Text Size</div>
-                  <div className="flex items-center gap-3">
+                  <div className="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1 tracking-wide select-none" style={{letterSpacing: '0.01em'}}>Text Size</div>
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleTextSizeChange('decrease')}
                       disabled={currentTextSizeIndex === 0}
-                      className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
                       title="Decrease text size"
-                      style={{ boxShadow: '0 2px 8px 0 rgba(80,120,255,0.06)' }}
+                      style={{ boxShadow: '0 1px 4px 0 rgba(80,120,255,0.04)' }}
                     >
-                      <Minus className="w-5 h-5" />
+                      <Minus className="w-4 h-4" />
                     </button>
                     <span
-                      className="font-bold text-2xl text-gray-900 dark:text-white transition-all duration-200 select-none"
-                      style={{ minWidth: 56, display: 'inline-block', textAlign: 'center' }}
+                      className="font-bold text-base text-gray-900 dark:text-white transition-all duration-200 select-none"
+                      style={{ minWidth: 36, display: 'inline-block', textAlign: 'center' }}
                     >
                       {Math.round(textSize * 100)}%
                     </span>
                     <button
                       onClick={() => handleTextSizeChange('increase')}
                       disabled={currentTextSizeIndex === textSizeOptions.length - 1}
-                      className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
                       title="Increase text size"
-                      style={{ boxShadow: '0 2px 8px 0 rgba(80,120,255,0.06)' }}
+                      style={{ boxShadow: '0 1px 4px 0 rgba(80,120,255,0.04)' }}
                     >
-                      <Plus className="w-5 h-5" />
+                      <Plus className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

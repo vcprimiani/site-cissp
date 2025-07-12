@@ -40,6 +40,31 @@ export const Header: React.FC<HeaderProps> = ({
     onOpenVoiceSettings?.();
   };
 
+  // Inject Canny SDK and identify user
+  React.useEffect(() => {
+    // Load Canny SDK
+    if (!document.getElementById('canny-jssdk')) {
+      const script = document.createElement('script');
+      script.id = 'canny-jssdk';
+      script.src = 'https://canny.io/sdk.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+    // Identify user when SDK is loaded and user is present
+    if (currentUser && window.Canny) {
+      window.Canny('identify', {
+        appID: '6871aeb0cf5e2ff8c43cef94',
+        user: {
+          email: currentUser.email,
+          name: currentUser.name,
+          id: currentUser.id,
+          avatarURL: currentUser.avatarURL,
+          created: new Date(currentUser.created).toISOString(),
+        },
+      });
+    }
+  }, [currentUser]);
+
   return (
     <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -127,7 +152,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Separate Community button to the far right with a subtle outline glow */}
-            <div className="flex-1 flex justify-end">
+            <div className="flex-1 flex justify-end items-center gap-2">
               <a
                 href="https://CISSPStudyGroup.com"
                 target="_blank"
@@ -138,6 +163,19 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <Users className="w-4 h-4 mr-2 text-[#F8D27F]" />
                 <span>Study Group</span>
+              </a>
+              <a
+                data-canny-link
+                href="https://cissp.canny.io"
+                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md hover:from-blue-600 hover:to-purple-600 hover:scale-105 focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 outline-none"
+                style={{ marginLeft: 12 }}
+                title="Give Feedback"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-white">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Give Feedback</span>
               </a>
             </div>
 
