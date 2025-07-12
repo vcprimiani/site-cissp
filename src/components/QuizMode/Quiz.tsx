@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Question } from '../../types';
-import { Clock, CheckCircle, XCircle, ArrowRight, ArrowLeft, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader, Briefcase, Sparkles } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, ArrowRight, ArrowLeft, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader, Briefcase, Sparkles, Flag } from 'lucide-react';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { analyzeCISSPKeywords, highlightKeywords } from '../../services/keywordAnalysis';
 import { generateManagerPerspective, enhanceQuestionExplanation } from '../../services/openai';
 import { useQuizPersistence } from '../../hooks/useQuizPersistence';
 import { isStructuredExplanation } from '../../utils/textFormatting';
+import { useFlags } from '../../hooks/useFlags';
+import { FlagModal } from '../UI/FlagModal';
 
 interface QuizProps {
   questions: Question[];
@@ -90,7 +92,29 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     window.speechSynthesis.speak(utterance);
   };
 
+  // Flag functionality
+  const [showFlagModal, setShowFlagModal] = React.useState(false);
+  const { isQuestionFlagged, flagQuestion, unflagQuestion, loading: flagsLoading } = useFlags();
+  const isFlagged = isQuestionFlagged(currentQuestion.id);
+
+  const handleFlagClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isFlagged) {
+      unflagQuestion(currentQuestion.id);
+    } else {
+      setShowFlagModal(true);
+    }
+  };
+
   const currentQuestion = questions[currentIndex];
+
+  const handleFlagSubmit = async (reason: string, customReason?: string) => {
+    try {
+      await flagQuestion(currentQuestion.id, reason, customReason);
+    } catch (error) {
+      console.error('Error flagging question:', error);
+    }
+  };
   const isLastQuestion = currentIndex === questions.length - 1;
 
   // Save state whenever it changes
@@ -606,16 +630,27 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
               {/* Question Text */}
               <div className="mb-6">
-                {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 ? (
-                  <div 
-                    className="text-xl leading-relaxed text-gray-900 font-medium"
-                    dangerouslySetInnerHTML={{ __html: getHighlightedQuestionText() }}
-                  />
-                ) : (
-                  <span className="text-xl leading-relaxed text-gray-900 font-medium">
-                    {currentQuestion.question}
-                  </span>
-                )}
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 ? (
+                      <div 
+                        className="text-xl leading-relaxed text-gray-900 font-medium"
+                        dangerouslySetInnerHTML={{ __html: getHighlightedQuestionText() }}
+                      />
+                    ) : (
+                      <span className="text-xl leading-relaxed text-gray-900 font-medium">
+                        {currentQuestion.question}
+                      </span>
+                    )}
+                  </div>
+                  {/* Flag Indicator */}
+                  {isFlagged && (
+                    <div className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 border border-red-200 ml-3">
+                      <Flag className="w-3 h-3" />
+                      <span>Flagged</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Answer Options */}
@@ -883,6 +918,24 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 </button>
               </div>
 
+              {/* Flag Question Button */}
+              <div>
+                <button
+                  onClick={handleFlagClick}
+                  disabled={flagsLoading}
+                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    isFlagged
+                      ? 'bg-red-100 text-red-800 border border-red-300'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <Flag className="w-4 h-4" />
+                  <span>
+                    {isFlagged ? 'Remove Flag' : 'Flag Question'}
+                  </span>
+                </button>
+              </div>
+
               {/* Navigation Buttons */}
               <div className="space-y-3">
                 {/* Back Button */}
@@ -907,6 +960,15 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
           </div>
         </div>
       </div>
+
+      {/* Flag Modal */}
+      <FlagModal
+        isOpen={showFlagModal}
+        onClose={() => setShowFlagModal(false)}
+        onFlag={handleFlagSubmit}
+        questionText={currentQuestion.question}
+        loading={flagsLoading}
+      />
     </div>
   );
 };

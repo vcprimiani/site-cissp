@@ -31,21 +31,17 @@ export const useFlags = (): UseFlagsReturn => {
       setLoading(true);
       setError(null);
 
-      // Get all questions and filter by user's flags
+      // Get questions that this user has flagged
       const { data: questions, error: fetchError } = await supabase
         .from('questions')
-        .select('id, flagged_by')
-        .not('flagged_by', 'is', null);
+        .select('id')
+        .contains('flagged_by', [user.id]);
 
       if (fetchError) {
         throw fetchError;
       }
 
-      // Filter questions that this user has flagged
-      const userFlaggedQuestions = (questions || [])
-        .filter((q: any) => q.flagged_by && q.flagged_by.includes(user.id))
-        .map((q: any) => q.id);
-
+      const userFlaggedQuestions = (questions || []).map((q: any) => q.id);
       setFlaggedQuestionIds(userFlaggedQuestions);
     } catch (err: any) {
       console.error('Error fetching user flags:', err);
