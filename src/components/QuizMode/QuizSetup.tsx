@@ -594,7 +594,8 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                       <label className="block text-sm font-medium text-gray-700 mb-3">
                         Number of Questions
                       </label>
-                      <div className="flex items-center justify-between">
+                      <div className="space-y-4">
+                        {/* Preset buttons */}
                         <div className="flex items-center space-x-2">
                           {[5, 10, 25].map(num => (
                             <button
@@ -610,14 +611,40 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                             </button>
                           ))}
                         </div>
-                        <button
-                          onClick={generateQuiz}
-                          disabled={filteredQuestions.length === 0}
-                          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Play className="w-5 h-5" />
-                          <span>Start Quiz</span>
-                        </button>
+                        
+                        {/* Custom input field */}
+                        <div className="flex items-center space-x-3">
+                          <label className="text-sm font-medium text-gray-700">Custom:</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max={filteredQuestions.length}
+                            value={numberOfQuestions}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              if (!isNaN(value) && value > 0) {
+                                setNumberOfQuestions(Math.min(value, filteredQuestions.length));
+                              }
+                            }}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                            placeholder={`1-${filteredQuestions.length}`}
+                          />
+                          <span className="text-sm text-gray-500">
+                            (max: {filteredQuestions.length})
+                          </span>
+                        </div>
+                        
+                        {/* Start Quiz button */}
+                        <div className="flex justify-end">
+                          <button
+                            onClick={generateQuiz}
+                            disabled={filteredQuestions.length === 0}
+                            className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Play className="w-5 h-5" />
+                            <span>Start Quiz</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
