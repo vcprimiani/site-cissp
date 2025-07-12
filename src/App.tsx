@@ -99,6 +99,11 @@ function App() {
 
   const handleModeChange = (mode: AppMode) => {
     setAppState(prev => ({ ...prev, mode }));
+    
+    // If we're on the admin page, navigate back to the main app
+    if (currentPath === '/admin') {
+      window.location.href = '/';
+    }
   };
 
   const handleUpdateState = (updates: Partial<AppState>) => {
