@@ -21,6 +21,7 @@ interface PersistedQuizState {
   enhancedExplanation?: string | null;
   loadingEnhancedExplanation?: boolean;
   enhancedExplanationError?: string | null;
+  textSize?: number;
 }
 
 const STORAGE_KEY = 'quiz-persistent-state';
