@@ -173,8 +173,7 @@ export const Header: React.FC<HeaderProps> = ({
               <a
                 data-canny-link
                 href="https://cissp.canny.io"
-                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md hover:from-blue-600 hover:to-purple-600 hover:scale-105 focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 outline-none"
-                style={{ marginLeft: 12 }}
+                className="px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md transition-all duration-200 hover:from-blue-600 hover:to-purple-600 hover:scale-105 focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 outline-none"
                 title="Give Feedback"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-white">
