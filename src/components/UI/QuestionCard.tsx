@@ -93,7 +93,10 @@ Study more at: https://site.cisspstudygroup.com`;
 
   const handleFlagSubmit = async (reason: string, customReason?: string) => {
     try {
-      await flagQuestion(question.id, reason, customReason);
+      const success = await flagQuestion(question.id, reason, customReason);
+      if (success) {
+        setShowFlagModal(false);
+      }
     } catch (error) {
       console.error('Error flagging question:', error);
     }
@@ -179,6 +182,15 @@ Study more at: https://site.cisspstudygroup.com`;
           <div className="flex-1 min-w-0">
             {/* Status Indicators Row */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
+              {/* Flagged Status Indicator */}
+              {isFlagged && (
+                <div className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                  <Flag className="w-3 h-3" />
+                  <span>Flagged</span>
+                  <span className="text-xs opacity-75">(excluded from quizzes)</span>
+                </div>
+              )}
+              
               {/* Domain Badge */}
               <div 
                 className="flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium"
@@ -376,20 +388,20 @@ Study more at: https://site.cisspstudygroup.com`;
       <div className="absolute bottom-3 right-3 z-10 flex flex-row gap-2">
         {/* Flag Button */}
         <button
-          className={`p-2 rounded-full shadow border border-gray-200 transition-colors ${
+          className={`p-2 rounded-full shadow border transition-all duration-200 ${
             isFlagged
-              ? 'bg-red-100 border-red-400 ring-2 ring-red-300 shadow-lg'
-              : 'bg-white hover:bg-red-50'
+              ? 'bg-red-500 border-red-600 ring-2 ring-red-300 shadow-lg hover:bg-red-600'
+              : 'bg-white border-gray-200 hover:bg-red-50 hover:border-red-300'
           }`}
           aria-label={isFlagged ? 'Remove flag' : 'Flag question'}
           onClick={handleFlagClick}
           disabled={flagsLoading}
           style={{ zIndex: 2 }}
-          title={isFlagged ? 'Remove flag' : 'Flag this question'}
+          title={isFlagged ? 'Remove flag (flagged questions are excluded from quizzes)' : 'Flag this question'}
         >
           <Flag
             className={`w-6 h-6 transition-colors ${
-              isFlagged ? 'text-red-700 fill-red-400' : 'text-gray-400'
+              isFlagged ? 'text-white' : 'text-gray-400'
             }`}
             fill={isFlagged ? 'currentColor' : 'none'}
           />

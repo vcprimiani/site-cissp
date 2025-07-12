@@ -103,10 +103,10 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   // Get all available tags from available questions
   const allTags = Array.from(new Set(availableQuestions.flatMap(q => q.tags))).sort();
   
-  // Filter questions based on selected tags
+  // Filter questions based on selected tags and exclude flagged questions
   const filteredQuestions = selectedTags.length > 0 
-    ? availableQuestions.filter(q => q.isActive && selectedTags.some(tag => q.tags.includes(tag)))
-    : availableQuestions.filter(q => q.isActive);
+    ? availableQuestions.filter(q => q.isActive && !q.isFlagged && selectedTags.some(tag => q.tags.includes(tag)))
+    : availableQuestions.filter(q => q.isActive && !q.isFlagged);
 
   const generateQuiz = () => {
     if (filteredQuestions.length === 0) return;
@@ -213,7 +213,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
 
   // Add this function to start a quiz from bookmarks
   const startQuizFromBookmarks = () => {
-    const bookmarkedQuestions = questions.filter(q => bookmarkedIds.includes(q.id));
+    const bookmarkedQuestions = questions.filter(q => bookmarkedIds.includes(q.id) && !q.isFlagged);
     if (bookmarkedQuestions.length === 0) return;
     const questionsToUse = Math.min(numberOfQuestions, bookmarkedQuestions.length);
     const shuffledQuestions = [...bookmarkedQuestions]
