@@ -46,7 +46,13 @@ export const useQuestions = (): UseQuestionsReturn => {
         tags: item.tags as string[],
         createdBy: item.created_by,
         isActive: item.is_active,
-        createdAt: new Date(item.created_at)
+        createdAt: new Date(item.created_at),
+        flagCount: item.flag_count || 0,
+        flaggedBy: item.flagged_by || [],
+        flagReasons: item.flag_reasons || [],
+        isFlagged: item.is_flagged || false,
+        flaggedAt: item.flagged_at ? new Date(item.flagged_at) : undefined,
+        flagStatus: item.flag_status || 'pending'
       }));
 
       setQuestions(transformedQuestions);
@@ -97,7 +103,13 @@ export const useQuestions = (): UseQuestionsReturn => {
         tags: data.tags as string[],
         createdBy: data.created_by,
         isActive: data.is_active,
-        createdAt: new Date(data.created_at)
+        createdAt: new Date(data.created_at),
+        flagCount: data.flag_count || 0,
+        flaggedBy: data.flagged_by || [],
+        flagReasons: data.flag_reasons || [],
+        isFlagged: data.is_flagged || false,
+        flaggedAt: data.flagged_at ? new Date(data.flagged_at) : undefined,
+        flagStatus: data.flag_status || 'pending'
       };
 
       // Add to local state (it will be at the top due to created_at ordering)

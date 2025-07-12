@@ -58,6 +58,27 @@ export interface Question {
   createdBy: string;
   createdAt: Date;
   isActive: boolean;
+  flagCount: number;
+  flaggedBy: string[];
+  flagReasons: string[];
+  isFlagged: boolean;
+  flaggedAt?: Date;
+  flagStatus: 'pending' | 'reviewed' | 'dismissed' | 'actioned';
+}
+
+export interface FlagReason {
+  value: string;
+  label: string;
+  description: string;
+}
+
+export interface FlagHistory {
+  id: string;
+  questionId: string;
+  userId: string;
+  action: 'flag' | 'unflag' | 'review' | 'dismiss' | 'action';
+  reason?: string;
+  createdAt: Date;
 }
 
 export interface Quiz {
