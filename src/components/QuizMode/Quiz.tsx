@@ -880,33 +880,6 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 </button>
               </div>
 
-              {/* Highlight Keywords Button */}
-              <div className="w-full">
-                <button
-                  onClick={handleToggleKeywords}
-                  disabled={loadingKeywords}
-                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    showKeywords 
-                      ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' 
-                      : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                  }`}
-                >
-                  {loadingKeywords ? (
-                    <Loader className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Lightbulb className="w-4 h-4" />
-                  )}
-                  <span>
-                    {loadingKeywords 
-                      ? 'Analyzing...' 
-                      : showKeywords 
-                      ? 'Hide Keywords' 
-                      : 'Highlight Keywords'
-                    }
-                  </span>
-                </button>
-              </div>
-
               {/* Flag Question Button */}
               <div className="w-full">
                 <button
