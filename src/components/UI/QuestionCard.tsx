@@ -385,10 +385,10 @@ Study more at: https://site.cisspstudygroup.com`;
       </div>
 
       {/* Action Buttons - bottom right, side by side */}
-      <div className="absolute bottom-3 right-3 z-10 flex flex-row gap-2">
+      <div className="absolute bottom-3 right-3 z-50 flex flex-row gap-2">
         {/* Flag Button */}
         <button
-          className={`p-2 rounded-full shadow border transition-all duration-200 ${
+          className={`p-3 rounded-full shadow-lg border transition-all duration-200 ${
             isFlagged
               ? 'bg-red-500 border-red-600 ring-2 ring-red-300 shadow-lg hover:bg-red-600'
               : 'bg-white border-gray-200 hover:bg-red-50 hover:border-red-300'
@@ -396,11 +396,10 @@ Study more at: https://site.cisspstudygroup.com`;
           aria-label={isFlagged ? 'Remove flag' : 'Flag question'}
           onClick={handleFlagClick}
           disabled={flagsLoading}
-          style={{ zIndex: 2 }}
           title={isFlagged ? 'Remove flag (flagged questions are excluded from quizzes)' : 'Flag this question'}
         >
           <Flag
-            className={`w-6 h-6 transition-colors ${
+            className={`w-5 h-5 transition-colors ${
               isFlagged ? 'text-white' : 'text-gray-400'
             }`}
             fill={isFlagged ? 'currentColor' : 'none'}
@@ -457,7 +456,7 @@ Study more at: https://site.cisspstudygroup.com`;
         
         {/* Bookmark Button */}
         <button
-          className={`p-2 rounded-full shadow border border-gray-200 transition-colors ${
+          className={`p-3 rounded-full shadow-lg border border-gray-200 transition-colors ${
             isBookmarked
               ? 'bg-blue-100 border-blue-400 ring-2 ring-blue-300 shadow-lg'
               : 'bg-white hover:bg-blue-50'
@@ -465,11 +464,10 @@ Study more at: https://site.cisspstudygroup.com`;
           aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
           onClick={e => { if (hasActiveSubscription) { e.stopPropagation(); toggleBookmark(question.id); } }}
           disabled={bookmarksLoading || !hasActiveSubscription}
-          style={{ zIndex: 2 }}
           title={!hasActiveSubscription ? 'Bookmarking is for paid members only' : (isBookmarked ? 'Remove bookmark' : 'Add bookmark')}
         >
           <Bookmark
-            className={`w-6 h-6 transition-colors ${
+            className={`w-5 h-5 transition-colors ${
               isBookmarked ? 'text-blue-700 fill-blue-400' : 'text-gray-400'
             }`}
             fill={isBookmarked ? 'currentColor' : 'none'}
