@@ -12,6 +12,7 @@ import { getLocalDailyQuizQuestions } from '../../services/dailyQuiz';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
 import { generateAIQuestion } from '../../services/openai';
+import { useAppState } from '../../hooks/useAppState';
 
 interface QuizSetupProps {
   onQuizComplete?: (incorrectQuestions: Question[]) => void;
@@ -48,6 +49,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   } = useSessionTracker();
   const { hasPersistedQuiz, persistedState, clearPersistedState } = useQuizPersistence();
   const { bookmarkedIds, loading: bookmarksLoading } = useBookmarks();
+  const { appState } = useAppState();
   
   const [numberOfQuestions, setNumberOfQuestions] = useState(5);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -380,6 +382,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
               onComplete={handleQuizComplete}
               onExit={exitQuiz}
               onProgressChange={(current, total) => setQuizProgress({current, total})}
+              currentUser={appState.currentUser}
             />
           </div>
         </div>

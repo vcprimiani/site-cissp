@@ -19,6 +19,7 @@ interface QuizProps {
   onComplete: (results: QuizResults) => void;
   onExit: () => void;
   onProgressChange?: (current: number, total: number) => void;
+  currentUser?: any; // Accept currentUser as a prop
 }
 
 interface QuizResults {
@@ -33,7 +34,7 @@ interface QuizResults {
   }[];
 }
 
-export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete, onExit, onProgressChange }) => {
+export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete, onExit, onProgressChange, currentUser }) => {
   const { persistedState, saveQuizState, clearPersistedState, hasPersistedQuiz } = useQuizPersistence();
   
   // Initialize state from initialIndex, persistedState, or 0
@@ -414,7 +415,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   const domainColor = getDomainColor(currentQuestion?.domain || '');
   const difficultyColor = getDifficultyColor(currentQuestion?.difficulty || 'Easy');
 
-  const currentUser = JSON.parse(localStorage.getItem('supabase.auth.user') || 'null');
+  // Remove localStorage-based user lookup
+  // const currentUser = JSON.parse(localStorage.getItem('supabase.auth.user') || 'null');
   const questionIds = questions.map(q => q.id);
   const { ratings, setRating } = useRatings(questionIds, currentUser?.id || null);
   const [ratingCounts, setRatingCounts] = useState<{ up: number; down: number }>({ up: 0, down: 0 });
