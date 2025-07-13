@@ -23,6 +23,7 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
   const [filter, setFilter] = useState<'all' | 'pending' | 'reviewed' | 'dismissed' | 'actioned'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   
   const { showSuccess, showError, showInfo } = useToast();
 
@@ -126,6 +127,36 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
     } catch (err: any) {
       console.error('Error updating flag status:', err);
       const errorMessage = err.message || 'Failed to update status';
+      showError('Error', errorMessage);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // Handle question deletion
+  const handleDeleteQuestion = async (questionId: string) => {
+    try {
+      setActionLoading(questionId);
+      
+      // Call the delete method from FlagService
+      await FlagService.deleteQuestion({
+        questionId,
+        adminUserId: 'admin' // This should come from auth context
+      });
+
+      // Remove from local state
+      setFlaggedQuestions(prev => prev.filter(q => q.id !== questionId));
+      
+      // Close modal if it was the selected question
+      if (selectedQuestion?.id === questionId) {
+        setSelectedQuestion(null);
+      }
+
+      showSuccess('Question Deleted', 'Question has been permanently removed from the database');
+      setDeleteConfirm(null);
+    } catch (err: any) {
+      console.error('Error deleting question:', err);
+      const errorMessage = err.message || 'Failed to delete question';
       showError('Error', errorMessage);
     } finally {
       setActionLoading(null);
@@ -338,7 +369,7 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
           </div>
         ) : (
           filteredQuestions.map(question => (
-            <div key={question.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow">
+            <div key={question.id} className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow relative">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
@@ -411,6 +442,37 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
                       </span>
                     )}
                   </div>
+                </div>
+              )}
+
+              {/* Delete Button for Actioned Questions */}
+              {question.flagStatus === 'actioned' && (
+                <div className="absolute bottom-3 right-3">
+                  {deleteConfirm === question.id ? (
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleDeleteQuestion(question.id)}
+                        disabled={actionLoading === question.id}
+                        className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50"
+                      >
+                        {actionLoading === question.id ? 'Deleting...' : 'Confirm'}
+                      </button>
+                      <button
+                        onClick={() => setDeleteConfirm(null)}
+                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setDeleteConfirm(question.id)}
+                      className="flex items-center space-x-1 px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete from DB</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -510,6 +572,41 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
                       >
                         {actionLoading === selectedQuestion.id ? 'Processing...' : 'Mark as Reviewed'}
                       </button>
+                    )}
+
+                    {/* Delete Button for Actioned Questions in Modal */}
+                    {selectedQuestion.flagStatus === 'actioned' && (
+                      <div className="border-t pt-4">
+                        <h5 className="font-medium text-red-700 mb-2">Danger Zone</h5>
+                        {deleteConfirm === selectedQuestion.id ? (
+                          <div className="space-y-2">
+                            <p className="text-sm text-red-600">Are you sure you want to permanently delete this question?</p>
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleDeleteQuestion(selectedQuestion.id)}
+                                disabled={actionLoading === selectedQuestion.id}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50"
+                              >
+                                {actionLoading === selectedQuestion.id ? 'Deleting...' : 'Yes, Delete'}
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirm(null)}
+                                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setDeleteConfirm(selectedQuestion.id)}
+                            className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span>Delete from Database</span>
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

@@ -53,6 +53,11 @@ export interface UpdateFlagStatusParams {
   adminUserId: string;
 }
 
+export interface DeleteQuestionParams {
+  questionId: string;
+  adminUserId: string;
+}
+
 export class FlagService {
   // Flag a question
   static async flagQuestion({ questionId, userId, reason, customReason }: FlagQuestionParams): Promise<boolean> {
@@ -192,6 +197,32 @@ export class FlagService {
     }
   }
 
+  // Delete a question (admin only)
+  static async deleteQuestion({ questionId, adminUserId }: DeleteQuestionParams): Promise<boolean> {
+    try {
+      const { error: deleteError } = await supabase
+        .from('questions')
+        .delete()
+        .eq('id', questionId);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
+      // Add to flag history
+      await this.addFlagHistory({
+        questionId,
+        userId: adminUserId,
+        action: 'delete'
+      });
+
+      return true;
+    } catch (error: any) {
+      console.error('Error deleting question:', error);
+      throw error;
+    }
+  }
+
   // Get flagged questions
   static async getFlaggedQuestions(): Promise<any[]> {
     try {
@@ -250,7 +281,7 @@ export class FlagService {
   }: {
     questionId: string;
     userId: string;
-    action: 'flag' | 'unflag' | 'review' | 'dismiss' | 'action';
+    action: 'flag' | 'unflag' | 'review' | 'dismiss' | 'action' | 'delete';
     reason?: string;
   }): Promise<void> {
     try {
