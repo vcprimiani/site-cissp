@@ -424,7 +424,15 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   }, [currentQuestion?.id]);
 
   const handleThumb = async (val: 1 | -1) => {
-    if (!currentUser || !currentQuestion || !currentQuestion.id) return;
+    console.log('Thumb clicked', val, currentUser, currentQuestion?.id);
+    if (!currentUser) {
+      showToast('error', 'No user found. Please log in.');
+      return;
+    }
+    if (!currentQuestion || !currentQuestion.id) {
+      showToast('error', 'No question found.');
+      return;
+    }
     try {
       const success = await setQuestionRating(currentQuestion.id, currentUser.id, val);
       if (!success) {
