@@ -45,27 +45,28 @@ export const RatingButton: React.FC<RatingButtonProps> = ({ questionId, userId }
 
   // Aggregate rating calculation
   const totalVotes = ratingCounts.up + ratingCounts.down;
+  // Score: 1 (all down) to 5 (all up), 3 is neutral
   const aggregateScore = totalVotes === 0 ? 3 : 3 + ((ratingCounts.up - ratingCounts.down) / totalVotes) * 2;
+  // Clamp between 1 and 5
   const clampedScore = Math.max(1, Math.min(5, aggregateScore));
-
-  // Adjusted emoji/label logic
-  let emoji = '🤔';
-  let vibeLabel = 'Not enough votes yet';
-  if (totalVotes > 1) {
-    if (clampedScore <= 1.5) {
-      emoji = '😡';
-      vibeLabel = 'Hated by most users';
-    } else if (clampedScore <= 3.5) {
-      emoji = '🤔';
-      vibeLabel = 'Mixed/Neutral';
-    } else if (clampedScore < 5) {
-      emoji = '🙂';
-      vibeLabel = 'Liked by most users';
-    } else {
-      emoji = '🤩';
-      vibeLabel = 'Loved by most users';
-    }
-  }
+  // Emoji map
+  const vibeEmoji = [
+    '😡', // 1
+    '😕', // 2
+    '😐', // 3
+    '🙂', // 4
+    '🤩'  // 5
+  ];
+  // Pick emoji based on rounded score
+  const emoji = vibeEmoji[Math.round(clampedScore) - 1];
+  const vibeLabels = [
+    'Hated by most users',
+    'Not a fan',
+    'Mixed/Neutral',
+    'Liked by most users',
+    'Loved by most users'
+  ];
+  const vibeLabel = vibeLabels[Math.round(clampedScore) - 1];
 
   return (
     <div className="w-full flex items-center space-x-2 mt-2">
@@ -106,9 +107,9 @@ export const RatingButton: React.FC<RatingButtonProps> = ({ questionId, userId }
         <span className="text-xs">{ratingCounts.down}</span>
       </button>
       {/* Aggregate rating display */}
-      <div className="flex items-center ml-2 group cursor-default" title={`${vibeLabel} (${clampedScore.toFixed(1)}/5 · ${totalVotes} vote${totalVotes === 1 ? '' : 's'})`}>
+      <div className="flex items-center ml-2 group cursor-default" title={`${vibeLabel} (${clampedScore.toFixed(1)}/5)`}>
         <span className="text-2xl mr-1">{emoji}</span>
-        <span className="text-xs text-gray-500 group-hover:text-gray-700 transition-colors">{clampedScore.toFixed(1)}/5 · {totalVotes} vote{totalVotes === 1 ? '' : 's'}</span>
+        <span className="text-xs text-gray-500 group-hover:text-gray-700 transition-colors">{clampedScore.toFixed(1)}/5</span>
       </div>
     </div>
   );
