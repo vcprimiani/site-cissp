@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { FlagService, FLAG_REASONS } from '../services/flagService';
 import { useAuth } from './useAuth';
 import { Question } from '../types';
