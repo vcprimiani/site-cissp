@@ -56,11 +56,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   const [tallyCounts, setTallyCounts] = useState<number[]>(persistedState?.tallyCounts || [0, 0, 0, 0]);
   const [showTallies, setShowTallies] = useState(persistedState?.showTallies || false);
 
-  // Keyword highlighting - store keywords per question
-  const [questionKeywords, setQuestionKeywords] = useState<Record<string, string[]>>({});
-  const [showKeywords, setShowKeywords] = useState(persistedState?.showKeywords || false);
-  const [loadingKeywords, setLoadingKeywords] = useState(false);
-  const [keywordError, setKeywordError] = useState<string | null>(null);
+
 
   // Manager's perspective feature
   const [managerPerspectives, setManagerPerspectives] = useState<Record<string, string>>({});
@@ -76,6 +72,19 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   // Get current question - add safety check
   const currentQuestion = questions && questions.length > 0 ? questions[currentIndex] || questions[0] : null;
+
+  // Text size controls
+  const [textSize, setTextSize] = useState(persistedState?.textSize || 1); // 0.8, 1, 1.2, 1.4, 1.6
+  const textSizeOptions = [0.8, 1, 1.2, 1.4, 1.6];
+  const currentTextSizeIndex = textSizeOptions.indexOf(textSize);
+  
+  const handleTextSizeChange = (direction: 'increase' | 'decrease') => {
+    if (direction === 'increase' && currentTextSizeIndex < textSizeOptions.length - 1) {
+      setTextSize(textSizeOptions[currentTextSizeIndex + 1]);
+    } else if (direction === 'decrease' && currentTextSizeIndex > 0) {
+      setTextSize(textSizeOptions[currentTextSizeIndex - 1]);
+    }
+  };
 
   // Read Aloud state and logic
   const [isSpeaking, setIsSpeaking] = React.useState(false);
@@ -119,6 +128,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       console.error('Error flagging question:', error);
     }
   };
+
   const isLastQuestion = currentIndex === questions.length - 1;
 
   // Save state whenever it changes
@@ -136,15 +146,14 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       questionElapsedTime,
       tallyCounts,
       showTallies,
-      keywords: questionKeywords[currentQuestion?.id] || [],
-      showKeywords,
       isActive: true,
       isEnhancedExplanation,
       enhancedExplanation,
       loadingEnhancedExplanation,
-      enhancedExplanationError
+      enhancedExplanationError,
+      textSize
     });
-  }, [currentIndex, userAnswers, selectedAnswer, showResult, questionStartTime, questionTimes, elapsedTime, questionElapsedTime, tallyCounts, showTallies, questionKeywords, showKeywords, isEnhancedExplanation, enhancedExplanation, loadingEnhancedExplanation, enhancedExplanationError]);
+  }, [currentIndex, userAnswers, selectedAnswer, showResult, questionStartTime, questionTimes, elapsedTime, questionElapsedTime, tallyCounts, showTallies, isEnhancedExplanation, enhancedExplanation, loadingEnhancedExplanation, enhancedExplanationError, textSize]);
 
   // Timer effect
   useEffect(() => {
@@ -176,7 +185,6 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     setQuestionStartTime(Date.now());
     setQuestionElapsedTime(0); // Reset per-question timer
     setTallyCounts([0, 0, 0, 0]); // Reset tallies for new question
-    setKeywordError(null);
     setShowManagerPerspective(false);
     setManagerPerspectiveError(null);
     setIsEnhancedExplanation(false);
@@ -247,39 +255,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     return tallyCounts.reduce((sum, count) => sum + count, 0);
   };
 
-  const handleToggleKeywords = async () => {
-    const questionId = currentQuestion.id;
-    
-    // If we already have keywords for this question, just toggle display
-    if (questionKeywords[questionId]) {
-      setShowKeywords(!showKeywords);
-      return;
-    }
 
-    // If we don't have keywords yet, analyze them
-    if (loadingKeywords) return;
-    
-    setLoadingKeywords(true);
-    setKeywordError(null);
-    
-    try {
-      const result = await analyzeCISSPKeywords(currentQuestion.question);
-      
-      if (result.error) {
-        setKeywordError(result.error);
-      } else {
-        setQuestionKeywords(prev => ({
-          ...prev,
-          [questionId]: result.keywords
-        }));
-        setShowKeywords(true);
-      }
-    } catch (error: any) {
-      setKeywordError('Failed to analyze keywords. Please try again.');
-    } finally {
-      setLoadingKeywords(false);
-    }
-  };
 
   const handleManagerPerspective = async () => {
     const questionId = currentQuestion.id;
@@ -450,14 +426,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   const domainColor = getDomainColor(currentQuestion.domain);
   const difficultyColor = getDifficultyColor(currentQuestion.difficulty);
 
-  // Get highlighted question text
-  const getHighlightedQuestionText = () => {
-    const keywords = questionKeywords[currentQuestion.id] || [];
-    if (showKeywords && keywords.length > 0) {
-      return highlightKeywords(currentQuestion.question, keywords);
-    }
-    return currentQuestion.question;
-  };
+
 
   // Format manager perspective response for better readability
   const formatManagerPerspective = (text: string): JSX.Element[] => {
@@ -615,59 +584,15 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
           <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col lg:flex-row gap-8 w-full">
             {/* Main Question Content */}
             <div className="flex-1 min-w-0">
-              {/* Keywords Display */}
-              {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 && (
-                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Lightbulb className="w-4 h-4 text-yellow-600" />
-                    <span className="font-medium text-yellow-800">Key CISSP Terms:</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {questionKeywords[currentQuestion.id].map((keyword, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-medium"
-                      >
-                        {keyword}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Keyword Error */}
-              {keywordError && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <XCircle className="w-4 h-4 text-red-600" />
-                    <span className="text-red-800 text-sm">{keywordError}</span>
-                  </div>
-                </div>
-              )}
 
               {/* Question Text */}
               <div className="mb-6">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    {showKeywords && questionKeywords[currentQuestion.id]?.length > 0 ? (
-                      <div 
-                        className="text-xl leading-relaxed text-gray-900 font-medium"
-                        dangerouslySetInnerHTML={{ __html: getHighlightedQuestionText() }}
-                      />
-                    ) : (
-                      <span className="text-xl leading-relaxed text-gray-900 font-medium">
-                        {currentQuestion.question}
-                      </span>
-                    )}
-                  </div>
-                  {/* Flag Indicator */}
-                  {isFlagged && (
-                    <div className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 border border-red-200 ml-3">
-                      <Flag className="w-3 h-3" />
-                      <span>Flagged</span>
-                    </div>
-                  )}
-                </div>
+                <span 
+                  className="leading-relaxed text-gray-900 font-medium"
+                  style={{ fontSize: `${textSize * 1.25}rem` }}
+                >
+                  {currentQuestion.question}
+                </span>
               </div>
 
               {/* Answer Options */}
@@ -702,7 +627,10 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                         }`}>
                           {String.fromCharCode(65 + index)}
                         </div>
-                        <p className="text-gray-900 leading-relaxed flex-1 text-sm">
+                        <p 
+                          className="text-gray-900 leading-relaxed flex-1"
+                          style={{ fontSize: `${textSize * 0.875}rem` }}
+                        >
                           {option}
                         </p>
                       </div>
@@ -751,10 +679,17 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
               {/* Explanation (show after submit) */}
               {showResult && (
                 <div className="bg-white rounded-lg p-4 border mb-6">
-                  <h4 className="font-medium text-gray-900 mb-2">Explanation:</h4>
-                  {isEnhancedExplanation && enhancedExplanation
-                    ? formatExplanation(enhancedExplanation)
-                    : formatExplanation(currentQuestion.explanation)}
+                  <h4 
+                    className="font-medium text-gray-900 mb-2"
+                    style={{ fontSize: `${textSize * 1.125}rem` }}
+                  >
+                    Explanation:
+                  </h4>
+                  <div style={{ fontSize: `${textSize * 0.875}rem` }}>
+                    {isEnhancedExplanation && enhancedExplanation
+                      ? formatExplanation(enhancedExplanation)
+                      : formatExplanation(currentQuestion.explanation)}
+                  </div>
                 </div>
               )}
 
@@ -811,29 +746,66 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 )}
               </div>
 
-              {/* Timers */}
-              <div className="w-full space-y-4">
-                {/* Total Timer */}
-                <div className="w-full">
-                  <div className="text-xs text-gray-500 mb-1">Total Time</div>
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <Clock className="w-4 h-4" />
-                    <span className="font-mono text-lg font-semibold">{formatTime(elapsedTime)}</span>
+              {/* Timers and Text Size Controls */}
+              <div className="flex items-start justify-between">
+                {/* Timers */}
+                <div className="space-y-4 flex-1">
+                  {/* Total Timer */}
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Total Time</div>
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <Clock className="w-4 h-4" />
+                      <span className="font-mono text-lg font-semibold">{formatTime(elapsedTime)}</span>
+                    </div>
+                  </div>
+
+                  {/* Per-Question Timer */}
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Question Time</div>
+                    <div className="flex items-center space-x-2">
+                      <RotateCcw className="w-4 h-4" />
+                      <span 
+                        className={`font-mono text-lg font-semibold ${
+                          questionElapsedTime >= 85 ? 'text-red-600' : 'text-gray-600'
+                        }`}
+                      >
+                        {formatTime(questionElapsedTime)}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Per-Question Timer */}
-                <div className="w-full">
-                  <div className="text-xs text-gray-500 mb-1">Question Time</div>
-                  <div className="flex items-center space-x-2">
-                    <RotateCcw className="w-4 h-4" />
-                    <span 
-                      className={`font-mono text-lg font-semibold ${
-                        questionElapsedTime >= 85 ? 'text-red-600' : 'text-gray-600'
-                      }`}
+                {/* Text Size Controls */}
+                <div
+                  className="backdrop-blur bg-white/70 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-xl shadow px-3 py-2 flex flex-col items-center min-w-[110px]"
+                  style={{ boxShadow: '0 2px 12px 0 rgba(80,120,255,0.06)' }}
+                >
+                  <div className="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1 tracking-wide select-none" style={{letterSpacing: '0.01em'}}>Text Size</div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleTextSizeChange('decrease')}
+                      disabled={currentTextSizeIndex === 0}
+                      className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="Decrease text size"
+                      style={{ boxShadow: '0 1px 4px 0 rgba(80,120,255,0.04)' }}
                     >
-                      {formatTime(questionElapsedTime)}
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span
+                      className="font-bold text-base text-gray-900 dark:text-white transition-all duration-200 select-none"
+                      style={{ minWidth: 36, display: 'inline-block', textAlign: 'center' }}
+                    >
+                      {Math.round(textSize * 100)}%
                     </span>
+                    <button
+                      onClick={() => handleTextSizeChange('increase')}
+                      disabled={currentTextSizeIndex === textSizeOptions.length - 1}
+                      className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="Increase text size"
+                      style={{ boxShadow: '0 1px 4px 0 rgba(80,120,255,0.04)' }}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>

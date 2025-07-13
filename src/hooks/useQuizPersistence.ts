@@ -14,13 +14,12 @@ interface PersistedQuizState {
   questionElapsedTime?: number;
   tallyCounts: number[];
   showTallies: boolean;
-  keywords: string[];
-  showKeywords: boolean;
   isActive: boolean;
   isEnhancedExplanation?: boolean;
   enhancedExplanation?: string | null;
   loadingEnhancedExplanation?: boolean;
   enhancedExplanationError?: string | null;
+  textSize?: number;
 }
 
 const STORAGE_KEY = 'quiz-persistent-state';
