@@ -18,6 +18,8 @@ import ProgressPage from './components/Progress/ProgressPage';
 import { AdminAccess } from './components/Admin/AdminAccess';
 import { PageWrapper } from './components/Layout/PageWrapper';
 import { DevBanner } from './components/UI/DevBanner';
+import { ToastContainer, useToast } from './components/UI/Toast';
+import { initializeToast } from './utils/toast';
 
 // 🚨 CRITICAL FOR AI AGENTS: All pages/components that use hooks MUST be wrapped in PageWrapper
 // This prevents "must be used within Provider" errors
@@ -37,6 +39,12 @@ function App() {
     isAuthenticated: false,
     showAuth: false
   });
+
+  const { toasts, showSuccess, showError, showWarning, showInfo, removeToast } = useToast();
+
+  React.useEffect(() => {
+    initializeToast({ showSuccess, showError, showWarning, showInfo });
+  }, [showSuccess, showError, showWarning, showInfo]);
 
   // Check for URL parameters to determine which page to show
   const urlParams = new URLSearchParams(window.location.search);
@@ -279,6 +287,7 @@ function App() {
           </div>
         </PageWrapper>
       </div>
+      <ToastContainer toasts={toasts} onClose={removeToast} />
     </>
   );
 }
