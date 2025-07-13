@@ -11,6 +11,7 @@ import { FlagModal } from '../UI/FlagModal';
 import { getQuestionRating, setQuestionRating, getQuestionRatingAggregate } from '../../services/flagService';
 import { useRatings } from '../../hooks/useRatings';
 import { showToast } from '../../utils/toast';
+import { RatingButton } from '../UI/RatingButton';
 
 interface QuizProps {
   questions: Question[];
@@ -855,27 +856,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
               </div>
 
               {/* Thumbs Up/Down Rating UI */}
-              {currentQuestion && (
-                <div className="w-full">
-                  <div className="flex items-center space-x-2">
-                    <button
-                      className={`flex items-center space-x-1 px-2 py-1 rounded-full transition-all duration-150 ${ratings[currentQuestion.id] === 1 ? 'bg-green-100 text-green-700 font-bold' : 'hover:bg-green-50 text-gray-700'}`}
-                      onClick={() => handleThumb(1)}
-                      aria-label="Thumbs Up"
-                    >
-                      <ThumbsUp className="w-5 h-5" />
-                      <span className="text-xs">{ratingCounts.up}</span>
-                    </button>
-                    <button
-                      className={`flex items-center space-x-1 px-2 py-1 rounded-full transition-all duration-150 ${ratings[currentQuestion.id] === -1 ? 'bg-red-100 text-red-700 font-bold' : 'hover:bg-red-50 text-gray-700'}`}
-                      onClick={() => handleThumb(-1)}
-                      aria-label="Thumbs Down"
-                    >
-                      <ThumbsDown className="w-5 h-5" />
-                      <span className="text-xs">{ratingCounts.down}</span>
-                    </button>
-                  </div>
-                </div>
+              {currentQuestion && currentUser && (
+                <RatingButton questionId={currentQuestion.id} userId={currentUser.id} />
               )}
 
               {/* Navigation Buttons */}
