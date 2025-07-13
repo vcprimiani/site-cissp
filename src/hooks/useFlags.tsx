@@ -66,7 +66,6 @@ export const FlagProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .filter((q: any) => q.flagged_by && Array.isArray(q.flagged_by) && q.flagged_by.includes(user.id))
         .map((q: any) => q.id);
       
-      console.log(`Fetched ${userFlaggedQuestions.length} flagged questions for user ${user.id}:`, userFlaggedQuestions);
       setFlaggedQuestionIds(userFlaggedQuestions);
     } catch (err: any) {
       console.error('Error fetching user flags:', err);
@@ -96,11 +95,7 @@ export const FlagProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (success) {
         // Update local state immediately for better UX
-        setFlaggedQuestionIds(prev => {
-          const newState = [...prev, questionId];
-          console.log(`Flagged question ${questionId}, new state:`, newState);
-          return newState;
-        });
+        setFlaggedQuestionIds(prev => [...prev, questionId]);
       }
 
       return success;
@@ -131,11 +126,7 @@ export const FlagProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (success) {
         // Update local state immediately for better UX
-        setFlaggedQuestionIds(prev => {
-          const newState = prev.filter(id => id !== questionId);
-          console.log(`Unflagged question ${questionId}, new state:`, newState);
-          return newState;
-        });
+        setFlaggedQuestionIds(prev => prev.filter(id => id !== questionId));
       }
 
       return success;
@@ -150,9 +141,7 @@ export const FlagProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Check if a question is flagged by current user
   const isQuestionFlagged = (questionId: string): boolean => {
-    const isFlagged = flaggedQuestionIds.includes(questionId);
-    console.log(`Checking flag for question ${questionId}: ${isFlagged} (total flagged: ${flaggedQuestionIds.length})`);
-    return isFlagged;
+    return flaggedQuestionIds.includes(questionId);
   };
 
   // Refresh flags
