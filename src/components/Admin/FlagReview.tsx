@@ -505,8 +505,8 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
                     question={selectedQuestion}
                     isExpanded={true}
                     showActions={false}
-                    hasActiveSubscription={hasActiveSubscription}
-                    subscriptionLoading={subscriptionLoading}
+                    hasActiveSubscription={true} // Always show answers for admin review
+                    subscriptionLoading={false}
                   />
                 </div>
 
