@@ -410,32 +410,29 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* Social Proof Section */}
-      <section className="py-16 bg-gray-50">
+      {/* How It Works Section */}
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Trusted by CISSP Students Worldwide
-            </h2>
-            <p className="text-gray-600">Join thousands studying for CISSP certification</p>
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <p className="text-xl text-gray-600">Get started in three easy steps</p>
           </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white rounded-xl p-6 shadow-lg">
-                <div className="flex items-center space-x-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-700 mb-4 italic">"{testimonial.content}"</p>
-                <div>
-                  <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                  <div className="text-sm text-gray-600">{testimonial.role}</div>
-                  <div className="text-sm text-gray-500">{testimonial.company}</div>
-                </div>
-              </div>
-            ))}
+            <div className="bg-white rounded-xl p-8 shadow text-center">
+              <div className="flex items-center justify-center mb-4"><UserCheck className="w-8 h-8 text-blue-600" /></div>
+              <h3 className="font-semibold text-gray-900 mb-2">1. Create an Account</h3>
+              <p className="text-gray-600">Sign up in seconds and access your dashboard instantly.</p>
+            </div>
+            <div className="bg-white rounded-xl p-8 shadow text-center">
+              <div className="flex items-center justify-center mb-4"><Sparkles className="w-8 h-8 text-purple-600" /></div>
+              <h3 className="font-semibold text-gray-900 mb-2">2. Try Some Questions Free</h3>
+              <p className="text-gray-600">Explore quizzes, AI explanations, and daily practice at no cost.</p>
+            </div>
+            <div className="bg-white rounded-xl p-8 shadow text-center">
+              <div className="flex items-center justify-center mb-4"><TrendingUp className="w-8 h-8 text-green-600" /></div>
+              <h3 className="font-semibold text-gray-900 mb-2">3. Upgrade for Unlimited Practice</h3>
+              <p className="text-gray-600">Unlock unlimited questions, advanced analytics, and all premium features.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -510,47 +507,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
-            <p className="text-xl text-gray-600">Get started in three easy steps</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-xl p-8 shadow text-center">
-              <div className="flex items-center justify-center mb-4"><UserCheck className="w-8 h-8 text-blue-600" /></div>
-              <h3 className="font-semibold text-gray-900 mb-2">1. Create an Account</h3>
-              <p className="text-gray-600">Sign up in seconds and access your dashboard instantly.</p>
-            </div>
-            <div className="bg-white rounded-xl p-8 shadow text-center">
-              <div className="flex items-center justify-center mb-4"><Sparkles className="w-8 h-8 text-purple-600" /></div>
-              <h3 className="font-semibold text-gray-900 mb-2">2. Try Some Questions Free</h3>
-              <p className="text-gray-600">Explore quizzes, AI explanations, and daily practice at no cost.</p>
-            </div>
-            <div className="bg-white rounded-xl p-8 shadow text-center">
-              <div className="flex items-center justify-center mb-4"><TrendingUp className="w-8 h-8 text-green-600" /></div>
-              <h3 className="font-semibold text-gray-900 mb-2">3. Upgrade for Unlimited Practice</h3>
-              <p className="text-gray-600">Unlock unlimited questions, advanced analytics, and all premium features.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{stat.number}</div>
-                <div className="text-gray-600 font-medium">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Who Is This For Section */}
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -572,6 +528,78 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <h3 className="font-semibold text-gray-900 mb-2">Career Changers</h3>
               <p className="text-gray-600">Transition into cybersecurity with confidence and expert support.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Highlights (interactive cards) */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              What Makes Casey AI Unique
+            </h2>
+            <p className="text-xl text-gray-600">
+              Discover the key features that make Casey AI the most effective CISSP study tool.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className={`bg-white rounded-2xl p-8 shadow-lg transition-all duration-300 ${
+                  activeFeature === index ? 'scale-105' : ''
+                }`}
+                onMouseEnter={() => setActiveFeature(index)}
+                onMouseLeave={() => setActiveFeature(0)}
+              >
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${feature.color}`}>
+                    <feature.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900">{feature.title}</h3>
+                </div>
+                <p className="text-gray-700 mb-4">{feature.description}</p>
+                <p className="text-gray-600 text-sm">{feature.details}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof/Stats Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Why Users Love Casey AI
+            </h2>
+            <p className="text-gray-600">Join thousands studying for CISSP certification</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="bg-white rounded-xl p-6 shadow-lg">
+                <div className="flex items-center space-x-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-700 mb-4 italic">"{testimonial.content}"</p>
+                <div>
+                  <div className="font-semibold text-gray-900">{testimonial.name}</div>
+                  <div className="text-sm text-gray-600">{testimonial.role}</div>
+                  <div className="text-sm text-gray-500">{testimonial.company}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{stat.number}</div>
+                <div className="text-gray-600 font-medium">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
