@@ -195,10 +195,11 @@ export class FlagService {
   // Get flagged questions
   static async getFlaggedQuestions(): Promise<any[]> {
     try {
+      // Query for questions that have been flagged (flag_count > 0)
       const { data, error } = await supabase
         .from('questions')
         .select('*')
-        .eq('is_flagged', true)
+        .gt('flag_count', 0)
         .order('flag_count', { ascending: false })
         .order('flagged_at', { ascending: false });
 
