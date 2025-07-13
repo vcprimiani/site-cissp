@@ -139,6 +139,8 @@ function App() {
           onModeChange={handleModeChange}
           currentUser={appState.currentUser}
           onLogout={() => {}} // Logout is handled by the useAuth hook
+          hasActiveSubscription={hasActiveSubscription}
+          subscriptionLoading={subscriptionLoading}
         />
         <PricingPage />
       </div>
@@ -181,12 +183,14 @@ function App() {
           subscriptionLoading={subscriptionLoading}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <FlagProvider>
-            <AdminAccess 
-              hasActiveSubscription={hasActiveSubscription}
-              subscriptionLoading={subscriptionLoading}
-            />
-          </FlagProvider>
+          <BookmarksProvider>
+            <FlagProvider>
+              <AdminAccess 
+                hasActiveSubscription={hasActiveSubscription}
+                subscriptionLoading={subscriptionLoading}
+              />
+            </FlagProvider>
+          </BookmarksProvider>
         </div>
       </div>
     );
