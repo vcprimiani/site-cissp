@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { FlagService, FLAG_REASONS } from '../services/flagService';
 import { useAuth } from './useAuth';
 import { Question } from '../types';
@@ -14,7 +14,28 @@ interface UseFlagsReturn {
   refreshFlags: () => Promise<void>;
 }
 
+// Create a context for flag state
+interface FlagContextType {
+  flaggedQuestionIds: string[];
+  loading: boolean;
+  error: string | null;
+  flagQuestion: (questionId: string, reason: string, customReason?: string) => Promise<boolean>;
+  unflagQuestion: (questionId: string) => Promise<boolean>;
+  isQuestionFlagged: (questionId: string) => boolean;
+  refreshFlags: () => Promise<void>;
+}
+
+const FlagContext = createContext<FlagContextType | null>(null);
+
 export const useFlags = (): UseFlagsReturn => {
+  const context = useContext(FlagContext);
+  if (!context) {
+    throw new Error('useFlags must be used within a FlagProvider');
+  }
+  return context;
+};
+
+export const FlagProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [flaggedQuestionIds, setFlaggedQuestionIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -44,6 +65,7 @@ export const useFlags = (): UseFlagsReturn => {
       const userFlaggedQuestions = (questions || [])
         .filter((q: any) => q.flagged_by && Array.isArray(q.flagged_by) && q.flagged_by.includes(user.id))
         .map((q: any) => q.id);
+      
       setFlaggedQuestionIds(userFlaggedQuestions);
     } catch (err: any) {
       console.error('Error fetching user flags:', err);
@@ -132,7 +154,7 @@ export const useFlags = (): UseFlagsReturn => {
     fetchUserFlags();
   }, [user]);
 
-  return {
+  const value: FlagContextType = {
     flaggedQuestionIds,
     loading,
     error,
@@ -141,4 +163,10 @@ export const useFlags = (): UseFlagsReturn => {
     isQuestionFlagged,
     refreshFlags
   };
+
+  return (
+    <FlagContext.Provider value={value}>
+      {children}
+    </FlagContext.Provider>
+  );
 }; 

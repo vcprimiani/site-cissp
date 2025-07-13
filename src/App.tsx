@@ -11,6 +11,7 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { useAuth } from './hooks/useAuth';
 import { useSubscription } from './hooks/useSubscription';
 import { BookmarksProvider } from './hooks/useBookmarks';
+import { FlagProvider } from './hooks/useFlags';
 import { LandingPage } from './components/Landing/LandingPage';
 import ResetPassword from './components/Auth/ResetPassword';
 import ProgressPage from './components/Progress/ProgressPage';
@@ -180,10 +181,12 @@ function App() {
           subscriptionLoading={subscriptionLoading}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <AdminAccess 
-            hasActiveSubscription={hasActiveSubscription}
-            subscriptionLoading={subscriptionLoading}
-          />
+          <FlagProvider>
+            <AdminAccess 
+              hasActiveSubscription={hasActiveSubscription}
+              subscriptionLoading={subscriptionLoading}
+            />
+          </FlagProvider>
         </div>
       </div>
     );
@@ -213,34 +216,36 @@ function App() {
       </div>
       <div style={{ paddingTop: '48px' }}>
         <BookmarksProvider>
-          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-            <Header
-              mode={appState.mode}
-              onModeChange={handleModeChange}
-              currentUser={appState.currentUser}
-              onLogout={() => {}} // Logout is handled by the useAuth hook
-              hasActiveSubscription={hasActiveSubscription}
-              subscriptionLoading={subscriptionLoading}
-            />
-            
-            <main>
-              {appState.mode === 'question-bank' ? (
-                <QuestionBankMode 
-                  appState={appState} 
-                  onUpdateState={handleUpdateState}
-                  hasActiveSubscription={hasActiveSubscription}
-                  subscriptionLoading={subscriptionLoading}
-                />
-              ) : (
-                <QuizMode 
-                  appState={appState} 
-                  onUpdateState={handleUpdateState}
-                  hasActiveSubscription={hasActiveSubscription}
-                  subscriptionLoading={subscriptionLoading}
-                />
-              )}
-            </main>
-          </div>
+          <FlagProvider>
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+              <Header
+                mode={appState.mode}
+                onModeChange={handleModeChange}
+                currentUser={appState.currentUser}
+                onLogout={() => {}} // Logout is handled by the useAuth hook
+                hasActiveSubscription={hasActiveSubscription}
+                subscriptionLoading={subscriptionLoading}
+              />
+              
+              <main>
+                {appState.mode === 'question-bank' ? (
+                  <QuestionBankMode 
+                    appState={appState} 
+                    onUpdateState={handleUpdateState}
+                    hasActiveSubscription={hasActiveSubscription}
+                    subscriptionLoading={subscriptionLoading}
+                  />
+                ) : (
+                  <QuizMode 
+                    appState={appState} 
+                    onUpdateState={handleUpdateState}
+                    hasActiveSubscription={hasActiveSubscription}
+                    subscriptionLoading={subscriptionLoading}
+                  />
+                )}
+              </main>
+            </div>
+          </FlagProvider>
         </BookmarksProvider>
       </div>
     </>
