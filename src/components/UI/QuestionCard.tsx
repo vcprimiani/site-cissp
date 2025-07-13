@@ -1,18 +1,16 @@
 import React from 'react';
 import { Question } from '../../types';
-import { ChevronDown, ChevronUp, Brain, Share2, Bookmark, Flag } from 'lucide-react';
+import { ChevronDown, ChevronUp, Brain, Share2, Bookmark } from 'lucide-react';
 import { getDomainColor, getDifficultyColor, getStatusColor, generateColorClasses, categoryIcons } from '../../utils/colorSystem';
 import { SocialShareButtons } from './SocialShareButtons';
 import { highlightKeywords } from '../../services/keywordAnalysis';
 import { formatExplanationText } from '../../utils/textFormatting';
 import { useBookmarks } from '../../hooks/useBookmarks';
-import { useFlags } from '../../hooks/useFlags';
 import { Lock, Crown } from 'lucide-react';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
 import { elevenLabsService } from '../../services/elevenlabs';
 import PlayPauseButton from './PlayPauseButton';
-import { FlagModal } from './FlagModal';
 
 interface QuestionCardProps {
   question: Question;
@@ -38,14 +36,11 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   subscriptionLoading
 }) => {
   const [showShareMenu, setShowShareMenu] = React.useState(false);
-  const [showFlagModal, setShowFlagModal] = React.useState(false);
   const domainColor = getDomainColor(question.domain);
   const difficultyColor = getDifficultyColor(question.difficulty);
   const aiColor = getStatusColor('ai-generated');
   const { bookmarkedIds, toggleBookmark, loading: bookmarksLoading } = useBookmarks();
-  const { isQuestionFlagged, flagQuestion, unflagQuestion, loading: flagsLoading } = useFlags();
   const isBookmarked = bookmarkedIds.includes(question.id);
-  const isFlagged = isQuestionFlagged(question.id);
 
   const getShareMessage = () => {
     const correctAnswer = question.options[question.correctAnswer];
@@ -80,26 +75,6 @@ Study more at: https://site.cisspstudygroup.com`;
   const handleShareClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowShareMenu(!showShareMenu);
-  };
-
-  const handleFlagClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isFlagged) {
-      unflagQuestion(question.id);
-    } else {
-      setShowFlagModal(true);
-    }
-  };
-
-  const handleFlagSubmit = async (reason: string, customReason?: string) => {
-    try {
-      const success = await flagQuestion(question.id, reason, customReason);
-      if (success) {
-        setShowFlagModal(false);
-      }
-    } catch (error) {
-      console.error('Error flagging question:', error);
-    }
   };
 
 
@@ -182,14 +157,6 @@ Study more at: https://site.cisspstudygroup.com`;
           <div className="flex-1 min-w-0">
             {/* Status Indicators Row */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              {/* Flagged Status Indicator */}
-              {isFlagged && (
-                <div className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                  <Flag className="w-3 h-3" />
-                  <span>Flagged</span>
-                  <span className="text-xs opacity-75">(excluded from quizzes)</span>
-                </div>
-              )}
               
               {/* Domain Badge */}
               <div 
@@ -386,26 +353,6 @@ Study more at: https://site.cisspstudygroup.com`;
 
       {/* Action Buttons - bottom right, side by side */}
       <div className="absolute bottom-3 right-3 z-50 flex flex-row gap-2">
-        {/* Flag Button */}
-        <button
-          className={`p-3 rounded-full shadow-lg border transition-all duration-200 ${
-            isFlagged
-              ? 'bg-red-500 border-red-600 ring-2 ring-red-300 shadow-lg hover:bg-red-600'
-              : 'bg-white border-gray-200 hover:bg-red-50 hover:border-red-300'
-          }`}
-          aria-label={isFlagged ? 'Remove flag' : 'Flag question'}
-          onClick={handleFlagClick}
-          disabled={flagsLoading}
-          title={isFlagged ? 'Remove flag (flagged questions are excluded from quizzes)' : 'Flag this question'}
-        >
-          <Flag
-            className={`w-5 h-5 transition-colors ${
-              isFlagged ? 'text-white' : 'text-gray-400'
-            }`}
-            fill={isFlagged ? 'currentColor' : 'none'}
-          />
-        </button>
-
         {/* Share Button */}
         {showActions && (
           <div className="relative">
@@ -474,15 +421,6 @@ Study more at: https://site.cisspstudygroup.com`;
           />
         </button>
       </div>
-
-      {/* Flag Modal */}
-      <FlagModal
-        isOpen={showFlagModal}
-        onClose={() => setShowFlagModal(false)}
-        onFlag={handleFlagSubmit}
-        questionText={question.question}
-        loading={flagsLoading}
-      />
     </div>
   );
 };
