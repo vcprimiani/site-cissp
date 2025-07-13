@@ -118,7 +118,7 @@ Always be encouraging, professional, and focus on helping students truly underst
 ${context ? `Additional context: ${context}` : ''}`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o",
         messages: [
           {
             role: "system",
@@ -364,7 +364,7 @@ Format your response as JSON with this structure:
       }
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o",
         messages: [
           {
             role: "system",
