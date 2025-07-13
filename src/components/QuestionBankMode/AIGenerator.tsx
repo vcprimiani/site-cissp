@@ -20,7 +20,10 @@ interface AIGeneratorProps {
 function getCurrentWeekKey() {
   const now = new Date();
   const year = now.getFullYear();
-  const week = Math.ceil(((now - new Date(year, 0, 1)) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
+  const startOfYear = new Date(year, 0, 1);
+  const timeDiff = now.getTime() - startOfYear.getTime();
+  const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+  const week = Math.ceil((daysDiff + startOfYear.getDay() + 1) / 7);
   return `${year}-W${week}`;
 }
 
@@ -35,8 +38,8 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
   const [selectedDomain, setSelectedDomain] = useState('');
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [recentlyAdded, setRecentlyAdded] = useState<any[]>([]);
-  const [generationProgress, setGenerationProgress] = useState({ current: 0, total: 0 });
+  const [recentlyAdded, setRecentlyAdded] = useState<Question[]>([]);
+  const [generationProgress, setGenerationProgress] = useState<{ current: number; total: number }>({ current: 0, total: 0 });
   const [advancedQuestionCount, setAdvancedQuestionCount] = useState<1 | 5 | 10>(1);
   const [isNavigating, setIsNavigating] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -274,7 +277,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
     
     try {
       const existingTerms = questions.map(q => q.tags).flat();
-      const newQuestions = [];
+      const newQuestions: Question[] = [];
       
       for (let i = 0; i < count; i++) {
         setGenerationProgress({ current: i + 1, total: count });
@@ -302,11 +305,16 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
           }
           
           if (response.question) {
-            const newQuestion = {
+            const newQuestion: Omit<Question, 'id' | 'createdAt'> = {
               ...response.question,
               createdBy: currentUser.id,
               isActive: true,
-              tags: [...response.question.tags, 'ai-generated'] // Add ai-generated tag
+              tags: [...response.question.tags, 'ai-generated'],
+              flagCount: 0,
+              flaggedBy: [],
+              flagReasons: [],
+              isFlagged: false,
+              flagStatus: 'pending',
             };
             
             // Show preview of the generated question
@@ -404,7 +412,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
     
     try {
       const existingTerms = questions.map(q => q.tags).flat();
-      const newQuestions = [];
+      const newQuestions: Question[] = [];
       
       for (let i = 0; i < advancedQuestionCount; i++) {
         setGenerationProgress({ current: i + 1, total: advancedQuestionCount });
@@ -426,11 +434,16 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
           }
           
           if (response.question) {
-            const newQuestion = {
+            const newQuestion: Omit<Question, 'id' | 'createdAt'> = {
               ...response.question,
               createdBy: currentUser.id,
               isActive: true,
-              tags: [...response.question.tags, 'ai-generated'] // Add ai-generated tag
+              tags: [...response.question.tags, 'ai-generated'],
+              flagCount: 0,
+              flaggedBy: [],
+              flagReasons: [],
+              isFlagged: false,
+              flagStatus: 'pending',
             };
             
             // Show preview of the generated question
@@ -732,18 +745,21 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
         <div className="bg-white rounded-xl shadow p-6 mb-4">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">1. Select a CISSP Domain</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {domains.map(domain => (
+            {domainStats.map(({ domain, percent }) => (
               <button
                 key={domain}
                 onClick={() => hasActiveSubscription ? handleDomainSelect(domain) : setShowUpgradeModal(true)}
-                className={`p-4 rounded-lg border-2 transition-all duration-200 text-left font-medium text-base ${
+                className={`p-4 rounded-lg border-2 transition-all duration-200 text-left font-medium text-base flex flex-col items-start justify-between space-y-1 ${
                   selectedDomain === domain
                     ? 'border-blue-600 bg-blue-50 text-blue-900 shadow'
                     : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-blue-300 hover:bg-blue-50'
                 }`}
                 disabled={!hasActiveSubscription}
               >
-                {domain}
+                <span>{domain}</span>
+                <span className={`text-xs font-semibold mt-1 ${getPercentColor(percent)}`}>
+                  {percent}% of questions
+                </span>
               </button>
             ))}
           </div>
@@ -890,10 +906,34 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                 </button>
               ))}
             </div>
+            {/* Progress Bar and Feedback */}
             {isGenerating && (
-              <div className="flex items-center space-x-2 mb-2">
-                <Loader className="w-5 h-5 animate-spin text-blue-600" />
-                <span className="text-blue-700 font-medium">Generating questions...</span>
+              <div className="w-full flex flex-col items-center mb-2">
+                <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${Number(generationProgress.total) > 0 ? Math.round((Number(generationProgress.current) / Number(generationProgress.total)) * 100) : 0}%` }}
+                  ></div>
+                </div>
+                <span className="text-blue-700 font-medium text-sm mb-1">
+                  Generating question {generationProgress.current} of {generationProgress.total} ({Number(generationProgress.total) > 0 ? Math.round((Number(generationProgress.current) / Number(generationProgress.total)) * 100) : 0}%)
+                </span>
+                {/* List of generated questions so far */}
+                <div className="w-full mt-2">
+                  {recentlyAdded.slice(0, generationProgress.current).map((q, idx) => (
+                    <div key={idx} className="flex items-center space-x-2 mb-1">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span className="text-sm text-gray-800 truncate">{q.question}</span>
+                    </div>
+                  ))}
+                  {/* Loading indicator for the current question */}
+                  {generationProgress.current < generationProgress.total && (
+                    <div className="flex items-center space-x-2 mb-1 animate-pulse">
+                      <Loader className="w-4 h-4 text-blue-500 animate-spin" />
+                      <span className="text-sm text-blue-700">Generating next question...</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             {rateLimitError && (

@@ -28,22 +28,10 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
 }) => {
   const { bookmarkedIds, toggleBookmark } = useBookmarks();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterDomain, setFilterDomain] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('');
   const [showColorKey, setShowColorKey] = useState(false);
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
-
-  const domains = [
-    'Security and Risk Management',
-    'Asset Security',
-    'Security Architecture and Engineering',
-    'Communication and Network Security',
-    'Identity and Access Management',
-    'Security Assessment and Testing',
-    'Security Operations',
-    'Software Development Security'
-  ];
 
   const filteredQuestions = useMemo(() => {
     return questions.filter(q => {
@@ -52,18 +40,15 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
         q.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
         q.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
       
-      // Domain filter
-      const domainMatch = !filterDomain || q.domain === filterDomain;
-      
       // Difficulty filter
       const difficultyMatch = !filterDifficulty || q.difficulty === filterDifficulty;
       
       // Bookmark filter
       const bookmarkMatch = !showBookmarksOnly || bookmarkedIds.includes(q.id);
       
-      return searchMatch && domainMatch && difficultyMatch && bookmarkMatch;
+      return searchMatch && difficultyMatch && bookmarkMatch;
     });
-  }, [questions, searchTerm, filterDomain, filterDifficulty, showBookmarksOnly, bookmarkedIds]);
+  }, [questions, searchTerm, filterDifficulty, showBookmarksOnly, bookmarkedIds]);
 
   const toggleQuestionExpanded = (questionId: string) => {
     setExpandedQuestions(prev => {
@@ -93,7 +78,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
       {/* Header with Stats and Actions */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-1">
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-4 flex-1">
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
             <div className="flex items-center justify-between">
               <div>
@@ -114,38 +99,6 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
               </div>
               <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
                 <Crown className="w-5 h-5 text-white" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-600">Domains</p>
-                <p className="text-2xl font-bold text-green-900">{new Set(questions.map(q => q.domain)).size}</p>
-              </div>
-              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                <Filter className="w-5 h-5 text-white" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-600">Avg Difficulty</p>
-                <p className="text-2xl font-bold text-orange-900">
-                  {(() => {
-                    const difficulties = questions.map(q => q.difficulty);
-                    const avg = difficulties.reduce((sum, d) => {
-                      return sum + (d === 'Easy' ? 1 : d === 'Medium' ? 2 : 3);
-                    }, 0) / difficulties.length;
-                    return avg <= 1.5 ? 'Easy' : avg <= 2.5 ? 'Medium' : 'Hard';
-                  })()}
-                </p>
-              </div>
-              <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                <span className="text-white text-lg">📊</span>
               </div>
             </div>
           </div>
@@ -202,16 +155,6 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
         </div>
         <div className="flex gap-2">
           <select
-            value={filterDomain}
-            onChange={e => setFilterDomain(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 bg-white shadow-sm"
-          >
-            <option value="">All Domains</option>
-            {domains.map(domain => (
-              <option key={domain} value={domain}>{domain}</option>
-            ))}
-          </select>
-          <select
             value={filterDifficulty}
             onChange={e => setFilterDifficulty(e.target.value)}
             className="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 bg-white shadow-sm"
@@ -221,9 +164,9 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
             <option value="Medium">Medium</option>
             <option value="Hard">Hard</option>
           </select>
-          {(filterDomain || filterDifficulty || searchTerm) && (
+          {(filterDifficulty || searchTerm) && (
             <button
-              onClick={() => { setFilterDomain(''); setFilterDifficulty(''); setSearchTerm(''); }}
+              onClick={() => { setFilterDifficulty(''); setSearchTerm(''); }}
               className="px-4 py-2 rounded-lg border border-gray-200 bg-gray-100 text-gray-700 text-sm hover:bg-gray-200 transition-all duration-200"
             >
               Clear Filters
