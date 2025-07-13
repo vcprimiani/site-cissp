@@ -70,8 +70,8 @@ export const useFlags = (): UseFlagsReturn => {
       });
 
       if (success) {
-        // Add to local state
-        setFlaggedQuestionIds((prev: string[]) => [...prev, questionId]);
+        // Refresh flags from database to ensure consistency
+        await fetchUserFlags();
       }
 
       return success;
@@ -101,8 +101,8 @@ export const useFlags = (): UseFlagsReturn => {
       });
 
       if (success) {
-        // Remove from local state
-        setFlaggedQuestionIds((prev: string[]) => prev.filter((id: string) => id !== questionId));
+        // Refresh flags from database to ensure consistency
+        await fetchUserFlags();
       }
 
       return success;
