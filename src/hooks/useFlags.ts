@@ -34,14 +34,16 @@ export const useFlags = (): UseFlagsReturn => {
       // Get questions that this user has flagged
       const { data: questions, error: fetchError } = await supabase
         .from('questions')
-        .select('id')
-        .contains('flagged_by', [user.id]);
+        .select('id, flagged_by');
 
       if (fetchError) {
         throw fetchError;
       }
 
-      const userFlaggedQuestions = (questions || []).map((q: any) => q.id);
+      // Filter questions that contain the current user's ID in flagged_by array
+      const userFlaggedQuestions = (questions || [])
+        .filter((q: any) => q.flagged_by && Array.isArray(q.flagged_by) && q.flagged_by.includes(user.id))
+        .map((q: any) => q.id);
       setFlaggedQuestionIds(userFlaggedQuestions);
     } catch (err: any) {
       console.error('Error fetching user flags:', err);
