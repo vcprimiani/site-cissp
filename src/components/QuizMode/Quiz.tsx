@@ -840,27 +840,10 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
 
               {/* Flag Question Button */}
-              <div className="w-full">
-                <button
-                  onClick={handleFlagClick}
-                  disabled={flagsLoading}
-                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isFlagged
-                      ? 'bg-red-500 text-white border border-red-600 shadow-lg hover:bg-red-600'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
-                  }`}
-                >
-                  <Flag className={`w-4 h-4 ${isFlagged ? 'text-white' : 'text-gray-600'}`} />
-                  <span>
-                    {isFlagged ? '🚩 Question Flagged' : 'Flag Question'}
-                  </span>
-                </button>
-              </div>
+              {/* This button is now moved to the right of the question text */}
 
               {/* Thumbs Up/Down Rating UI */}
-              {currentQuestion && currentUser && (
-                <RatingButton questionId={currentQuestion.id} userId={currentUser.id} />
-              )}
+              {/* This component is now moved to the right of the question text */}
 
               {/* Navigation Buttons */}
               <div className="w-full space-y-3">
