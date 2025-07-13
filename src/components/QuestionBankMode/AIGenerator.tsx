@@ -6,7 +6,7 @@ import { useSubscription } from '../../hooks/useSubscription';
 import { formatTimeRemaining } from '../../services/aiSecurity';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
-import { parseOptionExplanations, isExplanationStructured } from '../../utils/textFormatting';
+import { parseOptionExplanations, isExplanationStructured, parseExplanationSections, renderSectionContent } from '../../utils/textFormatting';
 import { logFailedAIGeneration } from '../../utils/aiGenerationLog';
 
 interface AIGeneratorProps {
@@ -1009,8 +1009,21 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                         </div>
                       ) : (
                         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                          <p className="text-sm text-yellow-800 font-semibold mb-1">Warning: Explanation is not structured per option and will not be saved.</p>
-                          <p className="text-sm text-gray-700">{currentQuestionPreview.explanation}</p>
+                          <p className="text-sm text-yellow-800 font-semibold mb-2">Warning: Explanation is not structured per option and will not be saved.</p>
+                          {parseExplanationSections(currentQuestionPreview.explanation).map((section, idx) => (
+                            <div key={idx} className="mb-2">
+                              {section.header && <div className="font-bold text-gray-800 mb-1">{section.header}</div>}
+                              {renderSectionContent(section.content).length > 1 ? (
+                                <ul className="list-disc list-inside ml-4">
+                                  {renderSectionContent(section.content).map((item, i) => (
+                                    <li key={i} className="text-sm text-gray-700">{item}</li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p className="text-sm text-gray-700">{section.content}</p>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>

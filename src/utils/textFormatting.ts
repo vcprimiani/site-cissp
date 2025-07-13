@@ -125,3 +125,40 @@ export function parseOptionExplanations(explanation: string, options: string[]):
 export function isExplanationStructured(explanation: string, options: string[]): boolean {
   return !!parseOptionExplanations(explanation, options);
 }
+
+/**
+ * Parses an explanation string into sections based on numbered headers (e.g., '1. Correct Answer:').
+ * Returns an array of { header, content }.
+ */
+export function parseExplanationSections(explanation: string): Array<{ header: string; content: string }> {
+  // Match headers like '1. Correct Answer:', '2. Why Other Options Are Wrong:', etc.
+  const sectionRegex = /\n?\s*(\d+\.[^:]+:)/g;
+  const matches = [...explanation.matchAll(sectionRegex)];
+  if (matches.length === 0) {
+    return [{ header: '', content: explanation.trim() }];
+  }
+  const sections: Array<{ header: string; content: string }> = [];
+  for (let i = 0; i < matches.length; i++) {
+    const start = matches[i].index! + matches[i][0].length;
+    const end = i < matches.length - 1 ? matches[i + 1].index! : explanation.length;
+    const header = matches[i][1].trim();
+    const content = explanation.slice(start, end).trim();
+    sections.push({ header, content });
+  }
+  return sections;
+}
+
+/**
+ * Renders section content as a list if it contains dashes or bullets, otherwise as paragraphs.
+ */
+export function renderSectionContent(content: string): Array<string> {
+  // Split on lines starting with dash or bullet
+  const lines = content.split(/\n|\r/).map(l => l.trim()).filter(Boolean);
+  const bulletLines = lines.filter(l => l.startsWith('-') || l.startsWith('•'));
+  if (bulletLines.length >= 2) {
+    // Return as list items (without the dash)
+    return bulletLines.map(l => l.replace(/^[-•]\s*/, ''));
+  }
+  // Otherwise, return as paragraphs
+  return [content];
+}
