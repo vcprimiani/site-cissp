@@ -121,6 +121,7 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
             }}
             hasActiveSubscription={hasActiveSubscription}
             subscriptionLoading={subscriptionLoading}
+            appState={appState}
           />
         )}
         

@@ -12,10 +12,12 @@ import { getLocalDailyQuizQuestions } from '../../services/dailyQuiz';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
 import { generateAIQuestion } from '../../services/openai';
-import { useAppState } from '../../hooks/useAppState';
 
 interface QuizSetupProps {
-  onQuizComplete?: (incorrectQuestions: Question[]) => void;
+  onQuizComplete: (incorrectQuestions: Question[]) => void;
+  hasActiveSubscription: boolean;
+  subscriptionLoading: boolean;
+  appState: import('../../types').AppState;
 }
 
 interface QuizSession {
@@ -49,7 +51,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   } = useSessionTracker();
   const { hasPersistedQuiz, persistedState, clearPersistedState } = useQuizPersistence();
   const { bookmarkedIds, loading: bookmarksLoading } = useBookmarks();
-  const { appState } = useAppState();
+  const appState = { currentUser: { id: 'test-user-id', email: 'test@example.com' } }; // Mock current user for now
   
   const [numberOfQuestions, setNumberOfQuestions] = useState(5);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -131,7 +133,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   };
 
   const resumeQuiz = () => {
-    if (hasPersistedQuiz() && persistedState) {
+    if (hasPersistedQuiz() === true && !!persistedState) {
       setQuizSession({
         questions: persistedState.questions,
         currentIndex: persistedState.currentIndex,
@@ -269,7 +271,13 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
         const newQ = {
           ...response.question,
           isActive: true,
-          tags: [...response.question.tags, 'ai-generated']
+          tags: [...response.question.tags, 'ai-generated'],
+          createdBy: appState.currentUser?.id || 'ai',
+          flagCount: 0,
+          flaggedBy: [],
+          flagReasons: [],
+          isFlagged: false,
+          flagStatus: 'pending' as const,
         };
         await addQuestion(newQ); // addQuestion will handle createdBy and createdAt
         newQuestionsData.push(newQ);
@@ -390,7 +398,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
       {quizMode === 'setup' && (
         <div className="space-y-8">
           {/* Resume Quiz Banner */}
-          {hasPersistedQuiz() && persistedState && (
+          {hasPersistedQuiz() === true && !!persistedState && (
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6 shadow-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -521,7 +529,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                       </div>
                     </button>
                     {/* Resume Quiz */}
-                    {hasPersistedQuiz() && persistedState && (
+                    {hasPersistedQuiz() === true && !!persistedState && (
                       <button
                         className="flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-200 bg-green-50 text-green-700 border-green-300 hover:bg-green-100 hover:border-green-400"
                         onClick={resumeQuiz}
@@ -539,12 +547,12 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                     <button
                       type="button"
                       className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-300 shadow-lg ${
-                        hasPersistedQuiz() && persistedState
+                        hasPersistedQuiz() === true && !!persistedState
                           ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
                           : 'border-orange-400 bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 font-semibold hover:from-orange-100 hover:to-amber-100 hover:shadow-xl transform hover:scale-[1.02]'
                       }`}
                       onClick={() => {
-                        if (hasPersistedQuiz() && persistedState) return;
+                        if (hasPersistedQuiz() === true && !!persistedState) return;
                         // Find all hard questions from all domains
                         const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
                         if (hardQuestions.length < 10) {
@@ -562,11 +570,11 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                         });
                         setQuizMode('quiz');
                       }}
-                      disabled={hasPersistedQuiz() && persistedState}
+                      disabled={hasPersistedQuiz() === true && !!persistedState}
                     >
                       <span className="text-lg">🌶️</span>
                       <span>10 Hard Random (All Domains)</span>
-                      {hasPersistedQuiz() && persistedState ? (
+                      {hasPersistedQuiz() === true && !!persistedState ? (
                         <span className="text-xs text-gray-500">⏸️ Quiz Paused</span>
                       ) : (
                         <span className="text-sm opacity-75">→</span>
@@ -576,12 +584,12 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                     <button
                       type="button"
                       className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-300 shadow-lg ${
-                        hasPersistedQuiz() && persistedState
+                        hasPersistedQuiz() === true && !!persistedState
                           ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
                           : 'border-blue-400 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 font-semibold hover:from-blue-100 hover:to-cyan-100 hover:shadow-xl transform hover:scale-[1.02]'
                       }`}
                       onClick={handleRandomGenerateAndStart}
-                      disabled={randomGenerating || (hasPersistedQuiz() && persistedState)}
+                      disabled={randomGenerating || (hasPersistedQuiz() === true && !!persistedState)}
                     >
                       {randomGenerating ? (
                         <span className="flex items-center space-x-2 w-full">
@@ -596,7 +604,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                         <>
                           <span className="text-lg">🎲</span>
                           <span>Generate 10 New Quiz Questions</span>
-                          {hasPersistedQuiz() && persistedState ? (
+                          {hasPersistedQuiz() === true && !!persistedState ? (
                             <span className="text-xs text-gray-500">⏸️ Quiz Paused</span>
                           ) : (
                             <span className="text-sm opacity-75">→</span>
@@ -617,7 +625,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                       <span>Quiz Configuration</span>
                     </h3>
                     <div className="bg-gray-50 rounded-xl p-6">
-                      {hasPersistedQuiz() && persistedState && (
+                      {hasPersistedQuiz() === true && !!persistedState && (
                         <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                           <div className="flex items-center space-x-2">
                             <span className="text-yellow-600">⚠️</span>
@@ -637,9 +645,9 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                             <button
                               key={num}
                               onClick={() => setNumberOfQuestions(Math.min(num, filteredQuestions.length))}
-                              disabled={hasPersistedQuiz() && persistedState}
+                              disabled={hasPersistedQuiz() === true && !!persistedState}
                               className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 font-medium ${
-                                hasPersistedQuiz() && persistedState
+                                hasPersistedQuiz() === true && !!persistedState
                                   ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
                                   : numberOfQuestions === num
                                   ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm'
@@ -677,15 +685,15 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                         <div className="flex justify-end">
                           <button
                             onClick={generateQuiz}
-                            disabled={filteredQuestions.length === 0 || (hasPersistedQuiz() && persistedState)}
+                            disabled={filteredQuestions.length === 0 || (hasPersistedQuiz() === true && !!persistedState)}
                             className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 font-medium ${
-                              hasPersistedQuiz() && persistedState
+                              hasPersistedQuiz() === true && !!persistedState
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'
                             }`}
                           >
                             <Play className="w-5 h-5" />
-                            <span>{hasPersistedQuiz() && persistedState ? 'Quiz Paused' : 'Start Quiz'}</span>
+                            <span>{hasPersistedQuiz() === true && !!persistedState ? 'Quiz Paused' : 'Start Quiz'}</span>
                           </button>
                         </div>
                       </div>
