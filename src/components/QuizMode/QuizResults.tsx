@@ -4,6 +4,7 @@ import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { SocialShareButtons } from '../UI/SocialShareButtons';
 import { useAuth } from '../../hooks/useAuth';
 import { saveQuizProgress } from '../../services/progress';
+import { parseExplanationSections, renderSectionContent } from '../../utils/textFormatting';
 
 interface QuizResultsProps {
   results: {
@@ -89,53 +90,21 @@ site.cisspstudygroup.com
 #CISSP #Cybersecurity #StudyGroup`;
   };
 
-  // Add the formatExplanation function from Quiz.tsx
-  const formatExplanation = (text: string): JSX.Element[] => {
-    const cleanText = text
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/\*(.*?)\*/g, '$1')
-      .replace(/\s+/g, ' ')
-      .trim();
-    const sections = cleanText.split(/\n\s*\n/).filter(section => section.trim());
-    return sections.map((section, index) => {
-      const trimmedSection = section.trim();
-      if (/^\d+\./.test(trimmedSection)) {
-        const [title, ...content] = trimmedSection.split(/[:\-]/);
-        return (
-          <div key={index} className="mb-3">
-            <h4 className="font-semibold text-blue-800 mb-1 text-sm">{title.trim()}</h4>
-            {content.length > 0 && (
-              <div className="text-gray-700 text-sm leading-relaxed pl-4">{content.join(':').trim()}</div>
-            )}
-          </div>
-        );
-      }
-      if (trimmedSection.includes('- ') || trimmedSection.includes('• ')) {
-        const lines = trimmedSection.split('\n');
-        const title = lines[0];
-        const bullets = lines.slice(1).filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
-        return (
-          <div key={index} className="mb-3">
-            {title && !title.startsWith('-') && !title.startsWith('•') && (
-              <h4 className="font-semibold text-blue-800 mb-1 text-sm">{title}</h4>
-            )}
-            <ul className="space-y-1 pl-4">
-              {bullets.map((bullet, bIndex) => (
-                <li key={bIndex} className="text-gray-700 text-sm flex items-start">
-                  <span className="text-blue-600 mr-2 mt-1">•</span>
-                  <span className="leading-relaxed">{bullet.replace(/^[-•]\s*/, '').trim()}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      }
-      return (
-        <div key={index} className="mb-2">
-          <p className="text-gray-700 text-sm leading-relaxed">{trimmedSection}</p>
-        </div>
-      );
-    });
+  const renderFormattedExplanation = (text: string) => {
+    return parseExplanationSections(text).map((section, idx) => (
+      <div key={idx} className="mb-2">
+        {section.header && <div className="font-bold text-gray-800 mb-1">{section.header}</div>}
+        {renderSectionContent(section.content).length > 1 ? (
+          <ul className="list-disc list-inside ml-4">
+            {renderSectionContent(section.content).map((item, i) => (
+              <li key={i} className="text-sm text-gray-700">{item}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-gray-700">{section.content}</p>
+        )}
+      </div>
+    ));
   };
 
   return (
@@ -345,7 +314,7 @@ site.cisspstudygroup.com
 
                   <div className="bg-white rounded-lg p-3 border">
                     <h4 className="font-medium text-gray-900 mb-2">Explanation:</h4>
-                    {formatExplanation(result.question.explanation)}
+                    {renderFormattedExplanation(result.question.explanation)}
                   </div>
                 </div>
               );

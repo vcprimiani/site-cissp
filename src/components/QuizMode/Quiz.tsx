@@ -5,7 +5,7 @@ import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { analyzeCISSPKeywords, highlightKeywords } from '../../services/keywordAnalysis';
 import { generateManagerPerspective, enhanceQuestionExplanation } from '../../services/openai';
 import { useQuizPersistence } from '../../hooks/useQuizPersistence';
-import { isStructuredExplanation } from '../../utils/textFormatting';
+import { parseExplanationSections, renderSectionContent } from '../../utils/textFormatting';
 import { useFlags } from '../../hooks/useFlags';
 import { FlagModal } from '../UI/FlagModal';
 
@@ -478,57 +478,22 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     });
   };
 
-  // Add a function to format the explanation text for better readability
-  const formatExplanation = (text: string): JSX.Element[] => {
-    const cleanText = text
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
-      .replace(/\*(.*?)\*/g, '$1')     // Remove italic markdown
-      .replace(/\s+/g, ' ')           // Clean multiple spaces
-      .trim();
-
-    const sections = cleanText.split(/\n\s*\n/).filter(section => section.trim());
-    return sections.map((section, index) => {
-      const trimmedSection = section.trim();
-      // Numbered section
-      if (/^\d+\./.test(trimmedSection)) {
-        const [title, ...content] = trimmedSection.split(/[:\-]/);
-        return (
-          <div key={index} className="mb-3">
-            <h4 className="font-semibold text-blue-800 mb-1 text-sm">{title.trim()}</h4>
-            {content.length > 0 && (
-              <div className="text-gray-700 text-sm leading-relaxed pl-4">{content.join(':').trim()}</div>
-            )}
-          </div>
-        );
-      }
-      // Bullet points
-      if (trimmedSection.includes('- ') || trimmedSection.includes('• ')) {
-        const lines = trimmedSection.split('\n');
-        const title = lines[0];
-        const bullets = lines.slice(1).filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
-        return (
-          <div key={index} className="mb-3">
-            {title && !title.startsWith('-') && !title.startsWith('•') && (
-              <h4 className="font-semibold text-blue-800 mb-1 text-sm">{title}</h4>
-            )}
-            <ul className="space-y-1 pl-4">
-              {bullets.map((bullet, bIndex) => (
-                <li key={bIndex} className="text-gray-700 text-sm flex items-start">
-                  <span className="text-blue-600 mr-2 mt-1">•</span>
-                  <span className="leading-relaxed">{bullet.replace(/^[-•]\s*/, '').trim()}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      }
-      // Regular paragraph
-      return (
-        <div key={index} className="mb-2">
-          <p className="text-gray-700 text-sm leading-relaxed">{trimmedSection}</p>
-        </div>
-      );
-    });
+  // Replace the formatExplanation function and use this in the render:
+  const renderFormattedExplanation = (text: string) => {
+    return parseExplanationSections(text).map((section, idx) => (
+      <div key={idx} className="mb-2">
+        {section.header && <div className="font-bold text-gray-800 mb-1">{section.header}</div>}
+        {renderSectionContent(section.content).length > 1 ? (
+          <ul className="list-disc list-inside ml-4">
+            {renderSectionContent(section.content).map((item, i) => (
+              <li key={i} className="text-sm text-gray-700">{item}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-gray-700">{section.content}</p>
+        )}
+      </div>
+    ));
   };
 
   // Ref for the main question card
@@ -671,8 +636,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                   </h4>
                   <div style={{ fontSize: `${textSize * 0.875}rem` }}>
                     {isEnhancedExplanation && enhancedExplanation
-                      ? formatExplanation(enhancedExplanation)
-                      : formatExplanation(currentQuestion.explanation)}
+                      ? renderFormattedExplanation(enhancedExplanation)
+                      : renderFormattedExplanation(currentQuestion.explanation)}
                   </div>
                 </div>
               )}

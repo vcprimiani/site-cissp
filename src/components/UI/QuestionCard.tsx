@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp, Brain, Share2, Bookmark, Flag } from 'lucide-re
 import { getDomainColor, getDifficultyColor, getStatusColor, generateColorClasses, categoryIcons } from '../../utils/colorSystem';
 import { SocialShareButtons } from './SocialShareButtons';
 import { highlightKeywords } from '../../services/keywordAnalysis';
-import { formatExplanationText } from '../../utils/textFormatting';
+import { parseExplanationSections, renderSectionContent } from '../../utils/textFormatting';
 import { useBookmarks } from '../../hooks/useBookmarks';
 import { Lock, Crown } from 'lucide-react';
 import { redirectToCheckout } from '../../services/stripe';
@@ -76,71 +76,21 @@ Study more at: https://site.cisspstudygroup.com`;
     setShowShareMenu(!showShareMenu);
   };
 
-
-
-  // Add the formatExplanation function from Quiz.tsx
-  const formatExplanation = (text: string): JSX.Element[] => {
-    const cleanText = text
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/\*(.*?)\*/g, '$1')
-      .replace(/\s+/g, ' ')
-      .trim();
-    
-    const sections = cleanText.split(/\n\s*\n/).filter(section => section.trim());
-    return sections.map((section, index) => {
-      const trimmedSection = section.trim();
-      
-      // Check if it's a numbered section (1., 2., 3., etc.)
-      if (/^\d+\./.test(trimmedSection)) {
-        const [title, ...content] = trimmedSection.split(/[:\-]/);
-        return (
-          <div key={index} className="mb-4">
-            <h4 className="font-semibold text-blue-800 mb-2 text-sm">
-              {title.trim()}
-            </h4>
-            {content.length > 0 && (
-              <div className="text-gray-700 text-sm leading-relaxed pl-4">
-                {content.join(':').trim()}
-              </div>
-            )}
-          </div>
-        );
-      }
-      
-      // Check if it contains bullet points
-      if (trimmedSection.includes('- ') || trimmedSection.includes('• ')) {
-        const lines = trimmedSection.split('\n');
-        const title = lines[0];
-        const bullets = lines.slice(1).filter(line => line.trim().startsWith('-') || line.trim().startsWith('•'));
-        
-        return (
-          <div key={index} className="mb-4">
-            {title && !title.startsWith('-') && !title.startsWith('•') && (
-              <h4 className="font-semibold text-blue-800 mb-2 text-sm">{title}</h4>
-            )}
-            <ul className="space-y-1 pl-4">
-              {bullets.map((bullet, bIndex) => (
-                <li key={bIndex} className="text-gray-700 text-sm flex items-start">
-                  <span className="text-blue-600 mr-2 mt-1">•</span>
-                  <span className="leading-relaxed">
-                    {bullet.replace(/^[-•]\s*/, '').trim()}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      }
-      
-      // Regular paragraph
-      return (
-        <div key={index} className="mb-3">
-          <p className="text-gray-700 text-sm leading-relaxed">
-            {trimmedSection}
-          </p>
-        </div>
-      );
-    });
+  const renderFormattedExplanation = (text: string) => {
+    return parseExplanationSections(text).map((section, idx) => (
+      <div key={idx} className="mb-2">
+        {section.header && <div className="font-bold text-gray-800 mb-1">{section.header}</div>}
+        {renderSectionContent(section.content).length > 1 ? (
+          <ul className="list-disc list-inside ml-4">
+            {renderSectionContent(section.content).map((item, i) => (
+              <li key={i} className="text-sm text-gray-700">{item}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-gray-700">{section.content}</p>
+        )}
+      </div>
+    ));
   };
 
   return (
@@ -316,13 +266,11 @@ Study more at: https://site.cisspstudygroup.com`;
                 ))}
               </div>
 
-              {/* Explanation */}
-              <div className="relative mt-6">
-                <h4 className="font-semibold mb-3 text-gray-900">
-                  Explanation:
-                </h4>
-                <div className="bg-white rounded-lg p-4 border-2 border-gray-200 shadow-sm">
-                  {formatExplanation(question.explanation)}
+              {/* Explanation Section */}
+              <div className="mt-4">
+                <h4 className="font-semibold text-blue-800 mb-2 text-sm">Explanation:</h4>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  {renderFormattedExplanation(question.explanation)}
                 </div>
               </div>
             </div>
