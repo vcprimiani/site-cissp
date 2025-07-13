@@ -4,6 +4,7 @@ import { Question, FlagHistory } from '../../types';
 import { Eye, EyeOff, Check, X, AlertTriangle, Clock, Users, RefreshCw, Filter, Search, Trash2, Shield, CheckCircle, XCircle } from 'lucide-react';
 import { QuestionCard } from '../UI/QuestionCard';
 import { useToast } from '../UI/Toast';
+import { useAuth } from '../../hooks/useAuth';
 
 interface FlagReviewProps {
   hasActiveSubscription: boolean;
@@ -14,6 +15,7 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
   hasActiveSubscription,
   subscriptionLoading
 }) => {
+  const { user } = useAuth();
   const [flaggedQuestions, setFlaggedQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -88,13 +90,17 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
 
   // Handle status update
   const handleStatusUpdate = async (questionId: string, status: 'pending' | 'reviewed' | 'dismissed' | 'actioned') => {
+    if (!user) {
+      showError('Error', 'You must be logged in as an admin to perform this action.');
+      return;
+    }
     try {
       setActionLoading(questionId);
       
       await FlagService.updateFlagStatus({
         questionId,
         status,
-        adminUserId: 'admin' // This should come from auth context
+        adminUserId: user.id // Use real authenticated user id
       });
 
       // Update local state
@@ -135,13 +141,17 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
 
   // Handle question deletion
   const handleDeleteQuestion = async (questionId: string) => {
+    if (!user) {
+      showError('Error', 'You must be logged in as an admin to perform this action.');
+      return;
+    }
     try {
       setActionLoading(questionId);
       
       // Call the delete method from FlagService
       await FlagService.deleteQuestion({
         questionId,
-        adminUserId: 'admin' // This should come from auth context
+        adminUserId: user.id // Use real authenticated user id
       });
 
       // Remove from local state
