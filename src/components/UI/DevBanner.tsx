@@ -2,7 +2,7 @@ import React from 'react';
 
 export const DevBanner: React.FC = () => {
   return (
-    <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white text-center py-2 px-4 font-bold text-sm shadow-lg relative z-50">
+    <div className="fixed top-0 left-0 w-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white text-center py-2 px-4 font-bold text-sm shadow-lg z-100">
       <div className="flex items-center justify-center space-x-2">
         <div className="animate-pulse">🚧</div>
         <span>DEVELOPMENT BRANCH</span>
