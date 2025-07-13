@@ -379,17 +379,23 @@ Format your response as JSON with this structure:
         temperature: 0.8
       });
 
-      const content = completion.choices[0]?.message?.content;
+      let content = completion.choices[0]?.message?.content;
       
       if (!content) {
         throw new Error('No response generated');
+      }
+
+      // Strip code block if present
+      content = content.trim();
+      if (content.startsWith('```')) {
+        content = content.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim();
       }
 
       try {
         const questionData = JSON.parse(content);
         return { question: questionData };
       } catch (parseError) {
-        console.error('Failed to parse AI question response:', parseError);
+        console.error('Failed to parse AI question response:', parseError, content);
         return { error: 'Failed to generate properly formatted question' };
       }
     }, 'question_generation', isBulkRequest);
