@@ -442,13 +442,32 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
                           Remove Flag
                         </button>
                       )}
-                      <button
-                        onClick={() => handleStatusUpdate(question.id, 'actioned')}
-                        disabled={actionLoading === question.id}
-                        className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors disabled:opacity-50"
-                      >
-                        {actionLoading === question.id ? '...' : 'Take Action'}
-                      </button>
+                      {/* Delete Button for Pending Questions */}
+                      {deleteConfirm === `delete-db-${question.id}` ? (
+                        <div className="flex space-x-2 mt-2">
+                          <button
+                            onClick={() => handleDeleteQuestion(question.id)}
+                            disabled={actionLoading === question.id}
+                            className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50"
+                          >
+                            {actionLoading === question.id ? 'Deleting...' : 'Confirm Delete'}
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirm(null)}
+                            className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setDeleteConfirm(`delete-db-${question.id}`)}
+                          className="flex items-center space-x-1 px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors mt-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span>Delete from DB</span>
+                        </button>
+                      )}
                     </>
                   )}
                 </div>
@@ -608,39 +627,14 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
                             Remove Flag
                           </button>
                         )
-                      ) : (
-                        <button
-                          onClick={() => handleStatusUpdate(selectedQuestion.id, 'dismissed')}
-                          disabled={actionLoading === selectedQuestion.id}
-                          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
-                        >
-                          {actionLoading === selectedQuestion.id ? 'Processing...' : 'Dismiss Flags'}
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleStatusUpdate(selectedQuestion.id, 'actioned')}
-                        disabled={actionLoading === selectedQuestion.id}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50"
-                      >
-                        {actionLoading === selectedQuestion.id ? 'Processing...' : 'Take Action'}
-                      </button>
+                      ) : null}
                     </div>
                     
-                    {selectedQuestion.flagStatus === 'pending' && (
-                      <button
-                        onClick={() => handleStatusUpdate(selectedQuestion.id, 'reviewed')}
-                        disabled={actionLoading === selectedQuestion.id}
-                        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
-                      >
-                        {actionLoading === selectedQuestion.id ? 'Processing...' : 'Mark as Reviewed'}
-                      </button>
-                    )}
-
-                    {/* Delete Button for Actioned Questions in Modal */}
-                    {selectedQuestion.flagStatus === 'actioned' && (
+                    {/* Delete Button for Pending/Actioned Questions in Modal */}
+                    {(selectedQuestion.flagStatus === 'pending' || selectedQuestion.flagStatus === 'actioned') && (
                       <div className="border-t pt-4">
                         <h5 className="font-medium text-red-700 mb-2">Danger Zone</h5>
-                        {deleteConfirm === selectedQuestion.id ? (
+                        {deleteConfirm === `delete-db-modal-${selectedQuestion.id}` ? (
                           <div className="space-y-2">
                             <p className="text-sm text-red-600">Are you sure you want to permanently delete this question?</p>
                             <div className="flex space-x-2">
@@ -661,7 +655,7 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
                           </div>
                         ) : (
                           <button
-                            onClick={() => setDeleteConfirm(selectedQuestion.id)}
+                            onClick={() => setDeleteConfirm(`delete-db-modal-${selectedQuestion.id}`)}
                             className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium"
                           >
                             <Trash2 className="w-4 h-4" />
