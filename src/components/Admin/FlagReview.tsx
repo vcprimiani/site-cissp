@@ -414,13 +414,34 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
                   </button>
                   {question.flagStatus === 'pending' && (
                     <>
-                      <button
-                        onClick={() => handleStatusUpdate(question.id, 'dismissed')}
-                        disabled={actionLoading === question.id}
-                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors disabled:opacity-50"
-                      >
-                        {actionLoading === question.id ? '...' : 'Dismiss'}
-                      </button>
+                      {deleteConfirm === `remove-flag-${question.id}` ? (
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => {
+                              handleStatusUpdate(question.id, 'dismissed');
+                              setDeleteConfirm(null);
+                            }}
+                            disabled={actionLoading === question.id}
+                            className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors disabled:opacity-50"
+                          >
+                            {actionLoading === question.id ? 'Removing...' : 'Confirm Remove'}
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirm(null)}
+                            className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setDeleteConfirm(`remove-flag-${question.id}`)}
+                          disabled={actionLoading === question.id}
+                          className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors disabled:opacity-50"
+                        >
+                          Remove Flag
+                        </button>
+                      )}
                       <button
                         onClick={() => handleStatusUpdate(question.id, 'actioned')}
                         disabled={actionLoading === question.id}
@@ -558,13 +579,44 @@ export const FlagReview: React.FC<FlagReviewProps> = ({
                   <div className="space-y-3">
                     <h4 className="font-medium text-gray-900">Actions</h4>
                     <div className="grid grid-cols-2 gap-3">
-                      <button
-                        onClick={() => handleStatusUpdate(selectedQuestion.id, 'dismissed')}
-                        disabled={actionLoading === selectedQuestion.id}
-                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
-                      >
-                        {actionLoading === selectedQuestion.id ? 'Processing...' : 'Dismiss Flags'}
-                      </button>
+                      {selectedQuestion.flagStatus === 'pending' ? (
+                        deleteConfirm === `remove-flag-modal-${selectedQuestion.id}` ? (
+                          <>
+                            <button
+                              onClick={() => {
+                                handleStatusUpdate(selectedQuestion.id, 'dismissed');
+                                setDeleteConfirm(null);
+                              }}
+                              disabled={actionLoading === selectedQuestion.id}
+                              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium disabled:opacity-50"
+                            >
+                              {actionLoading === selectedQuestion.id ? 'Removing...' : 'Confirm Remove'}
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirm(null)}
+                              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => setDeleteConfirm(`remove-flag-modal-${selectedQuestion.id}`)}
+                            disabled={actionLoading === selectedQuestion.id}
+                            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
+                          >
+                            Remove Flag
+                          </button>
+                        )
+                      ) : (
+                        <button
+                          onClick={() => handleStatusUpdate(selectedQuestion.id, 'dismissed')}
+                          disabled={actionLoading === selectedQuestion.id}
+                          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
+                        >
+                          {actionLoading === selectedQuestion.id ? 'Processing...' : 'Dismiss Flags'}
+                        </button>
+                      )}
                       <button
                         onClick={() => handleStatusUpdate(selectedQuestion.id, 'actioned')}
                         disabled={actionLoading === selectedQuestion.id}
