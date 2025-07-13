@@ -510,6 +510,33 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <p className="text-xl text-gray-600">Get started in three easy steps</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-xl p-8 shadow text-center">
+              <div className="flex items-center justify-center mb-4"><UserCheck className="w-8 h-8 text-blue-600" /></div>
+              <h3 className="font-semibold text-gray-900 mb-2">1. Create Your Account</h3>
+              <p className="text-gray-600">Sign up in seconds and access your dashboard instantly.</p>
+            </div>
+            <div className="bg-white rounded-xl p-8 shadow text-center">
+              <div className="flex items-center justify-center mb-4"><Sparkles className="w-8 h-8 text-purple-600" /></div>
+              <h3 className="font-semibold text-gray-900 mb-2">2. Personalize Your Study</h3>
+              <p className="text-gray-600">Choose your focus areas, set goals, and start practicing with Casey AI.</p>
+            </div>
+            <div className="bg-white rounded-xl p-8 shadow text-center">
+              <div className="flex items-center justify-center mb-4"><TrendingUp className="w-8 h-8 text-green-600" /></div>
+              <h3 className="font-semibold text-gray-900 mb-2">3. Track Progress & Improve</h3>
+              <p className="text-gray-600">Monitor your analytics, revisit weak areas, and build exam confidence.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Stats Section */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -520,6 +547,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <div className="text-gray-600 font-medium">{stat.label}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Who Is This For Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Who Is This For?</h2>
+          <p className="text-xl text-gray-600 mb-8">Casey AI is designed for every CISSP candidate</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gray-50 rounded-xl p-8 shadow text-center">
+              <GraduationCap className="w-8 h-8 text-blue-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">First-Time Test Takers</h3>
+              <p className="text-gray-600">Build a strong foundation and master all 8 domains with guided practice.</p>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-8 shadow text-center">
+              <Briefcase className="w-8 h-8 text-green-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">Busy Professionals</h3>
+              <p className="text-gray-600">Study on your schedule, across devices, with smart session tracking.</p>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-8 shadow text-center">
+              <Users className="w-8 h-8 text-purple-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-gray-900 mb-2">Career Changers</h3>
+              <p className="text-gray-600">Transition into cybersecurity with confidence and expert support.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -730,6 +782,35 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <div className="flex items-center space-x-1">
               <CheckCircle className="w-4 h-4" />
               <span>Cancel anytime</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
+          <div className="space-y-8">
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">Do I need to enter a credit card to start?</h3>
+              <p className="text-gray-600">No, you can start your free trial instantly without a credit card.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">Is this platform officially endorsed by (ISC)²?</h3>
+              <p className="text-gray-600">No, Casey AI is an independent study tool and is not affiliated with or endorsed by (ISC)².</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">Can I use this on my phone and computer?</h3>
+              <p className="text-gray-600">Yes, your progress syncs across iOS, Android, and web browsers.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">What makes Casey AI different?</h3>
+              <p className="text-gray-600">Casey AI combines unlimited AI-generated questions, instant explanations, and personalized analytics to help you study smarter, not harder.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">Can I cancel anytime?</h3>
+              <p className="text-gray-600">Absolutely. You’re in control—cancel your subscription at any time from your dashboard.</p>
             </div>
           </div>
         </div>
