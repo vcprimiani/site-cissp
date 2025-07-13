@@ -1,6 +1,6 @@
 import React from 'react';
 import { Question } from '../../types';
-import { ChevronDown, ChevronUp, Brain, Share2, Bookmark } from 'lucide-react';
+import { ChevronDown, ChevronUp, Brain, Share2, Bookmark, Flag } from 'lucide-react';
 import { getDomainColor, getDifficultyColor, getStatusColor, generateColorClasses, categoryIcons } from '../../utils/colorSystem';
 import { SocialShareButtons } from './SocialShareButtons';
 import { highlightKeywords } from '../../services/keywordAnalysis';
@@ -9,8 +9,7 @@ import { useBookmarks } from '../../hooks/useBookmarks';
 import { Lock, Crown } from 'lucide-react';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
-import { elevenLabsService } from '../../services/elevenlabs';
-import PlayPauseButton from './PlayPauseButton';
+
 
 interface QuestionCardProps {
   question: Question;
@@ -231,16 +230,11 @@ Study more at: https://site.cisspstudygroup.com`;
               </div>
             )}
 
-            {/* Question Text and Play Button */}
-            <div className="flex items-start gap-3 mb-2">
-              <span className="text-gray-900 font-medium text-base flex-1">
+            {/* Question Text */}
+            <div className="mb-2">
+              <span className="text-gray-900 font-medium text-base">
                 {question.question}
               </span>
-              <PlayPauseButton
-                text={question.question}
-                size="sm"
-                className="flex-shrink-0"
-              />
             </div>
 
             {/* Tags - Softer colors */}

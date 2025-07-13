@@ -13,7 +13,6 @@ interface HeaderProps {
   onLogout: () => void;
   hasActiveSubscription: boolean;
   subscriptionLoading: boolean;
-  onOpenVoiceSettings?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -22,8 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser, 
   onLogout, 
   hasActiveSubscription, 
-  subscriptionLoading,
-  onOpenVoiceSettings 
+  subscriptionLoading
 }) => {
   const { signOut } = useAuth();
   // const { isActive, productName } = useSubscription(); // REMOVE
@@ -35,10 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
     window.location.href = '/'; // Hard redirect to root/login
   };
 
-  const handleVoiceSettings = () => {
-    setShowSettings(false);
-    onOpenVoiceSettings?.();
-  };
+
 
   // Inject Canny SDK and identify user
   React.useEffect(() => {
@@ -235,12 +230,7 @@ export const Header: React.FC<HeaderProps> = ({
                       >
                         📈 View Progress
                       </a>
-                      <button
-                        onClick={handleVoiceSettings}
-                        className="block w-full text-left px-4 py-3 text-gray-800 hover:bg-blue-50 text-sm font-medium"
-                      >
-                        🔊 Voice Settings
-                      </button>
+
                       <button
                         onClick={() => {
                           setShowSettings(false);

@@ -86,23 +86,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     }
   };
 
-  // Read Aloud state and logic
-  const [isSpeaking, setIsSpeaking] = React.useState(false);
-  const utteranceRef = React.useRef<SpeechSynthesisUtterance | null>(null);
-  const handleReadAloud = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      return;
-    }
-    const utterance = new window.SpeechSynthesisUtterance(currentQuestion.question);
-    utteranceRef.current = utterance;
-    setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(utterance);
-  };
+
 
   // Flag functionality
   const [showFlagModal, setShowFlagModal] = React.useState(false);
@@ -849,36 +833,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 </span>
               </div>
 
-              {/* Voice/Read Aloud Button */}
-              <div className="w-full">
-                <button
-                  type="button"
-                  onClick={handleReadAloud}
-                  className={`w-full p-3 rounded-lg border border-blue-200 shadow-md hover:bg-blue-100 transition-colors ${
-                    isSpeaking ? 'bg-blue-200' : 'bg-white'
-                  }`}
-                  title={isSpeaking ? 'Pause reading' : 'Read question aloud'}
-                  style={{ boxShadow: '0 2px 8px 0 rgba(80, 120, 255, 0.10)' }}
-                >
-                  {isSpeaking ? (
-                    // Modern Pause icon
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 32 32" className="w-6 h-6 text-blue-600 mx-auto">
-                      <rect x="9" y="7" width="4" height="18" rx="2" />
-                      <rect x="19" y="7" width="4" height="18" rx="2" />
-                    </svg>
-                  ) : (
-                    // Modern Speaker with sound waves icon
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 32 32" className="w-6 h-6 text-blue-600 mx-auto">
-                      <path d="M14 8.5v15l-6-5.5H4v-4h4l6-5.5z" />
-                      <path d="M20.5 11.5a1 1 0 0 1 1.4 0c2.7 2.7 2.7 7.3 0 10a1 1 0 1 1-1.4-1.4c2-2 2-5.2 0-7.2a1 1 0 0 1 0-1.4z" />
-                      <path d="M24.5 7.5a1 1 0 0 1 1.4 0c5.1 5.1 5.1 13.4 0 18.5a1 1 0 1 1-1.4-1.4c4.3-4.3 4.3-11.4 0-15.7a1 1 0 0 1 0-1.4z" />
-                    </svg>
-                  )}
-                  <div className="text-xs text-gray-600 mt-1 text-center">
-                    {isSpeaking ? 'Pause' : 'Read Aloud'}
-                  </div>
-                </button>
-              </div>
+
 
               {/* Flag Question Button */}
               <div className="w-full">
