@@ -32,10 +32,13 @@ export const useFlags = (): UseFlagsReturn => {
       setError(null);
 
       // Get questions that this user has flagged
+      console.log('Fetching flags for user:', user.id);
       const { data: questions, error: fetchError } = await supabase
         .from('questions')
-        .select('id')
+        .select('id, flagged_by')
         .contains('flagged_by', [user.id]);
+      
+      console.log('Flag query result:', { questions, error: fetchError });
 
       if (fetchError) {
         throw fetchError;
