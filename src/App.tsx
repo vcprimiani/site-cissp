@@ -218,11 +218,7 @@ function App() {
   // Show full app for authenticated users with active subscription
   return (
     <>
-      {/* DEV Banner */}
-      <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 1000 }} className="bg-purple-700 text-white text-center font-bold py-2 shadow-md">
-        DEV — This is the development branch
-      </div>
-      <div style={{ paddingTop: '48px' }}>
+      <div>
         {/* 🚨 CRITICAL: Main app uses hooks, so it MUST be wrapped in PageWrapper */}
         <PageWrapper>
           <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
