@@ -10,6 +10,7 @@ import { useFlags } from '../../hooks/useFlags';
 import { FlagModal } from '../UI/FlagModal';
 import { getQuestionRating, setQuestionRating, getQuestionRatingAggregate } from '../../services/flagService';
 import { useRatings } from '../../hooks/useRatings';
+import { showToast } from '../../utils/toast';
 
 interface QuizProps {
   questions: Question[];
@@ -424,9 +425,18 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   const handleThumb = async (val: 1 | -1) => {
     if (!currentUser || !currentQuestion || !currentQuestion.id) return;
-    await setQuestionRating(currentQuestion.id, currentUser.id, val);
-    setRating(currentQuestion.id, val);
-    getQuestionRatingAggregate(currentQuestion.id).then(setRatingCounts);
+    try {
+      const success = await setQuestionRating(currentQuestion.id, currentUser.id, val);
+      if (!success) {
+        showToast('error', 'Failed to save your rating. Please try again.');
+        return;
+      }
+      setRating(currentQuestion.id, val);
+      getQuestionRatingAggregate(currentQuestion.id).then(setRatingCounts);
+    } catch (error) {
+      console.error('Error saving rating:', error);
+      showToast('error', 'Error saving your rating. Please check your connection or permissions.');
+    }
   };
 
 
