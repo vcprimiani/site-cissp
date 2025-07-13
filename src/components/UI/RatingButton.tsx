@@ -43,21 +43,23 @@ export const RatingButton: React.FC<RatingButtonProps> = ({ questionId, userId }
 
   const currentRating = ratings[questionId];
 
-  // Aggregate rating calculation
+  // Weighted aggregate rating calculation
+  // Use a Bayesian average to bias toward neutral (3) when votes are low
+  const prior = 3; // neutral
+  const priorWeight = 3; // how much to bias toward neutral (higher = less sensitive to few votes)
   const totalVotes = ratingCounts.up + ratingCounts.down;
-  // Score: 1 (all down) to 5 (all up), 3 is neutral
-  const aggregateScore = totalVotes === 0 ? 3 : 3 + ((ratingCounts.up - ratingCounts.down) / totalVotes) * 2;
-  // Clamp between 1 and 5
+  const rawScore = totalVotes === 0 ? 3 : 3 + ((ratingCounts.up - ratingCounts.down) / totalVotes) * 2;
+  // Bayesian average
+  const aggregateScore = (prior * priorWeight + rawScore * totalVotes) / (priorWeight + totalVotes);
   const clampedScore = Math.max(1, Math.min(5, aggregateScore));
-  // Emoji map
+  // Emoji map: 1 = 😡, 2/3 = 🤔, 4 = 🙂, 5 = 🤩
   const vibeEmoji = [
     '😡', // 1
-    '😕', // 2
-    '😐', // 3
+    '🤔', // 2
+    '🤔', // 3
     '🙂', // 4
     '🤩'  // 5
   ];
-  // Pick emoji based on rounded score
   const emoji = vibeEmoji[Math.round(clampedScore) - 1];
   const vibeLabels = [
     'Hated by most users',
@@ -107,9 +109,10 @@ export const RatingButton: React.FC<RatingButtonProps> = ({ questionId, userId }
         <span className="text-xs">{ratingCounts.down}</span>
       </button>
       {/* Aggregate rating display */}
-      <div className="flex items-center ml-2 group cursor-default" title={`${vibeLabel} (${clampedScore.toFixed(1)}/5)`}>
+      <div className="flex items-center ml-2 group cursor-default" title={`${vibeLabel} (${clampedScore.toFixed(1)}/5, ${totalVotes} vote${totalVotes === 1 ? '' : 's'})`}>
         <span className="text-2xl mr-1">{emoji}</span>
         <span className="text-xs text-gray-500 group-hover:text-gray-700 transition-colors">{clampedScore.toFixed(1)}/5</span>
+        <span className="text-xs text-gray-400 ml-1">({totalVotes} vote{totalVotes === 1 ? '' : 's'})</span>
       </div>
     </div>
   );
