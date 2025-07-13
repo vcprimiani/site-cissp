@@ -57,16 +57,12 @@ export class FlagService {
   // Flag a question
   static async flagQuestion({ questionId, userId, reason, customReason }: FlagQuestionParams): Promise<boolean> {
     try {
-      console.log('Flagging question:', { questionId, userId, reason, customReason });
-      
       // Get current question data
       const { data: question, error: fetchError } = await supabase
         .from('questions')
         .select('flagged_by, flag_reasons')
         .eq('id', questionId)
         .single();
-
-      console.log('Current question data:', question);
 
       if (fetchError) {
         throw fetchError;
@@ -87,7 +83,6 @@ export class FlagService {
       const newReasons = [...currentReasons, finalReason];
 
       // Update question with new flag data
-      console.log('Updating question with new flag data:', { newFlaggedBy, newReasons });
       const { error: updateError } = await supabase
         .from('questions')
         .update({
@@ -95,8 +90,6 @@ export class FlagService {
           flag_reasons: newReasons
         })
         .eq('id', questionId);
-
-      console.log('Update result:', { updateError });
 
       if (updateError) {
         throw updateError;

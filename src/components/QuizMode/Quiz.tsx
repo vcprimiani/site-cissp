@@ -102,16 +102,21 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   const handleFlagClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('Flag button clicked:', { currentQuestionId: currentQuestion?.id, isFlagged });
     if (isFlagged) {
+      console.log('Unflagging question:', currentQuestion.id);
       unflagQuestion(currentQuestion.id);
     } else {
+      console.log('Opening flag modal for question:', currentQuestion.id);
       setShowFlagModal(true);
     }
   };
 
   const handleFlagSubmit = async (reason: string, customReason?: string) => {
     try {
+      console.log('Submitting flag:', { reason, customReason, questionId: currentQuestion.id });
       const success = await flagQuestion(currentQuestion.id, reason, customReason);
+      console.log('Flag result:', success);
       if (success) {
         setShowFlagModal(false);
       }
