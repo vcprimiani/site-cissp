@@ -83,3 +83,45 @@ export const isStructuredExplanation = (explanation: string): boolean => {
   
   return hasNumberedSections || (hasBulletPoints && hasStructuredKeywords) || hasMultipleSections;
 };
+
+/**
+ * Parses an explanation string into a mapping of option index to explanation.
+ * Supports formats like 'Option A:', 'Option 1:', etc.
+ * Returns an object: { 0: '...', 1: '...', ... }
+ */
+export function parseOptionExplanations(explanation: string, options: string[]): Record<number, string> | null {
+  // Try to match Option A/B/C/D or Option 1/2/3/4
+  const regexes = [
+    /Option ([A-D]):/gi,
+    /Option ([1-4]):/gi
+  ];
+  let matchRegex = null;
+  let matches = null;
+  for (const regex of regexes) {
+    matches = [...explanation.matchAll(regex)];
+    if (matches.length === options.length) {
+      matchRegex = regex;
+      break;
+    }
+  }
+  if (!matchRegex || !matches || matches.length !== options.length) {
+    return null;
+  }
+  // Split the explanation into sections
+  const result: Record<number, string> = {};
+  for (let i = 0; i < matches.length; i++) {
+    const start = matches[i].index! + matches[i][0].length;
+    const end = i < matches.length - 1 ? matches[i + 1].index! : explanation.length;
+    const text = explanation.slice(start, end).trim();
+    result[i] = text;
+  }
+  return result;
+}
+
+/**
+ * Validates that the explanation string contains a section for each option.
+ * Returns true if valid, false otherwise.
+ */
+export function isExplanationStructured(explanation: string, options: string[]): boolean {
+  return !!parseOptionExplanations(explanation, options);
+}

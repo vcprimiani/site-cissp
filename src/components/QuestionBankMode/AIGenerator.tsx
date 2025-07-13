@@ -6,6 +6,8 @@ import { useSubscription } from '../../hooks/useSubscription';
 import { formatTimeRemaining } from '../../services/aiSecurity';
 import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
+import { parseOptionExplanations, isExplanationStructured } from '../../utils/textFormatting';
+import { logFailedAIGeneration } from '../../utils/aiGenerationLog';
 
 interface AIGeneratorProps {
   questions: Question[];
@@ -995,11 +997,22 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                         ))}
                       </div>
                       
-                      <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="text-sm text-green-800">
-                          <span className="font-medium">Explanation:</span> {currentQuestionPreview.explanation}
-                        </p>
-                      </div>
+                      {/* Explanation Section */}
+                      {isExplanationStructured(currentQuestionPreview.explanation, currentQuestionPreview.options) ? (
+                        <div className="mt-4">
+                          <h5 className="font-semibold text-green-700 mb-2">Explanations:</h5>
+                          {Object.entries(parseOptionExplanations(currentQuestionPreview.explanation, currentQuestionPreview.options)!).map(([idx, text]) => (
+                            <div key={idx} className={`mb-2 p-2 rounded ${parseInt(idx) === currentQuestionPreview.correctAnswer ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
+                              <span className={`font-bold ${parseInt(idx) === currentQuestionPreview.correctAnswer ? 'text-green-700' : 'text-gray-700'}`}>Option {String.fromCharCode(65 + parseInt(idx))}:</span> {text}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <p className="text-sm text-yellow-800 font-semibold mb-1">Warning: Explanation is not structured per option and will not be saved.</p>
+                          <p className="text-sm text-gray-700">{currentQuestionPreview.explanation}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
