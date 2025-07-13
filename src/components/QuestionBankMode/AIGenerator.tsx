@@ -55,6 +55,16 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
   });
   const [showSavedBanner, setShowSavedBanner] = useState(false);
   const [savedBannerCount, setSavedBannerCount] = useState(1);
+  const [currentQuestionPreview, setCurrentQuestionPreview] = useState<{
+    question: string;
+    options: string[];
+    correctAnswer: number;
+    explanation: string;
+    domain: string;
+    difficulty: string;
+    tags: string[];
+  } | null>(null);
+  const [previewMessage, setPreviewMessage] = useState<string>('');
 
   const FREE_LIMIT = 3;
   const weekKey = getCurrentWeekKey();
@@ -266,6 +276,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
       
       for (let i = 0; i < count; i++) {
         setGenerationProgress({ current: i + 1, total: count });
+        setPreviewMessage(`Generating question ${i + 1} of ${count}...`);
         
         try {
           // Create generation options based on selected domain
@@ -295,6 +306,17 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
               isActive: true,
               tags: [...response.question.tags, 'ai-generated'] // Add ai-generated tag
             };
+            
+            // Show preview of the generated question
+            setCurrentQuestionPreview({
+              question: response.question.question,
+              options: response.question.options,
+              correctAnswer: response.question.correctAnswer,
+              explanation: response.question.explanation,
+              domain: response.question.domain,
+              difficulty: response.question.difficulty,
+              tags: response.question.tags
+            });
             
             // Add to database via the hook
             const addedQuestion = await onAddQuestion(newQuestion);
@@ -358,6 +380,8 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
       }
       setIsGenerating(false);
       setGenerationProgress({ current: 0, total: 0 });
+      setCurrentQuestionPreview(null);
+      setPreviewMessage('');
     }
   };
 
@@ -382,6 +406,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
       
       for (let i = 0; i < advancedQuestionCount; i++) {
         setGenerationProgress({ current: i + 1, total: advancedQuestionCount });
+        setPreviewMessage(`Generating advanced question ${i + 1} of ${advancedQuestionCount}...`);
         
         try {
           const response = await generateAIQuestion(
@@ -405,6 +430,17 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
               isActive: true,
               tags: [...response.question.tags, 'ai-generated'] // Add ai-generated tag
             };
+            
+            // Show preview of the generated question
+            setCurrentQuestionPreview({
+              question: response.question.question,
+              options: response.question.options,
+              correctAnswer: response.question.correctAnswer,
+              explanation: response.question.explanation,
+              domain: response.question.domain,
+              difficulty: response.question.difficulty,
+              tags: response.question.tags
+            });
             
             // Add to database via the hook
             const addedQuestion = await onAddQuestion(newQuestion);
@@ -468,6 +504,8 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
       }
       setIsGenerating(false);
       setGenerationProgress({ current: 0, total: 0 });
+      setCurrentQuestionPreview(null);
+      setPreviewMessage('');
     }
   };
 
@@ -896,6 +934,74 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                   <p className="text-xs text-yellow-700 mt-1">
                     Choose a domain and optionally a subcategory to get started.
                   </p>
+                </div>
+              )}
+
+              {/* Question Preview */}
+              {isGenerating && currentQuestionPreview && (
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6 mt-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">✨</span>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900">Latest Generated Question</h4>
+                      <p className="text-sm text-gray-600">{previewMessage}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white rounded-lg p-4 border border-blue-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-2">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                          {currentQuestionPreview.domain}
+                        </span>
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
+                          {currentQuestionPreview.difficulty}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        {currentQuestionPreview.tags.slice(0, 3).map((tag, index) => (
+                          <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <p className="text-gray-900 font-medium">{currentQuestionPreview.question}</p>
+                      
+                      <div className="space-y-2">
+                        {currentQuestionPreview.options.map((option, index) => (
+                          <div key={index} className="flex items-center space-x-2">
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                              index === currentQuestionPreview.correctAnswer 
+                                ? 'border-green-500 bg-green-100' 
+                                : 'border-gray-300'
+                            }`}>
+                              {index === currentQuestionPreview.correctAnswer && (
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              )}
+                            </div>
+                            <span className={`text-sm ${
+                              index === currentQuestionPreview.correctAnswer 
+                                ? 'text-green-700 font-medium' 
+                                : 'text-gray-700'
+                            }`}>
+                              {option}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="text-sm text-green-800">
+                          <span className="font-medium">Explanation:</span> {currentQuestionPreview.explanation}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
