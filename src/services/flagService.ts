@@ -301,4 +301,35 @@ export class FlagService {
       console.error('Error adding flag history:', error);
     }
   }
+}
+
+export async function getQuestionRating(questionId: string, userId: string) {
+  const { data, error } = await supabase
+    .from('question_ratings')
+    .select('rating')
+    .eq('question_id', questionId)
+    .eq('user_id', userId)
+    .single();
+  if (error) return null;
+  return data?.rating ?? null;
+}
+
+export async function setQuestionRating(questionId: string, userId: string, rating: 1 | -1) {
+  // Upsert user's rating for this question
+  const { error } = await supabase
+    .from('question_ratings')
+    .upsert({ question_id: questionId, user_id: userId, rating }, { onConflict: 'question_id,user_id' });
+  return !error;
+}
+
+export async function getQuestionRatingAggregate(questionId: string) {
+  // Returns { up: number, down: number }
+  const { data, error } = await supabase
+    .from('question_ratings')
+    .select('rating', { count: 'exact', head: false })
+    .eq('question_id', questionId);
+  if (error || !data) return { up: 0, down: 0 };
+  const up = data.filter((r: any) => r.rating === 1).length;
+  const down = data.filter((r: any) => r.rating === -1).length;
+  return { up, down };
 } 

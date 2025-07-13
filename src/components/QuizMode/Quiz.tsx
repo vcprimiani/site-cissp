@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Question } from '../../types';
-import { Clock, CheckCircle, XCircle, ArrowRight, ArrowLeft, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader, Briefcase, Sparkles, Flag } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, ArrowRight, ArrowLeft, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader, Briefcase, Sparkles, Flag, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { analyzeCISSPKeywords, highlightKeywords } from '../../services/keywordAnalysis';
 import { generateManagerPerspective, enhanceQuestionExplanation } from '../../services/openai';
@@ -8,6 +8,8 @@ import { useQuizPersistence } from '../../hooks/useQuizPersistence';
 import { parseExplanationSections, renderSectionContent } from '../../utils/textFormatting';
 import { useFlags } from '../../hooks/useFlags';
 import { FlagModal } from '../UI/FlagModal';
+import { getQuestionRating, setQuestionRating, getQuestionRatingAggregate } from '../../services/flagService';
+import { useRatings } from '../../hooks/useRatings';
 
 interface QuizProps {
   questions: Question[];
@@ -91,12 +93,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   // Flag functionality
   const [showFlagModal, setShowFlagModal] = React.useState(false);
   const { isQuestionFlagged, flagQuestion, unflagQuestion, loading: flagsLoading } = useFlags();
-  const isFlagged = isQuestionFlagged(currentQuestion.id);
+  const isFlagged = isQuestionFlagged(currentQuestion?.id || '');
 
   const handleFlagClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isFlagged) {
-      unflagQuestion(currentQuestion.id);
+      unflagQuestion(currentQuestion?.id || '');
     } else {
       setShowFlagModal(true);
     }
@@ -104,7 +106,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   const handleFlagSubmit = async (reason: string, customReason?: string) => {
     try {
-      const success = await flagQuestion(currentQuestion.id, reason, customReason);
+      const success = await flagQuestion(currentQuestion?.id || '', reason, customReason);
       if (success) {
         setShowFlagModal(false);
       }
@@ -187,15 +189,15 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   // Always generate manager perspective when question changes
   useEffect(() => {
-    const questionId = currentQuestion.id;
+    const questionId = currentQuestion?.id || '';
     if (!managerPerspectives[questionId]) {
       setLoadingManagerPerspective(true);
       setManagerPerspectiveError(null);
       generateManagerPerspective(
-        currentQuestion.question,
-        currentQuestion.options,
-        currentQuestion.correctAnswer,
-        currentQuestion.domain
+        currentQuestion?.question || '',
+        currentQuestion?.options || [],
+        currentQuestion?.correctAnswer || 0,
+        currentQuestion?.domain || ''
       ).then(result => {
         if (result.error) {
           setManagerPerspectiveError(result.error);
@@ -212,7 +214,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, currentQuestion.id]);
+  }, [currentIndex, currentQuestion?.id]);
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (showResult) return; // Prevent selection after showing result
@@ -242,7 +244,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
 
   const handleManagerPerspective = async () => {
-    const questionId = currentQuestion.id;
+    const questionId = currentQuestion?.id || '';
     
     // If we already have the perspective for this question, just toggle display
     if (managerPerspectives[questionId]) {
@@ -258,10 +260,10 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     
     try {
       const result = await generateManagerPerspective(
-        currentQuestion.question,
-        currentQuestion.options,
-        currentQuestion.correctAnswer,
-        currentQuestion.domain
+        currentQuestion?.question || '',
+        currentQuestion?.options || [],
+        currentQuestion?.correctAnswer || 0,
+        currentQuestion?.domain || ''
       );
       
       if (result.error) {
@@ -281,7 +283,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   };
 
   const handleEnhanceExplanation = async () => {
-    const questionId = currentQuestion.id;
+    const questionId = currentQuestion?.id || '';
     
     // If we already have an enhanced explanation for this question, just toggle display
     if (enhancedExplanation) {
@@ -297,11 +299,11 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     
     try {
              const result = await enhanceQuestionExplanation(
-         currentQuestion.question,
-         currentQuestion.options,
-         currentQuestion.correctAnswer,
-         currentQuestion.explanation,
-         currentQuestion.domain
+         currentQuestion?.question || '',
+         currentQuestion?.options || [],
+         currentQuestion?.correctAnswer || 0,
+         currentQuestion?.explanation || '',
+         currentQuestion?.domain || ''
        );
       
              if (result.error) {
@@ -407,9 +409,25 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const domainColor = getDomainColor(currentQuestion.domain);
-  const difficultyColor = getDifficultyColor(currentQuestion.difficulty);
+  const domainColor = getDomainColor(currentQuestion?.domain || '');
+  const difficultyColor = getDifficultyColor(currentQuestion?.difficulty || 'Easy');
 
+  const currentUser = JSON.parse(localStorage.getItem('supabase.auth.user') || 'null');
+  const questionIds = questions.map(q => q.id);
+  const { ratings, setRating } = useRatings(questionIds, currentUser?.id || null);
+  const [ratingCounts, setRatingCounts] = useState<{ up: number; down: number }>({ up: 0, down: 0 });
+
+  useEffect(() => {
+    if (!currentQuestion || !currentQuestion.id) return;
+    getQuestionRatingAggregate(currentQuestion.id).then(setRatingCounts);
+  }, [currentQuestion?.id]);
+
+  const handleThumb = async (val: 1 | -1) => {
+    if (!currentUser || !currentQuestion || !currentQuestion.id) return;
+    await setQuestionRating(currentQuestion.id, currentUser.id, val);
+    setRating(currentQuestion.id, val);
+    getQuestionRatingAggregate(currentQuestion.id).then(setRatingCounts);
+  };
 
 
   // Format manager perspective response for better readability
@@ -667,14 +685,14 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
               </div>
 
               {/* Manager Perspective Content */}
-              {showManagerPerspective && managerPerspectives[currentQuestion.id] && (
+              {showManagerPerspective && managerPerspectives[currentQuestion?.id || ''] && (
                 <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-center space-x-2 mb-3">
                     <Briefcase className="w-4 h-4 text-blue-600" />
                     <span className="font-medium text-blue-900 text-sm">Manager's Strategic Perspective</span>
                   </div>
                   <div className="max-w-none">
-                    {formatManagerPerspective(managerPerspectives[currentQuestion.id])}
+                    {formatManagerPerspective(managerPerspectives[currentQuestion?.id || ''])}
                   </div>
                 </div>
               )}
@@ -817,6 +835,30 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                   </span>
                 </button>
               </div>
+
+              {/* Thumbs Up/Down Rating UI */}
+              {currentQuestion && (
+                <div className="w-full">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      className={`flex items-center space-x-1 px-2 py-1 rounded-full transition-all duration-150 ${ratings[currentQuestion.id] === 1 ? 'bg-green-100 text-green-700 font-bold' : 'hover:bg-green-50 text-gray-700'}`}
+                      onClick={() => handleThumb(1)}
+                      aria-label="Thumbs Up"
+                    >
+                      <ThumbsUp className="w-5 h-5" />
+                      <span className="text-xs">{ratingCounts.up}</span>
+                    </button>
+                    <button
+                      className={`flex items-center space-x-1 px-2 py-1 rounded-full transition-all duration-150 ${ratings[currentQuestion.id] === -1 ? 'bg-red-100 text-red-700 font-bold' : 'hover:bg-red-50 text-gray-700'}`}
+                      onClick={() => handleThumb(-1)}
+                      aria-label="Thumbs Down"
+                    >
+                      <ThumbsDown className="w-5 h-5" />
+                      <span className="text-xs">{ratingCounts.down}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Navigation Buttons */}
               <div className="w-full space-y-3">
