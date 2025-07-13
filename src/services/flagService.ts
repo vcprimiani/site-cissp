@@ -315,6 +315,8 @@ export async function getQuestionRating(questionId: string, userId: string) {
 }
 
 export async function setQuestionRating(questionId: string, userId: string, rating: 1 | -1) {
+  // Debug log to check payload
+  console.log('setQuestionRating payload:', { question_id: questionId, user_id: userId, rating });
   // Upsert user's rating for this question
   const { error } = await supabase
     .from('question_ratings')

@@ -41,7 +41,7 @@ interface QuizResults {
 
 type QuizMode = 'setup' | 'quiz' | 'results'; //comment
 
-export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boolean; subscriptionLoading: boolean }> = ({ onQuizComplete, hasActiveSubscription, subscriptionLoading }) => {
+export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boolean; subscriptionLoading: boolean }> = ({ onQuizComplete, hasActiveSubscription, subscriptionLoading, appState }) => {
   const { questions, loading, addQuestion, refreshQuestions } = useQuestions();
   const { 
     getAvailableQuestions, 
@@ -51,7 +51,6 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
   } = useSessionTracker();
   const { hasPersistedQuiz, persistedState, clearPersistedState } = useQuizPersistence();
   const { bookmarkedIds, loading: bookmarksLoading } = useBookmarks();
-  const appState = { currentUser: { id: 'test-user-id', email: 'test@example.com' } }; // Mock current user for now
   
   const [numberOfQuestions, setNumberOfQuestions] = useState(5);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
