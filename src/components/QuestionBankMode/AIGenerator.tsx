@@ -543,30 +543,25 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
     );
   }
 
+  // --- Redesigned Layout ---
   return (
-    <div className="space-y-6 sm:space-y-8 relative">
-      {/* Subscription Status Banner */}
+    <div className="max-w-3xl mx-auto space-y-8 py-8">
+      {/* Subscription Banner */}
       {!hasActiveSubscription && (
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                <Crown className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Unlock AI Question Generation</h3>
-                <p className="text-gray-600 text-sm">
-                  Subscribe to generate unlimited CISSP practice questions with advanced AI
-                </p>
-              </div>
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6 mb-6 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Crown className="w-8 h-8 text-yellow-500" />
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">Unlock AI Question Generation</h2>
+              <p className="text-gray-700 text-sm">Subscribe to generate unlimited CISSP practice questions with advanced AI.</p>
             </div>
-            <button
-              onClick={handleUpgradeClick}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
-            >
-              Upgrade Now
-            </button>
           </div>
+          <button
+            onClick={handleUpgradeClick}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-semibold shadow"
+          >
+            Upgrade Now
+          </button>
         </div>
       )}
 
@@ -733,507 +728,270 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
           </div>
         )}
 
-        {/* Quick Generator Controls */}
-        <div className={hasActiveSubscription ? '' : 'pointer-events-none opacity-60 select-none'}>
-          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-              <Wand2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
-              <span>Quick Generator</span>
-              {!hasActiveSubscription && (
-                <div className="flex items-center space-x-1 bg-orange-100 px-2 py-1 rounded-full">
-                  <Lock className="w-3 h-3 text-orange-600" />
-                  <span className="text-xs font-medium text-orange-800">Premium</span>
-                </div>
-              )}
-            </h3>
-
-            <div className="space-y-6">
-              {/* Domain Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Select CISSP Domain
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {domainStats.map(({ domain, percent, count }) => (
-                    <button
-                      key={domain}
-                      onClick={() => hasActiveSubscription ? handleDomainSelect(domain) : setShowUpgradeModal(true)}
-                      className={`text-left p-3 rounded-lg border-2 transition-all duration-200 flex flex-col items-start ${
-                        !hasActiveSubscription 
-                          ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                          : selectedDomain === domain
-                          ? 'border-purple-500 bg-purple-50 text-purple-900'
-                          : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-700'
-                      }`}
-                      disabled={!hasActiveSubscription}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <div className="font-medium text-sm mb-1 flex items-center gap-2">
-                          {domain}
-                          <span className={`ml-2 text-xs font-normal ${getPercentColor(percent)}`}>{percent}%</span>
-                          <span className="ml-1 text-xs text-gray-400">({count})</span>
-                        </div>
-                        {!hasActiveSubscription && <Lock className="w-4 h-4" />}
-                      </div>
-                      <div className="text-xs opacity-75">
-                        {domainSubcategories[domain as keyof typeof domainSubcategories].length} subcategories
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Subcategory Selection */}
-              {selectedDomain && hasActiveSubscription && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Select Subcategory from {selectedDomain}
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {domainSubcategories[selectedDomain as keyof typeof domainSubcategories].map((subcategory) => (
-                      <button
-                        key={subcategory}
-                        onClick={() => setSelectedSubcategory(subcategory)}
-                        className={`text-left p-3 rounded-lg border transition-all duration-200 text-sm ${
-                          selectedSubcategory === subcategory
-                            ? 'border-blue-500 bg-blue-50 text-blue-900'
-                            : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-700'
-                        }`}
-                      >
-                        {subcategory}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Current Selection Display */}
-              {canGenerate && hasActiveSubscription && (
-                <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border border-green-200">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Target className="w-4 h-4 text-green-600" />
-                    <span className="text-sm font-medium text-green-800">Ready to Generate</span>
-                  </div>
-                  <p className="text-sm text-green-700">
-                    <strong>Topic:</strong> {getCurrentTopic()}
-                  </p>
-                  {selectedDomain && (
-                    <p className="text-xs text-green-600 mt-1">
-                      <strong>Domain:</strong> {selectedDomain}
-                    </p>
-                  )}
-                  <p className="text-xs text-green-600 mt-2">
-                    ✨ Questions will be automatically saved to your secure database
-                  </p>
-                </div>
-              )}
-
-              {/* Generation Buttons */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Generate & Save Questions:</span>
-                  {isGenerating && generationProgress.total > 1 && (
-                    <span className="text-xs text-purple-600">
-                      Generating {generationProgress.current} of {generationProgress.total}...
-                    </span>
-                  )}
-                </div>
-                
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {/* Single Question */}
-                  <button
-                    onClick={() => checkSubscriptionAndProceed(() => handleQuickGenerate(1))}
-                    disabled={(!canGenerate && hasActiveSubscription) || isGenerating || !!rateLimitError}
-                    className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all duration-200 ${
-                      !hasActiveSubscription
-                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                        : rateLimitError
-                        ? 'border-orange-200 bg-orange-50 text-orange-400 cursor-not-allowed'
-                        : 'border-purple-200 hover:border-purple-400 hover:bg-purple-50'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
-                      hasActiveSubscription && !rateLimitError ? 'bg-purple-100' : 'bg-gray-100'
-                    }`}>
-                      <span className={`font-bold text-sm ${
-                        hasActiveSubscription && !rateLimitError ? 'text-purple-600' : 'text-gray-400'
-                      }`}>1</span>
-                    </div>
-                    <span className="text-sm font-medium text-gray-900">Single</span>
-                    <span className="text-xs text-gray-600">Question</span>
-                    {!hasActiveSubscription && <Lock className="w-3 h-3 mt-1" />}
-                  </button>
-
-                  {/* 5 Questions */}
-                  <button
-                    onClick={() => checkSubscriptionAndProceed(() => handleQuickGenerate(5))}
-                    disabled={(!canGenerate && hasActiveSubscription) || isGenerating || !!rateLimitError}
-                    className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all duration-200 ${
-                      !hasActiveSubscription
-                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                        : rateLimitError
-                        ? 'border-orange-200 bg-orange-50 text-orange-400 cursor-not-allowed'
-                        : 'border-blue-200 hover:border-blue-400 hover:bg-blue-50'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
-                      hasActiveSubscription && !rateLimitError ? 'bg-blue-100' : 'bg-gray-100'
-                    }`}>
-                      <span className={`font-bold text-sm ${
-                        hasActiveSubscription && !rateLimitError ? 'text-blue-600' : 'text-gray-400'
-                      }`}>5</span>
-                    </div>
-                    <span className="text-sm font-medium text-gray-900">Quick</span>
-                    <span className="text-xs text-gray-600">Set</span>
-                    {!hasActiveSubscription && <Lock className="w-3 h-3 mt-1" />}
-                  </button>
-
-                  {/* 10 Questions */}
-                  <button
-                    onClick={() => checkSubscriptionAndProceed(() => handleQuickGenerate(10))}
-                    disabled={(!canGenerate && hasActiveSubscription) || isGenerating || !!rateLimitError}
-                    className={`flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all duration-200 ${
-                      !hasActiveSubscription
-                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                        : rateLimitError
-                        ? 'border-orange-200 bg-orange-50 text-orange-400 cursor-not-allowed'
-                        : 'border-green-200 hover:border-green-400 hover:bg-green-50'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
-                      hasActiveSubscription && !rateLimitError ? 'bg-green-100' : 'bg-gray-100'
-                    }`}>
-                      <span className={`font-bold text-sm ${
-                        hasActiveSubscription && !rateLimitError ? 'text-green-600' : 'text-gray-400'
-                      }`}>10</span>
-                    </div>
-                    <span className="text-sm font-medium text-gray-900">Full</span>
-                    <span className="text-xs text-gray-600">Set</span>
-                    {!hasActiveSubscription && <Lock className="w-3 h-3 mt-1" />}
-                  </button>
-
-                  {/* Loading State */}
-                  {isGenerating && hasActiveSubscription && (
-                    <div className="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
-                      <Loader className="w-6 h-6 text-gray-600 animate-spin mb-2" />
-                      <span className="text-sm font-medium text-gray-600">Generating...</span>
-                      {generationProgress.total > 1 && (
-                        <span className="text-xs text-gray-500">
-                          {generationProgress.current}/{generationProgress.total}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Help Text */}
-              {!canGenerate && hasActiveSubscription && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-yellow-800">Select a domain to generate questions</span>
-                  </div>
-                  <p className="text-xs text-yellow-700 mt-1">
-                    Choose a domain and optionally a subcategory to get started.
-                  </p>
-                </div>
-              )}
-
-              {/* Question Preview */}
-              {isGenerating && currentQuestionPreview && (
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6 mt-6">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">✨</span>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-900">Latest Generated Question</h4>
-                      <p className="text-sm text-gray-600">{previewMessage}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white rounded-lg p-4 border border-blue-200">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-                          {currentQuestionPreview.domain}
-                        </span>
-                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
-                          {currentQuestionPreview.difficulty}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        {currentQuestionPreview.tags.slice(0, 3).map((tag, index) => (
-                          <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <p className="text-gray-900 font-medium">{currentQuestionPreview.question}</p>
-                      
-                      <div className="space-y-2">
-                        {currentQuestionPreview.options.map((option, index) => (
-                          <div key={index} className="flex items-center space-x-2">
-                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                              index === currentQuestionPreview.correctAnswer 
-                                ? 'border-green-500 bg-green-100' 
-                                : 'border-gray-300'
-                            }`}>
-                              {index === currentQuestionPreview.correctAnswer && (
-                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              )}
-                            </div>
-                            <span className={`text-sm ${
-                              index === currentQuestionPreview.correctAnswer 
-                                ? 'text-green-700 font-medium' 
-                                : 'text-gray-700'
-                            }`}>
-                              {option}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      {/* Explanation Section */}
-                      {isExplanationStructured(currentQuestionPreview.explanation, currentQuestionPreview.options) ? (
-                        <div className="mt-4">
-                          <h5 className="font-semibold text-green-700 mb-2">Explanations:</h5>
-                          {Object.entries(parseOptionExplanations(currentQuestionPreview.explanation, currentQuestionPreview.options)!).map(([idx, text]) => (
-                            <div key={idx} className={`mb-2 p-2 rounded ${parseInt(idx) === currentQuestionPreview.correctAnswer ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
-                              <span className={`font-bold ${parseInt(idx) === currentQuestionPreview.correctAnswer ? 'text-green-700' : 'text-gray-700'}`}>Option {String.fromCharCode(65 + parseInt(idx))}:</span> {text}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                          <p className="text-sm text-yellow-800 font-semibold mb-2">Warning: Explanation is not structured per option and will not be saved.</p>
-                          {parseExplanationSections(currentQuestionPreview.explanation).map((section, idx) => (
-                            <div key={idx} className="mb-2">
-                              {section.header && <div className="font-bold text-gray-800 mb-1">{section.header}</div>}
-                              {renderSectionContent(section.content).length > 1 ? (
-                                <ul className="list-disc list-inside ml-4">
-                                  {renderSectionContent(section.content).map((item, i) => (
-                                    <li key={i} className="text-sm text-gray-700">{item}</li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                <p className="text-sm text-gray-700">{section.content}</p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+        {/* Step 1: Select Domain */}
+        <div className="bg-white rounded-xl shadow p-6 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">1. Select a CISSP Domain</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {domains.map(domain => (
+              <button
+                key={domain}
+                onClick={() => hasActiveSubscription ? handleDomainSelect(domain) : setShowUpgradeModal(true)}
+                className={`p-4 rounded-lg border-2 transition-all duration-200 text-left font-medium text-base ${
+                  selectedDomain === domain
+                    ? 'border-blue-600 bg-blue-50 text-blue-900 shadow'
+                    : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+                }`}
+                disabled={!hasActiveSubscription}
+              >
+                {domain}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Advanced Generator Controls */}
-        <div className={hasActiveSubscription ? '' : 'pointer-events-none opacity-60 select-none'}>
-          <div className="bg-white rounded-xl shadow-lg">
-            <div 
-              className="p-4 sm:p-6 cursor-pointer"
-              onClick={() => hasActiveSubscription ? setShowAdvanced(!showAdvanced) : setShowUpgradeModal(true)}
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center space-x-2">
-                  <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                  <span>🎯 Advanced Generator Options</span>
-                  {!hasActiveSubscription && (
-                    <div className="flex items-center space-x-1 bg-orange-100 px-2 py-1 rounded-full">
-                      <Lock className="w-3 h-3 text-orange-600" />
-                      <span className="text-xs font-medium text-orange-800">Premium</span>
-                    </div>
-                  )}
-                </h3>
-                <div className="flex items-center space-x-2">
-                  {hasActiveSubscription ? (
-                    showAdvanced ? (
-                      <ChevronUp className="w-5 h-5 text-gray-400" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
-                    )
-                  ) : (
-                    <Lock className="w-5 h-5 text-gray-400" />
-                  )}
-                </div>
-              </div>
-              {!showAdvanced && (
-                <p className="text-sm text-gray-600 mt-2">
-                  {hasActiveSubscription 
-                    ? 'Configure detailed options for question generation including domain, difficulty, and question type'
-                    : 'Premium feature - Subscribe to access advanced generation options'
-                  }
-                </p>
-              )}
+        {/* Step 2: Select Subcategory (if domain selected) */}
+        {selectedDomain && (
+          <div className="bg-white rounded-xl shadow p-6 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">2. (Optional) Select a Subcategory</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {domainSubcategories[selectedDomain as keyof typeof domainSubcategories].map((subcategory) => (
+                <button
+                  key={subcategory}
+                  onClick={() => setSelectedSubcategory(subcategory)}
+                  className={`p-3 rounded-lg border transition-all duration-200 text-sm font-medium ${
+                    selectedSubcategory === subcategory
+                      ? 'border-green-600 bg-green-50 text-green-900 shadow'
+                      : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-green-300 hover:bg-green-50'
+                  }`}
+                >
+                  {subcategory}
+                </button>
+              ))}
             </div>
+          </div>
+        )}
 
-            {showAdvanced && hasActiveSubscription && (
-              <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-200">
-                <div className="space-y-6 pt-6">
-                  {/* Question Count Toggle */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Number of Questions to Generate
-                    </label>
-                    <div className="flex space-x-3">
-                      {[1, 5, 10].map((count) => (
-                        <button
-                          key={count}
-                          onClick={() => setAdvancedQuestionCount(count as 1 | 5 | 10)}
-                          className={`flex flex-col items-center justify-center p-3 border-2 rounded-lg transition-all duration-200 ${
-                            advancedQuestionCount === count
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-                          }`}
-                        >
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 ${
-                            advancedQuestionCount === count
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-gray-100 text-gray-600'
-                          }`}>
-                            <span className="text-xs font-bold">{count}</span>
-                          </div>
-                          <span className="text-xs font-medium text-gray-900">
-                            {count === 1 ? 'Single' : count === 5 ? 'Quick' : 'Full'}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
+        {/* Step 3: Choose Difficulty */}
+        {selectedDomain && (
+          <div className="bg-white rounded-xl shadow p-6 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">3. Choose Difficulty</h3>
+            <div className="flex space-x-4">
+              {['Easy', 'Medium', 'Hard'].map((level) => (
+                <button
+                  key={level}
+                  onClick={() => setAdvancedOptions(prev => ({ ...prev, difficulty: level as any }))}
+                  className={`px-6 py-2 rounded-full font-semibold border-2 transition-all duration-200 ${
+                    advancedOptions.difficulty === level
+                      ? 'border-purple-600 bg-purple-50 text-purple-900 shadow'
+                      : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-purple-300 hover:bg-purple-50'
+                  }`}
+                >
+                  {level}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Advanced Options (collapsible) */}
+        {selectedDomain && (
+          <div className="bg-white rounded-xl shadow p-6 mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-gray-900">4. Advanced Options</h3>
+              <button
+                onClick={() => setShowAdvanced(v => !v)}
+                className="text-blue-600 font-medium text-sm flex items-center"
+              >
+                {showAdvanced ? <ChevronUp className="w-5 h-5 ml-1" /> : <ChevronDown className="w-5 h-5 ml-1" />}
+                {showAdvanced ? 'Hide' : 'Show'}
+              </button>
+            </div>
+            {showAdvanced && (
+              <div className="space-y-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
+                  <div className="flex flex-wrap gap-2">
+                    {questionTypes.map(type => (
+                      <label key={type.value} className="flex items-center space-x-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="radio"
+                          name="questionType"
+                          value={type.value}
+                          checked={advancedOptions.questionType === type.value}
+                          onChange={(e) => setAdvancedOptions(prev => ({ ...prev, questionType: e.target.value as any }))}
+                          className="accent-blue-600"
+                        />
+                        <span className="font-medium text-sm">{type.label}</span>
+                      </label>
+                    ))}
                   </div>
-
-                  <div className="grid grid-cols-1 gap-4 sm:gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Domain</label>
-                      <select
-                        value={advancedOptions.domain}
-                        onChange={(e) => setAdvancedOptions(prev => ({ ...prev, domain: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      >
-                        {domains.map(domain => (
-                          <option key={domain} value={domain}>{domain}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
-                      <select
-                        value={advancedOptions.difficulty}
-                        onChange={(e) => setAdvancedOptions(prev => ({ ...prev, difficulty: e.target.value as any }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      >
-                        <option value="Easy">Easy</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Hard">Hard</option>
-                      </select>
-                    </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Scenario Focus</label>
+                  <div className="flex flex-wrap gap-2">
+                    {scenarioTypes.map(type => (
+                      <label key={type.value} className="flex items-center space-x-2 p-2 border rounded-lg cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="radio"
+                          name="scenarioType"
+                          value={type.value}
+                          checked={advancedOptions.scenarioType === type.value}
+                          onChange={(e) => setAdvancedOptions(prev => ({ ...prev, scenarioType: e.target.value as any }))}
+                          className="accent-blue-600"
+                        />
+                        <span className="font-medium text-sm">{type.label}</span>
+                      </label>
+                    ))}
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
-                    <div className="grid grid-cols-1 gap-3">
-                      {questionTypes.map(type => (
-                        <label key={type.value} className="flex items-start space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                          <input
-                            type="radio"
-                            name="questionType"
-                            value={type.value}
-                            checked={advancedOptions.questionType === type.value}
-                            onChange={(e) => setAdvancedOptions(prev => ({ ...prev, questionType: e.target.value as any }))}
-                            className="mt-1"
-                          />
-                          <div>
-                            <p className="font-medium text-gray-900 text-sm">{type.label}</p>
-                            <p className="text-xs text-gray-600">{type.description}</p>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Scenario Focus</label>
-                    <div className="grid grid-cols-1 gap-3">
-                      {scenarioTypes.map(type => (
-                        <label key={type.value} className="flex items-start space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                          <input
-                            type="radio"
-                            name="scenarioType"
-                            value={type.value}
-                            checked={advancedOptions.scenarioType === type.value}
-                            onChange={(e) => setAdvancedOptions(prev => ({ ...prev, scenarioType: e.target.value as any }))}
-                            className="mt-1"
-                          />
-                          <div>
-                            <p className="font-medium text-gray-900 text-sm">{type.label}</p>
-                            <p className="text-xs text-gray-600">{type.description}</p>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 sm:gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Focus Area (Optional)</label>
-                      <input
-                        type="text"
-                        value={advancedOptions.focusArea}
-                        onChange={(e) => setAdvancedOptions(prev => ({ ...prev, focusArea: e.target.value }))}
-                        placeholder="e.g., quarantine procedures, remediation"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      id="includeDistractors"
-                      checked={advancedOptions.includeDistractors}
-                      onChange={(e) => setAdvancedOptions(prev => ({ ...prev, includeDistractors: e.target.checked }))}
-                      className="rounded"
-                    />
-                    <label htmlFor="includeDistractors" className="text-sm text-gray-700">
-                      Include strong distractors that test common misconceptions
-                    </label>
-                  </div>
-
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-sm text-blue-800">
-                      ✨ Generated questions will be automatically saved to your secure database with the "ai-generated" tag
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={handleAdvancedGenerate}
-                    disabled={isGenerating || !!rateLimitError}
-                    className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
-                  >
-                    {isGenerating ? (
-                      <Loader className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Wand2 className="w-5 h-5" />
-                    )}
-                    <span>
-                      {isGenerating 
-                        ? `Generating ${advancedQuestionCount} Question${advancedQuestionCount > 1 ? 's' : ''}...` 
-                        : `Generate & Save ${advancedQuestionCount} Question${advancedQuestionCount > 1 ? 's' : ''}`
-                      }
-                    </span>
-                  </button>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Focus Area (Optional)</label>
+                  <input
+                    type="text"
+                    value={advancedOptions.focusArea}
+                    onChange={(e) => setAdvancedOptions(prev => ({ ...prev, focusArea: e.target.value }))}
+                    placeholder="e.g., quarantine procedures, remediation"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  />
+                </div>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="includeDistractors"
+                    checked={advancedOptions.includeDistractors}
+                    onChange={(e) => setAdvancedOptions(prev => ({ ...prev, includeDistractors: e.target.checked }))}
+                    className="rounded accent-blue-600"
+                  />
+                  <label htmlFor="includeDistractors" className="text-sm text-gray-700">
+                    Include strong distractors that test common misconceptions
+                  </label>
                 </div>
               </div>
             )}
           </div>
-        </div>
+        )}
+
+        {/* Step 5: Generate Button */}
+        {selectedDomain && (
+          <div className="bg-white rounded-xl shadow p-6 mb-4 flex flex-col items-center">
+            <div className="flex space-x-4 mb-4">
+              {[1, 5, 10].map((count) => (
+                <button
+                  key={count}
+                  onClick={() => checkSubscriptionAndProceed(() => handleQuickGenerate(count as 1 | 5 | 10))}
+                  disabled={isGenerating || !!rateLimitError}
+                  className={`px-6 py-3 rounded-lg font-semibold text-base transition-all duration-200 shadow-sm border-2 ${
+                    isGenerating || !!rateLimitError
+                      ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white border-blue-600 hover:from-blue-700 hover:to-purple-700'
+                  }`}
+                >
+                  Generate {count}
+                </button>
+              ))}
+            </div>
+            {isGenerating && (
+              <div className="flex items-center space-x-2 mb-2">
+                <Loader className="w-5 h-5 animate-spin text-blue-600" />
+                <span className="text-blue-700 font-medium">Generating questions...</span>
+              </div>
+            )}
+            {rateLimitError && (
+              <div className="text-orange-700 bg-orange-50 border border-orange-200 rounded-lg px-4 py-2 mt-2">
+                <AlertTriangle className="w-4 h-4 inline-block mr-2" />
+                {rateLimitError}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Question Preview */}
+        {isGenerating && currentQuestionPreview && (
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6 mt-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-bold">✨</span>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">Latest Generated Question</h4>
+                <p className="text-sm text-gray-600">{previewMessage}</p>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-4 border border-blue-200">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                    {currentQuestionPreview.domain}
+                  </span>
+                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
+                    {currentQuestionPreview.difficulty}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  {currentQuestionPreview.tags.slice(0, 3).map((tag, index) => (
+                    <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-3">
+                <p className="text-gray-900 font-medium">{currentQuestionPreview.question}</p>
+                <div className="space-y-2">
+                  {currentQuestionPreview.options.map((option, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        index === currentQuestionPreview.correctAnswer 
+                          ? 'border-green-500 bg-green-100' 
+                          : 'border-gray-300'
+                      }`}>
+                        {index === currentQuestionPreview.correctAnswer && (
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        )}
+                      </div>
+                      <span className={`text-sm ${
+                        index === currentQuestionPreview.correctAnswer 
+                          ? 'text-green-700 font-medium' 
+                          : 'text-gray-700'
+                      }`}>
+                        {option}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                {/* Explanation Section */}
+                {isExplanationStructured(currentQuestionPreview.explanation, currentQuestionPreview.options) ? (
+                  <div className="mt-4">
+                    <h5 className="font-semibold text-green-700 mb-2">Explanations:</h5>
+                    {Object.entries(parseOptionExplanations(currentQuestionPreview.explanation, currentQuestionPreview.options)!).map(([idx, text]) => (
+                      <div key={idx} className={`mb-2 p-2 rounded ${parseInt(idx) === currentQuestionPreview.correctAnswer ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
+                        <span className={`font-bold ${parseInt(idx) === currentQuestionPreview.correctAnswer ? 'text-green-700' : 'text-gray-700'}`}>Option {String.fromCharCode(65 + parseInt(idx))}:</span> {text}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-800 font-semibold mb-2">Warning: Explanation is not structured per option and will not be saved.</p>
+                    {parseExplanationSections(currentQuestionPreview.explanation).map((section, idx) => (
+                      <div key={idx} className="mb-2">
+                        {section.header && <div className="font-bold text-gray-800 mb-1">{section.header}</div>}
+                        {renderSectionContent(section.content).length > 1 ? (
+                          <ul className="list-disc list-inside ml-4">
+                            {renderSectionContent(section.content).map((item, i) => (
+                              <li key={i} className="text-sm text-gray-700">{item}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-gray-700">{section.content}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
