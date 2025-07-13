@@ -18,10 +18,10 @@ export function getLocalDailyQuizQuestions(allQuestions: Question[]): Question[]
     return stored.ids.map((id: string) => allQuestions.find(q => q.id === id)).filter(Boolean);
   }
   // Pick 3 random questions
-  const activeQuestions = allQuestions.filter(q => q.isActive);
+  const activeQuestions = allQuestions.filter(q => q.isActive && !q.isFlagged);
   if (activeQuestions.length < 3) return [];
   const shuffled = activeQuestions.sort(() => 0.5 - Math.random());
   const selected = shuffled.slice(0, 3).map(q => q.id);
   localStorage.setItem(LOCAL_KEY, JSON.stringify({ date: todayStr, ids: selected }));
-  return selected.map(id => activeQuestions.find(q => q.id === id)).filter(Boolean);
+  return selected.map(id => activeQuestions.find(q => q.id === id)).filter((q): q is Question => Boolean(q));
 } 
