@@ -520,18 +520,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-xl p-8 shadow text-center">
               <div className="flex items-center justify-center mb-4"><UserCheck className="w-8 h-8 text-blue-600" /></div>
-              <h3 className="font-semibold text-gray-900 mb-2">1. Create Your Account</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">1. Create an Account</h3>
               <p className="text-gray-600">Sign up in seconds and access your dashboard instantly.</p>
             </div>
             <div className="bg-white rounded-xl p-8 shadow text-center">
               <div className="flex items-center justify-center mb-4"><Sparkles className="w-8 h-8 text-purple-600" /></div>
-              <h3 className="font-semibold text-gray-900 mb-2">2. Personalize Your Study</h3>
-              <p className="text-gray-600">Choose your focus areas, set goals, and start practicing with Casey AI.</p>
+              <h3 className="font-semibold text-gray-900 mb-2">2. Try Some Questions Free</h3>
+              <p className="text-gray-600">Explore quizzes, AI explanations, and daily practice at no cost.</p>
             </div>
             <div className="bg-white rounded-xl p-8 shadow text-center">
               <div className="flex items-center justify-center mb-4"><TrendingUp className="w-8 h-8 text-green-600" /></div>
-              <h3 className="font-semibold text-gray-900 mb-2">3. Track Progress & Improve</h3>
-              <p className="text-gray-600">Monitor your analytics, revisit weak areas, and build exam confidence.</p>
+              <h3 className="font-semibold text-gray-900 mb-2">3. Upgrade for Unlimited Practice</h3>
+              <p className="text-gray-600">Unlock unlimited questions, advanced analytics, and all premium features.</p>
             </div>
           </div>
         </div>
