@@ -17,7 +17,6 @@ import ResetPassword from './components/Auth/ResetPassword';
 import ProgressPage from './components/Progress/ProgressPage';
 import { AdminAccess } from './components/Admin/AdminAccess';
 import { PageWrapper } from './components/Layout/PageWrapper';
-import { DevBanner } from './components/UI/DevBanner';
 
 // 🚨 CRITICAL FOR AI AGENTS: All pages/components that use hooks MUST be wrapped in PageWrapper
 // This prevents "must be used within Provider" errors
@@ -139,20 +138,17 @@ function App() {
   // Show pricing page if the path is /pricing
   if (currentPath === '/pricing' && isAuthenticated && appState.currentUser) {
     return (
-      <>
-        <DevBanner />
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 mt-16">
-          <Header
-            mode={appState.mode}
-            onModeChange={handleModeChange}
-            currentUser={appState.currentUser}
-            onLogout={() => {}} // Logout is handled by the useAuth hook
-            hasActiveSubscription={hasActiveSubscription}
-            subscriptionLoading={subscriptionLoading}
-          />
-          <PricingPage />
-        </div>
-      </>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Header
+          mode={appState.mode}
+          onModeChange={handleModeChange}
+          currentUser={appState.currentUser}
+          onLogout={() => {}} // Logout is handled by the useAuth hook
+          hasActiveSubscription={hasActiveSubscription}
+          subscriptionLoading={subscriptionLoading}
+        />
+        <PricingPage />
+      </div>
     );
   }
 
@@ -182,28 +178,25 @@ function App() {
   // Show admin page if the path is /admin
   if (currentPath === '/admin') {
     return (
-      <>
-        <DevBanner />
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 mt-16">
-          <Header
-            mode={appState.mode}
-            onModeChange={handleModeChange}
-            currentUser={appState.currentUser}
-            onLogout={() => {}} // Logout is handled by the useAuth hook
-            hasActiveSubscription={hasActiveSubscription}
-            subscriptionLoading={subscriptionLoading}
-          />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* 🚨 CRITICAL: AdminAccess uses hooks, so it MUST be wrapped in PageWrapper */}
-            <PageWrapper>
-              <AdminAccess 
-                hasActiveSubscription={hasActiveSubscription}
-                subscriptionLoading={subscriptionLoading}
-              />
-            </PageWrapper>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Header
+          mode={appState.mode}
+          onModeChange={handleModeChange}
+          currentUser={appState.currentUser}
+          onLogout={() => {}} // Logout is handled by the useAuth hook
+          hasActiveSubscription={hasActiveSubscription}
+          subscriptionLoading={subscriptionLoading}
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* 🚨 CRITICAL: AdminAccess uses hooks, so it MUST be wrapped in PageWrapper */}
+          <PageWrapper>
+            <AdminAccess 
+              hasActiveSubscription={hasActiveSubscription}
+              subscriptionLoading={subscriptionLoading}
+            />
+          </PageWrapper>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -224,42 +217,39 @@ function App() {
 
   // Show full app for authenticated users with active subscription
   return (
-    <>
-      <DevBanner />
-      <div className="mt-16">
-        {/* 🚨 CRITICAL: Main app uses hooks, so it MUST be wrapped in PageWrapper */}
-        <PageWrapper>
-          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-            <Header
-              mode={appState.mode}
-              onModeChange={handleModeChange}
-              currentUser={appState.currentUser}
-              onLogout={() => {}} // Logout is handled by the useAuth hook
-              hasActiveSubscription={hasActiveSubscription}
-              subscriptionLoading={subscriptionLoading}
-            />
-            
-            <main>
-              {appState.mode === 'question-bank' ? (
-                <QuestionBankMode 
-                  appState={appState} 
-                  onUpdateState={handleUpdateState}
-                  hasActiveSubscription={hasActiveSubscription}
-                  subscriptionLoading={subscriptionLoading}
-                />
-              ) : (
-                <QuizMode 
-                  appState={appState} 
-                  onUpdateState={handleUpdateState}
-                  hasActiveSubscription={hasActiveSubscription}
-                  subscriptionLoading={subscriptionLoading}
-                />
-              )}
-            </main>
-          </div>
-        </PageWrapper>
-      </div>
-    </>
+    <div>
+      {/* 🚨 CRITICAL: Main app uses hooks, so it MUST be wrapped in PageWrapper */}
+      <PageWrapper>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+          <Header
+            mode={appState.mode}
+            onModeChange={handleModeChange}
+            currentUser={appState.currentUser}
+            onLogout={() => {}} // Logout is handled by the useAuth hook
+            hasActiveSubscription={hasActiveSubscription}
+            subscriptionLoading={subscriptionLoading}
+          />
+          
+          <main>
+            {appState.mode === 'question-bank' ? (
+              <QuestionBankMode 
+                appState={appState} 
+                onUpdateState={handleUpdateState}
+                hasActiveSubscription={hasActiveSubscription}
+                subscriptionLoading={subscriptionLoading}
+              />
+            ) : (
+              <QuizMode 
+                appState={appState} 
+                onUpdateState={handleUpdateState}
+                hasActiveSubscription={hasActiveSubscription}
+                subscriptionLoading={subscriptionLoading}
+              />
+            )}
+          </main>
+        </div>
+      </PageWrapper>
+    </div>
   );
 }
 
