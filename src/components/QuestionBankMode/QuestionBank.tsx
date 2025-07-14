@@ -25,7 +25,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   onDeleteQuestion,
   hasActiveSubscription,
   subscriptionLoading
-}) => {
+}: QuestionBankProps) => {
   const { bookmarkedIds, toggleBookmark } = useBookmarks();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('');
@@ -34,24 +34,21 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
 
   const filteredQuestions = useMemo(() => {
-    return questions.filter(q => {
+    return questions.filter((q: Question) => {
       // Search filter
       const searchMatch = !searchTerm || 
         q.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        q.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+        q.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
       // Difficulty filter
       const difficultyMatch = !filterDifficulty || q.difficulty === filterDifficulty;
-      
       // Bookmark filter
       const bookmarkMatch = !showBookmarksOnly || bookmarkedIds.includes(q.id);
-      
       return searchMatch && difficultyMatch && bookmarkMatch;
     });
   }, [questions, searchTerm, filterDifficulty, showBookmarksOnly, bookmarkedIds]);
 
   const toggleQuestionExpanded = (questionId: string) => {
-    setExpandedQuestions(prev => {
+    setExpandedQuestions((prev: Set<string>) => {
       const newSet = new Set(prev);
       if (newSet.has(questionId)) {
         newSet.delete(questionId);
@@ -105,42 +102,41 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
         </div>
 
         {/* Action Buttons */}
-        {hasActiveSubscription && (
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => setShowBookmarksOnly(!showBookmarksOnly)}
-              className="inline-flex items-center px-4 py-2 rounded-xl border-2 text-sm font-semibold shadow-sm bg-blue-100 text-blue-800 border-blue-300 hover:bg-blue-200 transition-all duration-200"
-            >
-              <Crown className="w-5 h-5 mr-1" />
-              {showBookmarksOnly ? 'Bookmarked' : 'Show Bookmarks'}
-              <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-200 text-blue-800">
-                {bookmarkedIds.length}
-              </span>
-            </button>
-          </div>
-        )}
-        {/* Paywall Banner for Unsubscribed Users */}
-        {!hasActiveSubscription && (
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-4 flex items-center justify-between w-full md:w-auto">
-            <div className="flex items-center space-x-3">
-              <Crown className="w-8 h-8 text-blue-600" />
-              <div>
-                <h3 className="text-base font-semibold text-gray-900">Unlock Full Question Bank Features</h3>
-                <p className="text-gray-600 text-sm">Subscribe to edit, delete, and bookmark questions. Organize your study and track your progress.</p>
-              </div>
-            </div>
-            <button
-              onClick={async () => {
-                const product = stripeProducts[0];
-                await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
-              }}
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
-            >
-              Upgrade Now
-            </button>
-          </div>
-        )}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={() => setShowBookmarksOnly(!showBookmarksOnly)}
+            className="inline-flex items-center px-4 py-2 rounded-xl border-2 text-sm font-semibold shadow-sm bg-blue-100 text-blue-800 border-blue-300 hover:bg-blue-200 transition-all duration-200"
+          >
+            <Crown className="w-5 h-5 mr-1" />
+            {showBookmarksOnly ? 'Bookmarked' : 'Show Bookmarks'}
+            <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-200 text-blue-800">
+              {bookmarkedIds.length}
+            </span>
+            {!hasActiveSubscription && <Lock className="w-4 h-4 ml-2 text-gray-400" />}
+          </button>
+        </div>
       </div>
+      {/* Paywall Banner for Unsubscribed Users - moved below buttons */}
+      {!hasActiveSubscription && (
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-4 flex items-center justify-between w-full md:w-auto mt-4">
+          <div className="flex items-center space-x-3">
+            <Crown className="w-8 h-8 text-blue-600" />
+            <div>
+              <h3 className="text-base font-semibold text-gray-900">Unlock Full Question Bank Features</h3>
+              <p className="text-gray-600 text-sm">Subscribe to edit, delete, and bookmark questions. Organize your study and track your progress.</p>
+            </div>
+          </div>
+          <button
+            onClick={async () => {
+              const product = stripeProducts[0];
+              await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
+            }}
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
+          >
+            Upgrade Now
+          </button>
+        </div>
+      )}
 
       {/* Search & Filter Controls */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -190,7 +186,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
 
       {/* Question List */}
       <div className="space-y-4">
-        {filteredQuestions.map(q => (
+        {filteredQuestions.map((q: Question) => (
           <QuestionCard
             key={q.id}
             question={q}

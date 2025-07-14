@@ -198,14 +198,7 @@ site.cisspstudygroup.com
               <ArrowLeft className="w-4 h-4" />
               <span>New Quiz</span>
             </button>
-            <button
-              onClick={handleTrackProgress}
-              className="flex items-center justify-center space-x-2 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-              disabled={progressSaved}
-            >
-              <Trophy className="w-4 h-4" />
-              <span>{progressSaved ? 'Progress Saved!' : 'Track Progress'}</span>
-            </button>
+            {/* Remove the Track Progress button */}
           </div>
 
           {/* Share Achievement Section */}

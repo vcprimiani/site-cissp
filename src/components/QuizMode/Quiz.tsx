@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Question } from '../../types';
-import { Clock, CheckCircle, XCircle, ArrowRight, ArrowLeft, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader, Briefcase, Sparkles, Flag } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, ArrowRight, ArrowLeft, RotateCcw, Trophy, Target, Plus, Minus, Lightbulb, Loader, Briefcase, Sparkles, Flag, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { getDomainColor, getDifficultyColor } from '../../utils/colorSystem';
 import { analyzeCISSPKeywords, highlightKeywords } from '../../services/keywordAnalysis';
 import { generateManagerPerspective, enhanceQuestionExplanation } from '../../services/openai';
@@ -8,6 +8,12 @@ import { useQuizPersistence } from '../../hooks/useQuizPersistence';
 import { parseExplanationSections, renderSectionContent } from '../../utils/textFormatting';
 import { useFlags } from '../../hooks/useFlags';
 import { FlagModal } from '../UI/FlagModal';
+import { getQuestionRating, setQuestionRating, getQuestionRatingAggregate } from '../../services/flagService';
+import { useRatings } from '../../hooks/useRatings';
+import { showToast } from '../../utils/toast';
+import { RatingButton } from '../UI/RatingButton';
+import { supabase } from '../../lib/supabase';
+import { saveQuizProgress } from '../../services/progress';
 
 interface QuizProps {
   questions: Question[];
@@ -15,6 +21,7 @@ interface QuizProps {
   onComplete: (results: QuizResults) => void;
   onExit: () => void;
   onProgressChange?: (current: number, total: number) => void;
+  currentUser?: any; // Accept currentUser as a prop
 }
 
 interface QuizResults {
@@ -29,7 +36,7 @@ interface QuizResults {
   }[];
 }
 
-export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete, onExit, onProgressChange }) => {
+export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete, onExit, onProgressChange, currentUser }) => {
   const { persistedState, saveQuizState, clearPersistedState, hasPersistedQuiz } = useQuizPersistence();
   
   // Initialize state from initialIndex, persistedState, or 0
@@ -91,12 +98,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   // Flag functionality
   const [showFlagModal, setShowFlagModal] = React.useState(false);
   const { isQuestionFlagged, flagQuestion, unflagQuestion, loading: flagsLoading } = useFlags();
-  const isFlagged = isQuestionFlagged(currentQuestion.id);
+  const isFlagged = isQuestionFlagged(currentQuestion?.id || '');
 
   const handleFlagClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isFlagged) {
-      unflagQuestion(currentQuestion.id);
+      unflagQuestion(currentQuestion?.id || '');
     } else {
       setShowFlagModal(true);
     }
@@ -104,7 +111,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   const handleFlagSubmit = async (reason: string, customReason?: string) => {
     try {
-      const success = await flagQuestion(currentQuestion.id, reason, customReason);
+      const success = await flagQuestion(currentQuestion?.id || '', reason, customReason);
       if (success) {
         setShowFlagModal(false);
       }
@@ -187,15 +194,15 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   // Always generate manager perspective when question changes
   useEffect(() => {
-    const questionId = currentQuestion.id;
+    const questionId = currentQuestion?.id || '';
     if (!managerPerspectives[questionId]) {
       setLoadingManagerPerspective(true);
       setManagerPerspectiveError(null);
       generateManagerPerspective(
-        currentQuestion.question,
-        currentQuestion.options,
-        currentQuestion.correctAnswer,
-        currentQuestion.domain
+        currentQuestion?.question || '',
+        currentQuestion?.options || [],
+        currentQuestion?.correctAnswer || 0,
+        currentQuestion?.domain || ''
       ).then(result => {
         if (result.error) {
           setManagerPerspectiveError(result.error);
@@ -212,7 +219,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, currentQuestion.id]);
+  }, [currentIndex, currentQuestion?.id]);
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (showResult) return; // Prevent selection after showing result
@@ -242,7 +249,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
 
   const handleManagerPerspective = async () => {
-    const questionId = currentQuestion.id;
+    const questionId = currentQuestion?.id || '';
     
     // If we already have the perspective for this question, just toggle display
     if (managerPerspectives[questionId]) {
@@ -258,10 +265,10 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     
     try {
       const result = await generateManagerPerspective(
-        currentQuestion.question,
-        currentQuestion.options,
-        currentQuestion.correctAnswer,
-        currentQuestion.domain
+        currentQuestion?.question || '',
+        currentQuestion?.options || [],
+        currentQuestion?.correctAnswer || 0,
+        currentQuestion?.domain || ''
       );
       
       if (result.error) {
@@ -281,7 +288,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   };
 
   const handleEnhanceExplanation = async () => {
-    const questionId = currentQuestion.id;
+    const questionId = currentQuestion?.id || '';
     
     // If we already have an enhanced explanation for this question, just toggle display
     if (enhancedExplanation) {
@@ -297,11 +304,11 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     
     try {
              const result = await enhanceQuestionExplanation(
-         currentQuestion.question,
-         currentQuestion.options,
-         currentQuestion.correctAnswer,
-         currentQuestion.explanation,
-         currentQuestion.domain
+         currentQuestion?.question || '',
+         currentQuestion?.options || [],
+         currentQuestion?.correctAnswer || 0,
+         currentQuestion?.explanation || '',
+         currentQuestion?.domain || ''
        );
       
              if (result.error) {
@@ -317,7 +324,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     }
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     if (selectedAnswer === null) return;
     
     // Calculate time spent on current question
@@ -329,6 +336,21 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       newTimes[currentIndex] = timeSpent;
       return newTimes;
     });
+
+    // Save answer to batched progress
+    if (currentQuestion) {
+      setBatchedProgress(prev => [
+        ...prev,
+        {
+          user_id: currentUser.id,
+          question_id: currentQuestion.id,
+          user_answer: selectedAnswer,
+          is_correct: selectedAnswer === currentQuestion.correctAnswer,
+          answered_at: new Date().toISOString(),
+          time_spent: Math.floor((Date.now() - questionStartTime) / 1000),
+        }
+      ]);
+    }
 
     // Save answer
     const newAnswers = [...userAnswers];
@@ -355,6 +377,15 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
           timeSpent: finalTimes[index] || 0
         }))
       };
+      // Save quiz progress to quiz_sessions
+      if (currentUser && currentUser.id) {
+        try {
+          await saveQuizProgress({ user_id: currentUser.id, results, dev_mode: true });
+          console.log('Quiz progress saved to quiz_sessions');
+        } catch (err) {
+          console.error('Failed to save quiz progress:', err);
+        }
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
       onComplete(results);
     } else {
@@ -407,9 +438,43 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const domainColor = getDomainColor(currentQuestion.domain);
-  const difficultyColor = getDifficultyColor(currentQuestion.difficulty);
+  const domainColor = getDomainColor(currentQuestion?.domain || '');
+  const difficultyColor = getDifficultyColor(currentQuestion?.difficulty || 'Easy');
 
+  // Remove localStorage-based user lookup
+  // const currentUser = JSON.parse(localStorage.getItem('supabase.auth.user') || 'null');
+  const questionIds = questions.map(q => q.id);
+  const { ratings, setRating } = useRatings(questionIds, currentUser?.id || null);
+  const [ratingCounts, setRatingCounts] = useState<{ up: number; down: number }>({ up: 0, down: 0 });
+
+  useEffect(() => {
+    if (!currentQuestion || !currentQuestion.id) return;
+    getQuestionRatingAggregate(currentQuestion.id).then(setRatingCounts);
+  }, [currentQuestion?.id]);
+
+  const handleThumb = async (val: 1 | -1) => {
+    console.log('Thumb clicked', val, currentUser, currentQuestion?.id);
+    if (!currentUser) {
+      showToast('error', 'No user found. Please log in.');
+      return;
+    }
+    if (!currentQuestion || !currentQuestion.id) {
+      showToast('error', 'No question found.');
+      return;
+    }
+    try {
+      const success = await setQuestionRating(currentQuestion.id, currentUser.id, val);
+      if (!success) {
+        showToast('error', 'Failed to save your rating. Please try again.');
+        return;
+      }
+      setRating(currentQuestion.id, val);
+      getQuestionRatingAggregate(currentQuestion.id).then(setRatingCounts);
+    } catch (error) {
+      console.error('Error saving rating:', error);
+      showToast('error', 'Error saving your rating. Please check your connection or permissions.');
+    }
+  };
 
 
   // Format manager perspective response for better readability
@@ -525,12 +590,38 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     );
   }
 
+  const [batchedProgress, setBatchedProgress] = useState<any[]>([]);
+
+  const handleQuizComplete = async (results: QuizResults) => {
+    if (batchedProgress.length > 0) {
+      try {
+        console.log('[Progress] Attempting to upsert quiz progress:', batchedProgress);
+        showToast('info', 'Saving your progress...');
+        const { error } = await supabase.from('quiz_progress').upsert(batchedProgress, { onConflict: 'user_id,question_id' });
+        if (error) {
+          showToast('error', 'Failed to save your progress.');
+          console.error('[Progress] Quiz progress upsert error:', error);
+        } else {
+          showToast('success', 'Your progress has been saved!');
+          console.log('[Progress] Progress upserted successfully.');
+        }
+      } catch (err) {
+        showToast('error', 'Unexpected error saving progress.');
+        console.error('[Progress] Quiz progress upsert exception:', err);
+      }
+    } else {
+      console.log('[Progress] No progress to save (batchedProgress is empty).');
+    }
+    setBatchedProgress([]); // Clear after saving
+    onComplete(results);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Main Content */}
       <div className="flex-1 py-8 flex justify-center items-start">
-        <div className="w-full max-w-[1920px] mx-auto">
-          <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col lg:flex-row gap-8 w-full">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex justify-center">
+          <div className="w-full max-w-4xl mx-auto rounded-2xl shadow-xl bg-white/90 p-4 md:p-8 flex flex-col md:flex-row gap-8">
             {/* Main Question Content */}
             <div className="flex-1 min-w-0">
 
@@ -667,21 +758,21 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
               </div>
 
               {/* Manager Perspective Content */}
-              {showManagerPerspective && managerPerspectives[currentQuestion.id] && (
+              {showManagerPerspective && managerPerspectives[currentQuestion?.id || ''] && (
                 <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-center space-x-2 mb-3">
                     <Briefcase className="w-4 h-4 text-blue-600" />
                     <span className="font-medium text-blue-900 text-sm">Manager's Strategic Perspective</span>
                   </div>
                   <div className="max-w-none">
-                    {formatManagerPerspective(managerPerspectives[currentQuestion.id])}
+                    {formatManagerPerspective(managerPerspectives[currentQuestion?.id || ''])}
                   </div>
                 </div>
               )}
             </div>
 
             {/* Quick Actions (formerly sidebar) */}
-            <div className="flex-1 w-full max-w-md flex-shrink-0 flex flex-col gap-6">
+            <div className="flex-1 w-full max-w-sm flex-shrink-0 flex flex-col gap-6">
               {/* Quiz Header Info */}
               <div className="w-full">
                 <div className="flex items-center space-x-2 mb-3">
@@ -817,6 +908,11 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                   </span>
                 </button>
               </div>
+
+              {/* Thumbs Up/Down Rating UI */}
+              {currentQuestion && currentUser && (
+                <RatingButton questionId={currentQuestion.id} userId={currentUser.id} />
+              )}
 
               {/* Navigation Buttons */}
               <div className="w-full space-y-3">
