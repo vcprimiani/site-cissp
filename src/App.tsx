@@ -20,6 +20,7 @@ import { PageWrapper } from './components/Layout/PageWrapper';
 import { DevBanner } from './components/UI/DevBanner';
 import { ToastContainer, useToast } from './components/UI/Toast';
 import { initializeToast } from './utils/toast';
+import { ProgressDashboard } from './components/Progress/ProgressDashboard';
 
 // 🚨 CRITICAL FOR AI AGENTS: All pages/components that use hooks MUST be wrapped in PageWrapper
 // This prevents "must be used within Provider" errors
@@ -198,10 +199,18 @@ function App() {
   }
 
   // Show progress page if the path is /progress
-  if (currentPath === '/progress') {
+  if (currentPath === '/progress' && isAuthenticated && appState.currentUser) {
     return <>
       <DevBanner />
-      <ProgressPage />
+      <Header
+        mode={appState.mode}
+        onModeChange={handleModeChange}
+        currentUser={appState.currentUser}
+        onLogout={() => {}}
+        hasActiveSubscription={hasActiveSubscription}
+        subscriptionLoading={subscriptionLoading}
+      />
+      <ProgressDashboard userId={appState.currentUser.id} />
     </>;
   }
 
