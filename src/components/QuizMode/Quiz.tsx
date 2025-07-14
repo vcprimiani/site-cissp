@@ -337,17 +337,19 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     });
 
     // Save answer to batched progress
-    setBatchedProgress(prev => [
-      ...prev,
-      {
-        user_id: currentUser.id,
-        question_id: currentQuestion.id,
-        user_answer: selectedAnswer,
-        is_correct: selectedAnswer === currentQuestion.correctAnswer,
-        answered_at: new Date().toISOString(),
-        time_spent: Math.floor((Date.now() - questionStartTime) / 1000),
-      }
-    ]);
+    if (currentQuestion) {
+      setBatchedProgress(prev => [
+        ...prev,
+        {
+          user_id: currentUser.id,
+          question_id: currentQuestion.id,
+          user_answer: selectedAnswer,
+          is_correct: selectedAnswer === currentQuestion.correctAnswer,
+          answered_at: new Date().toISOString(),
+          time_spent: Math.floor((Date.now() - questionStartTime) / 1000),
+        }
+      ]);
+    }
 
     // Save answer
     const newAnswers = [...userAnswers];
@@ -583,18 +585,22 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   const handleQuizComplete = async (results: QuizResults) => {
     if (batchedProgress.length > 0) {
       try {
-        console.log('Upserting quiz progress:', batchedProgress);
+        console.log('[Progress] Attempting to upsert quiz progress:', batchedProgress);
+        showToast('info', 'Saving your progress...');
         const { error } = await supabase.from('quiz_progress').upsert(batchedProgress, { onConflict: 'user_id,question_id' });
         if (error) {
           showToast('error', 'Failed to save your progress.');
-          console.error('Quiz progress upsert error:', error);
+          console.error('[Progress] Quiz progress upsert error:', error);
         } else {
           showToast('success', 'Your progress has been saved!');
+          console.log('[Progress] Progress upserted successfully.');
         }
       } catch (err) {
         showToast('error', 'Unexpected error saving progress.');
-        console.error('Quiz progress upsert exception:', err);
+        console.error('[Progress] Quiz progress upsert exception:', err);
       }
+    } else {
+      console.log('[Progress] No progress to save (batchedProgress is empty).');
     }
     setBatchedProgress([]); // Clear after saving
     onComplete(results);

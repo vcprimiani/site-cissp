@@ -202,15 +202,17 @@ function App() {
   if (currentPath === '/progress' && isAuthenticated && appState.currentUser) {
     return <>
       <DevBanner />
-      <Header
-        mode={appState.mode}
-        onModeChange={handleModeChange}
-        currentUser={appState.currentUser}
-        onLogout={() => {}}
-        hasActiveSubscription={hasActiveSubscription}
-        subscriptionLoading={subscriptionLoading}
-      />
-      <ProgressDashboard userId={appState.currentUser.id} />
+      <PageWrapper>
+        <Header
+          mode={appState.mode}
+          onModeChange={handleModeChange}
+          currentUser={appState.currentUser}
+          onLogout={() => {}}
+          hasActiveSubscription={hasActiveSubscription}
+          subscriptionLoading={subscriptionLoading}
+        />
+        <ProgressDashboard userId={appState.currentUser.id} />
+      </PageWrapper>
     </>;
   }
 
