@@ -365,6 +365,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
             questions={dailyQuizQuestions || []}
             onComplete={handleQuizComplete}
             onExit={() => window.location.reload()}
+            currentUser={appState.currentUser}
           />
         </div>
       );
