@@ -12,7 +12,7 @@ import { getQuestionRating, setQuestionRating, getQuestionRatingAggregate } from
 import { useRatings } from '../../hooks/useRatings';
 import { showToast } from '../../utils/toast';
 import { RatingButton } from '../UI/RatingButton';
-import { supabase } from '../../lib/supabaseClient';
+import { supabase } from '../../lib/supabase';
 
 interface QuizProps {
   questions: Question[];

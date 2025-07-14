@@ -33,7 +33,7 @@ export async function fetchQuizProgress({ user_id, dev_mode = true }: { user_id:
     .select('*')
     .eq('user_id', user_id)
     .eq('dev_mode', dev_mode)
-    .order('timestamp', { ascending: true });
+    .order('answered_at', { ascending: true });
   if (error) throw error;
   return data as QuizProgressResult[];
 } 
