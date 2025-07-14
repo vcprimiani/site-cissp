@@ -118,28 +118,28 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
             {!hasActiveSubscription && <Lock className="w-4 h-4 ml-2 text-gray-400" />}
           </button>
         </div>
-        {/* Paywall Banner for Unsubscribed Users */}
-        {!hasActiveSubscription && (
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-4 flex items-center justify-between w-full md:w-auto">
-            <div className="flex items-center space-x-3">
-              <Crown className="w-8 h-8 text-blue-600" />
-              <div>
-                <h3 className="text-base font-semibold text-gray-900">Unlock Full Question Bank Features</h3>
-                <p className="text-gray-600 text-sm">Subscribe to edit, delete, and bookmark questions. Organize your study and track your progress.</p>
-              </div>
-            </div>
-            <button
-              onClick={async () => {
-                const product = stripeProducts[0];
-                await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
-              }}
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
-            >
-              Upgrade Now
-            </button>
-          </div>
-        )}
       </div>
+      {/* Paywall Banner for Unsubscribed Users - moved below buttons */}
+      {!hasActiveSubscription && (
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-4 flex items-center justify-between w-full md:w-auto mt-4">
+          <div className="flex items-center space-x-3">
+            <Crown className="w-8 h-8 text-blue-600" />
+            <div>
+              <h3 className="text-base font-semibold text-gray-900">Unlock Full Question Bank Features</h3>
+              <p className="text-gray-600 text-sm">Subscribe to edit, delete, and bookmark questions. Organize your study and track your progress.</p>
+            </div>
+          </div>
+          <button
+            onClick={async () => {
+              const product = stripeProducts[0];
+              await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
+            }}
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
+          >
+            Upgrade Now
+          </button>
+        </div>
+      )}
 
       {/* Search & Filter Controls */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
