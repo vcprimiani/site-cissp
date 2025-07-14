@@ -14,13 +14,13 @@ import { BookmarksProvider } from './hooks/useBookmarks';
 import { FlagProvider } from './hooks/useFlags';
 import { LandingPage } from './components/Landing/LandingPage';
 import ResetPassword from './components/Auth/ResetPassword';
-import ProgressPage from './components/Progress/ProgressPage';
+// import ProgressPage from './components/Progress/ProgressPage';
+// import { ProgressDashboard } from './components/Progress/ProgressDashboard';
 import { AdminAccess } from './components/Admin/AdminAccess';
 import { PageWrapper } from './components/Layout/PageWrapper';
 import { DevBanner } from './components/UI/DevBanner';
 import { ToastContainer, useToast } from './components/UI/Toast';
 import { initializeToast } from './utils/toast';
-import { ProgressDashboard } from './components/Progress/ProgressDashboard';
 
 // 🚨 CRITICAL FOR AI AGENTS: All pages/components that use hooks MUST be wrapped in PageWrapper
 // This prevents "must be used within Provider" errors
@@ -199,22 +199,22 @@ function App() {
   }
 
   // Show progress page if the path is /progress
-  if (currentPath === '/progress' && isAuthenticated && appState.currentUser) {
-    return <>
-      <DevBanner />
-      <PageWrapper>
-        <Header
-          mode={appState.mode}
-          onModeChange={handleModeChange}
-          currentUser={appState.currentUser}
-          onLogout={() => {}}
-          hasActiveSubscription={hasActiveSubscription}
-          subscriptionLoading={subscriptionLoading}
-        />
-        <ProgressDashboard userId={appState.currentUser.id} />
-      </PageWrapper>
-    </>;
-  }
+  // if (currentPath === '/progress' && isAuthenticated && appState.currentUser) {
+  //   return <>
+  //     <DevBanner />
+  //     <PageWrapper>
+  //       <Header
+  //         mode={appState.mode}
+  //         onModeChange={handleModeChange}
+  //         currentUser={appState.currentUser}
+  //         onLogout={() => {}}
+  //         hasActiveSubscription={hasActiveSubscription}
+  //         subscriptionLoading={subscriptionLoading}
+  //       />
+  //       <ProgressDashboard userId={appState.currentUser.id} />
+  //     </PageWrapper>
+  //   </>;
+  // }
 
   // Show admin page if the path is /admin
   if (currentPath === '/admin') {
