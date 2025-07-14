@@ -580,6 +580,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                       )}
                     </button>
                     {/* Generate 10 Random and Start Quiz */}
+                    {/*
                     <button
                       type="button"
                       className={`flex items-center justify-center space-x-3 p-4 rounded-xl border-2 transition-all duration-300 shadow-lg ${
@@ -611,6 +612,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                         </>
                       )}
                     </button>
+                    */}
                   </div>
                 </div>
               </div>
@@ -681,6 +683,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                         </div>
                         
                         {/* Start Quiz button */}
+                        {/*
                         <div className="flex justify-end">
                           <button
                             onClick={generateQuiz}
@@ -695,6 +698,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                             <span>{hasPersistedQuiz() === true && !!persistedState ? 'Quiz Paused' : 'Start Quiz'}</span>
                           </button>
                         </div>
+                        */}
                       </div>
                     </div>
                   </div>
