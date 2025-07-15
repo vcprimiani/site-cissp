@@ -55,6 +55,11 @@ function App() {
   const sessionId = urlParams.get('session_id');
   const currentPath = window.location.pathname;
 
+  // 🚨 Ensure /onboard route is handled first, before any auth or state checks
+  if (currentPath === '/onboard') {
+    return <OnboardPage />;
+  }
+
   // Update app state when auth state changes
   useEffect(() => {
     if (user && isAuthenticated) {
@@ -202,9 +207,9 @@ function App() {
   }
 
   // Add onboarding route for LearnWorlds SSO/magic link
-  if (currentPath === '/onboard') {
-    return <OnboardPage />;
-  }
+  // if (currentPath === '/onboard') {
+  //   return <OnboardPage />;
+  // }
 
   // Add referral report page (direct URL only, no link)
   if (currentPath === '/referral-report') {
