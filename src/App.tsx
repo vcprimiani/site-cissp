@@ -21,6 +21,8 @@ import { PageWrapper } from './components/Layout/PageWrapper';
 import { DevBanner } from './components/UI/DevBanner';
 import { ToastContainer, useToast } from './components/UI/Toast';
 import { initializeToast } from './utils/toast';
+import { OnboardPage } from './components/Auth/OnboardPage';
+import { ReferralReport } from './components/Auth/ReferralReport';
 
 // 🚨 CRITICAL FOR AI AGENTS: All pages/components that use hooks MUST be wrapped in PageWrapper
 // This prevents "must be used within Provider" errors
@@ -196,6 +198,16 @@ function App() {
       <DevBanner />
       <ResetPassword />
     </>;
+  }
+
+  // Add onboarding route for LearnWorlds SSO/magic link
+  if (currentPath === '/onboard') {
+    return <OnboardPage />;
+  }
+
+  // Add referral report page (direct URL only, no link)
+  if (currentPath === '/referral-report') {
+    return <ReferralReport />;
   }
 
   // Show progress page if the path is /progress
