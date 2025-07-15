@@ -30,6 +30,12 @@ import { ReferralCodeAdmin } from './components/Admin/ReferralCodeAdmin';
 // See: PROVIDER_PATTERN.md for complete documentation
 
 function App() {
+  // DEBUG: Log current path and onboarding detection
+  const currentPath = window.location.pathname;
+  console.log('[DEBUG] App.tsx loaded. currentPath:', currentPath);
+  if (currentPath === '/onboard') {
+    console.log('[DEBUG] /onboard route detected, rendering OnboardPage');
+  }
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { isActive: hasActiveSubscription, loading: subscriptionLoading, error: subscriptionError } = useSubscription();
   const [appState, setAppState] = useLocalStorage<AppState>('cissp-study-app', {
@@ -53,7 +59,6 @@ function App() {
   // Check for URL parameters to determine which page to show
   const urlParams = new URLSearchParams(window.location.search);
   const sessionId = urlParams.get('session_id');
-  const currentPath = window.location.pathname;
 
   // 🚨 Ensure /onboard route is handled first, before any auth or state checks
   if (currentPath === '/onboard') {
