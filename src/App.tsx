@@ -23,6 +23,7 @@ import { ToastContainer, useToast } from './components/UI/Toast';
 import { initializeToast } from './utils/toast';
 import { OnboardPage } from './components/Auth/OnboardPage';
 import { ReferralReport } from './components/Auth/ReferralReport';
+import { ReferralCodeAdmin } from './components/Admin/ReferralCodeAdmin';
 
 // 🚨 CRITICAL FOR AI AGENTS: All pages/components that use hooks MUST be wrapped in PageWrapper
 // This prevents "must be used within Provider" errors
@@ -208,6 +209,11 @@ function App() {
   // Add referral report page (direct URL only, no link)
   if (currentPath === '/referral-report') {
     return <ReferralReport />;
+  }
+
+  // Add referral code admin page (direct URL only, no link)
+  if (currentPath === '/admin/referral-codes') {
+    return <ReferralCodeAdmin />;
   }
 
   // Show progress page if the path is /progress

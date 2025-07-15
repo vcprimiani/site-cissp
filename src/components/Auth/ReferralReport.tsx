@@ -91,12 +91,12 @@ export const ReferralReport: React.FC = () => {
 
           {/* Testing URLs for LearnWorlds Integration */}
           <div className="mb-8 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
-            <h3 className="font-bold text-blue-800 mb-2">Testing URLs (for reference only)</h3>
+            <h3 className="font-bold text-blue-800 mb-2">Production Onboarding URL (for LearnWorlds)</h3>
             <p className="text-blue-900 text-sm mb-2">
-              The following URLs are used to onboard users from LearnWorlds and track referrals. No action is required on your part—these are for reference and testing only.
+              This is the production onboarding URL for LearnWorlds integration. Use this in your LearnWorlds external link activity to onboard users and track referrals.
             </p>
             <div className="bg-white border border-blue-200 rounded px-2 py-1 my-2 font-mono text-xs text-blue-900">
-              https://yourapp.com/onboard?email=test%40example.com&name=Test%20User&ref=learnworlds
+              {'https://www.cissp.app/onboard?email={{USER_EMAIL}}&name={{USER_NAME}}&ref=learnworlds'}
             </div>
             <p className="text-blue-900 text-xs">
               All users who sign up via this flow will appear in the referral report below.

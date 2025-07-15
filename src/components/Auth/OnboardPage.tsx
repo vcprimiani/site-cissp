@@ -14,6 +14,7 @@ export const OnboardPage: React.FC = () => {
   const [ref, setRef] = useState('');
   const [status, setStatus] = useState<'init' | 'creating' | 'created' | 'redirecting' | 'error'>('init');
   const [error, setError] = useState<string | null>(null);
+  const [partnerName, setPartnerName] = useState('');
 
   useEffect(() => {
     // Parse URL params
@@ -30,71 +31,95 @@ export const OnboardPage: React.FC = () => {
     }
   }, [isAuthenticated, user, navigate]);
 
-  const handleOnboard = async () => {
-    setStatus('creating');
-    setError(null);
-    if (!email) {
-      setError('Missing email. Please contact support.');
-      setStatus('error');
-      return;
-    }
-    try {
-      // Try to sign in first
-      let signInResult = await authHelpers.signIn(email, ''); // Empty password, will fail if not magic link
-      if (signInResult.error) {
-        // If user not found, sign up
-        if (signInResult.error.message.toLowerCase().includes('invalid login credentials')) {
-          const password = Math.random().toString(36).slice(-10) + 'A1!'; // Generate a strong random password
-          const signUpResult = await authHelpers.signUp(email, password, name || email.split('@')[0]);
-          if (signUpResult.error) {
-            setError(signUpResult.error.message);
-            setStatus('error');
-            return;
-          }
-        } else {
-          setError(signInResult.error.message);
-          setStatus('error');
-          return;
-        }
-      }
-      // Optionally, store referral code in user_referrals table
-      if (ref && user) {
-        try {
-          await supabase.from('user_referrals').upsert({
-            user_id: user.id,
-            ref_code: ref
-          }, { onConflict: ['user_id'] });
-        } catch (e) {
-          // Ignore referral tracking errors
-        }
-      }
-      setStatus('redirecting');
-      // Redirect to Stripe checkout
-      const product = stripeProducts[0];
-      if (!product) {
-        setError('No product configured.');
+  useEffect(() => {
+    const validateReferralCode = async () => {
+      if (!ref) {
+        setError('Missing referral code. Please contact support.');
         setStatus('error');
         return;
       }
-      const session = await createCheckoutSession({
-        priceId: product.priceId,
-        mode: product.mode,
-        successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${window.location.origin}/`,
-        couponCode: undefined,
-        promotionCode: undefined,
-      });
-      if (session && session.url) {
-        window.location.href = session.url;
-      } else {
-        setError('Failed to create Stripe checkout session.');
+      const { data, error } = await supabase
+        .from('referral_codes')
+        .select('id, is_active, partner_name')
+        .eq('code', ref)
+        .single();
+      if (error || !data) {
+        setError('Invalid referral code. Please contact support.');
+        setStatus('error');
+        return;
+      }
+      if (!data.is_active) {
+        setError('This referral code is no longer active. Please contact support.');
+        setStatus('error');
+        return;
+      }
+      setPartnerName(data.partner_name || '');
+      setStatus('creating');
+      setError(null);
+      if (!email) {
+        setError('Missing email. Please contact support.');
+        setStatus('error');
+        return;
+      }
+      try {
+        // Try to sign in first
+        let signInResult = await authHelpers.signIn(email, ''); // Empty password, will fail if not magic link
+        if (signInResult.error) {
+          // If user not found, sign up
+          if (signInResult.error.message.toLowerCase().includes('invalid login credentials')) {
+            const password = Math.random().toString(36).slice(-10) + 'A1!'; // Generate a strong random password
+            const signUpResult = await authHelpers.signUp(email, password, name || email.split('@')[0]);
+            if (signUpResult.error) {
+              setError(signUpResult.error.message);
+              setStatus('error');
+              return;
+            }
+          } else {
+            setError(signInResult.error.message);
+            setStatus('error');
+            return;
+          }
+        }
+        // Optionally, store referral code in user_referrals table
+        if (ref && user) {
+          try {
+            await supabase.from('user_referrals').upsert({
+              user_id: user.id,
+              ref_code: ref
+            }, { onConflict: 'user_id' });
+          } catch (e) {
+            // Ignore referral tracking errors
+          }
+        }
+        setStatus('redirecting');
+        // Redirect to Stripe checkout
+        const product = stripeProducts[0];
+        if (!product) {
+          setError('No product configured.');
+          setStatus('error');
+          return;
+        }
+        const session = await createCheckoutSession({
+          priceId: product.priceId,
+          mode: product.mode,
+          successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: `${window.location.origin}/`,
+          couponCode: undefined,
+          promotionCode: undefined,
+        });
+        if (session && session.url) {
+          window.location.href = session.url;
+        } else {
+          setError('Failed to create Stripe checkout session.');
+          setStatus('error');
+        }
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred.');
         setStatus('error');
       }
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
-      setStatus('error');
-    }
-  };
+    };
+    validateReferralCode();
+  }, [ref, email, name]);
 
   if (authLoading) {
     return (
@@ -120,7 +145,7 @@ export const OnboardPage: React.FC = () => {
         {status === 'init' && (
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
-            onClick={handleOnboard}
+            onClick={() => setStatus('creating')}
             disabled={!email}
           >
             Start Onboarding & Payment
@@ -145,6 +170,8 @@ export const OnboardPage: React.FC = () => {
         <div className="mt-6 text-xs text-gray-500 text-center">
           This onboarding is only for users coming from LearnWorlds.<br/>
           Existing users and normal signups are not affected.
+          <br/>
+          This is the production onboarding URL for LearnWorlds integration.
         </div>
       </div>
     </div>
