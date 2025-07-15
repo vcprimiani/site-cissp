@@ -24,18 +24,16 @@ import { initializeToast } from './utils/toast';
 import { OnboardPage } from './components/Auth/OnboardPage';
 import { ReferralReport } from './components/Auth/ReferralReport';
 import { ReferralCodeAdmin } from './components/Admin/ReferralCodeAdmin';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // 🚨 CRITICAL FOR AI AGENTS: All pages/components that use hooks MUST be wrapped in PageWrapper
 // This prevents "must be used within Provider" errors
 // See: PROVIDER_PATTERN.md for complete documentation
 
 function App() {
-  // DEBUG: Log current path and onboarding detection
+  // DEBUG: Log current path
   const currentPath = window.location.pathname;
   console.log('[DEBUG] App.tsx loaded. currentPath:', currentPath);
-  if (currentPath === '/onboard') {
-    console.log('[DEBUG] /onboard route detected, rendering OnboardPage');
-  }
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { isActive: hasActiveSubscription, loading: subscriptionLoading, error: subscriptionError } = useSubscription();
   const [appState, setAppState] = useLocalStorage<AppState>('cissp-study-app', {
@@ -59,11 +57,6 @@ function App() {
   // Check for URL parameters to determine which page to show
   const urlParams = new URLSearchParams(window.location.search);
   const sessionId = urlParams.get('session_id');
-
-  // 🚨 Ensure /onboard route is handled first, before any auth or state checks
-  if (currentPath === '/onboard') {
-    return <OnboardPage />;
-  }
 
   // Update app state when auth state changes
   useEffect(() => {
@@ -292,42 +285,50 @@ function App() {
 
   // Show full app for authenticated users with active subscription
   return (
-    <>
-      <DevBanner />
-      <div className="mt-12">
-        {/* 🚨 CRITICAL: Main app uses hooks, so it MUST be wrapped in PageWrapper */}
-        <PageWrapper>
-          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-            <Header
-              mode={appState.mode}
-              onModeChange={handleModeChange}
-              currentUser={appState.currentUser}
-              onLogout={() => {}} // Logout is handled by the useAuth hook
-              hasActiveSubscription={hasActiveSubscription}
-              subscriptionLoading={subscriptionLoading}
-            />
-            <main>
-              {appState.mode === 'question-bank' ? (
-                <QuestionBankMode 
-                  appState={appState} 
-                  onUpdateState={handleUpdateState}
-                  hasActiveSubscription={hasActiveSubscription}
-                  subscriptionLoading={subscriptionLoading}
-                />
-              ) : (
-                <QuizMode 
-                  appState={appState} 
-                  onUpdateState={handleUpdateState}
-                  hasActiveSubscription={hasActiveSubscription}
-                  subscriptionLoading={subscriptionLoading}
-                />
-              )}
-            </main>
-          </div>
-        </PageWrapper>
-      </div>
-      <ToastContainer toasts={toasts} onClose={removeToast} />
-    </>
+    <Router>
+      <Routes>
+        <Route path="/onboard" element={<OnboardPage />} />
+        <Route path="/" element={
+          <>
+            <DevBanner />
+            <div className="mt-12">
+              {/* 🚨 CRITICAL: Main app uses hooks, so it MUST be wrapped in PageWrapper */}
+              <PageWrapper>
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+                  <Header
+                    mode={appState.mode}
+                    onModeChange={handleModeChange}
+                    currentUser={appState.currentUser}
+                    onLogout={() => {}} // Logout is handled by the useAuth hook
+                    hasActiveSubscription={hasActiveSubscription}
+                    subscriptionLoading={subscriptionLoading}
+                  />
+                  <main>
+                    {appState.mode === 'question-bank' ? (
+                      <QuestionBankMode 
+                        appState={appState} 
+                        onUpdateState={handleUpdateState}
+                        hasActiveSubscription={hasActiveSubscription}
+                        subscriptionLoading={subscriptionLoading}
+                      />
+                    ) : (
+                      <QuizMode 
+                        appState={appState} 
+                        onUpdateState={handleUpdateState}
+                        hasActiveSubscription={hasActiveSubscription}
+                        subscriptionLoading={subscriptionLoading}
+                      />
+                    )}
+                  </main>
+                </div>
+              </PageWrapper>
+            </div>
+            <ToastContainer toasts={toasts} onClose={removeToast} />
+          </>
+        } />
+        {/* Fallback route for landing page, etc. */}
+      </Routes>
+    </Router>
   );
 }
 
