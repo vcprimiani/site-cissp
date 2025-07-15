@@ -75,11 +75,18 @@ export const ReferralReport: React.FC = () => {
     <PageWrapper>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col items-center py-12">
         <div className="bg-white shadow-lg rounded-lg p-8 max-w-3xl w-full">
-          {/* Branding and Welcome */}
-          <div className="mb-6 text-center">
-            <img src="/favicon.ico" alt="Logo" className="mx-auto mb-2 w-12 h-12 rounded-full" />
-            <h2 className="text-3xl font-bold mb-2 text-blue-900">Referral Report</h2>
-            <p className="text-gray-700 text-lg">Welcome! Here you can view and export all signups from your LearnWorlds campaign.</p>
+          {/* Branding and Logo */}
+          <div className="flex items-center mb-8 p-4 bg-white border border-gray-200 rounded shadow-sm space-x-4">
+            <img 
+              src="/Untitled design-7.png" 
+              alt="CISSP.app Logo" 
+              className="w-12 h-12 object-contain rounded-lg border border-gray-100 bg-gray-50"
+              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+            />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">www.cissp.app</h1>
+              <p className="text-sm text-gray-600 font-medium">by <a href="https://CISSPStudyGroup.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">CISSPStudyGroup.com</a></p>
+            </div>
           </div>
 
           {/* Testing URLs for LearnWorlds Integration */}
