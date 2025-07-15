@@ -2,7 +2,6 @@ import React from 'react';
 import { AppMode, User } from '../../types';
 import { Database, Target, LogOut, Crown, Users, CheckCircle, XCircle, Settings, Volume2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-// import { useSubscription } from '../../hooks/useSubscription'; // REMOVE
 import { Avatar } from '../UI/Avatar';
 import { clearInvalidSession } from '../../lib/supabase';
 
@@ -24,7 +23,6 @@ export const Header: React.FC<HeaderProps> = ({
   subscriptionLoading
 }) => {
   const { signOut } = useAuth();
-  // const { isActive, productName } = useSubscription(); // REMOVE
   const [showSettings, setShowSettings] = React.useState(false);
 
   const handleLogout = async () => {
