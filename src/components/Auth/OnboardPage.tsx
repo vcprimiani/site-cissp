@@ -74,6 +74,8 @@ export const OnboardPage: React.FC = () => {
               setStatus('error');
               return;
             }
+            // Set flag for password setup
+            localStorage.setItem('needs_password_setup', 'true');
           } else {
             setError(signInResult.error.message);
             setStatus('error');
