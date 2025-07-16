@@ -151,14 +151,6 @@ function App() {
     );
   }
 
-  // Show success page if there's a session_id parameter OR if the path is /success (after successful payment)
-  if ((sessionId || currentPath === '/success') && isAuthenticated && appState.currentUser) {
-    return <>
-      <DevBanner />
-      <SuccessPage />
-    </>;
-  }
-
   // Show pricing page if the path is /pricing
   if (currentPath === '/pricing' && isAuthenticated && appState.currentUser) {
     return (
