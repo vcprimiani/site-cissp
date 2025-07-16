@@ -15,6 +15,7 @@ export const OnboardPage: React.FC = () => {
   const [status, setStatus] = useState<'init' | 'creating' | 'created' | 'redirecting' | 'error'>('init');
   const [error, setError] = useState<string | null>(null);
   const [partnerName, setPartnerName] = useState('');
+  const [referralCodeValid, setReferralCodeValid] = useState<boolean | null>(null);
 
   useEffect(() => {
     // Parse URL params
@@ -24,115 +25,130 @@ export const OnboardPage: React.FC = () => {
     setRef(params.get('ref') || '');
   }, []);
 
-  // Remove the automatic redirect to main app - we want to redirect to payment instead
-  // useEffect(() => {
-  //   if (isAuthenticated && user) {
-  //     // Already logged in, redirect to main app
-  //     navigate('/');
-  //   }
-  // }, [isAuthenticated, user, navigate]);
-
+  // Validate referral code if provided
   useEffect(() => {
     const validateReferralCode = async () => {
       if (!ref) {
-        setError('Missing referral code. Please contact support.');
-        setStatus('error');
+        setReferralCodeValid(null); // No code provided, not an error
         return;
       }
-      const { data, error } = await supabase
-        .from('referral_codes')
-        .select('id, is_active, partner_name')
-        .eq('code', ref)
-        .single();
-      if (error || !data) {
-        setError('Invalid referral code. Please contact support.');
-        setStatus('error');
-        return;
-      }
-      if (!data.is_active) {
-        setError('This referral code is no longer active. Please contact support.');
-        setStatus('error');
-        return;
-      }
-      setPartnerName(data.partner_name || '');
-      setStatus('creating');
-      setError(null);
-      if (!email) {
-        setError('Missing email. Please contact support.');
-        setStatus('error');
-        return;
-      }
+      
       try {
-        // Check if user already exists by trying to sign up first
-        const password = Math.random().toString(36).slice(-10) + 'A1!'; // Generate a strong random password
-        const signUpResult = await authHelpers.signUp(email, password, name || email.split('@')[0]);
+        const { data, error } = await supabase
+          .from('referral_codes')
+          .select('id, is_active, partner_name')
+          .eq('code', ref)
+          .single();
+          
+        if (error || !data) {
+          setReferralCodeValid(false);
+          setError(`Invalid referral code: ${ref}. Please contact support.`);
+          return;
+        }
         
-        if (signUpResult.error) {
-          // If user already exists, try to sign in with magic link instead
-          if (signUpResult.error.message.toLowerCase().includes('user already registered')) {
-            // Send magic link for existing user
-            const { error: magicLinkError } = await supabase.auth.resetPasswordForEmail(email, {
-              redirectTo: `${window.location.origin}/onboard?email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&ref=${encodeURIComponent(ref)}`
-            });
-            if (magicLinkError) {
-              setError('Failed to send magic link. Please try again.');
-              setStatus('error');
-              return;
-            }
-            setError('Please check your email for a magic link to continue.');
-            setStatus('error');
-            return;
-          } else {
-            setError(signUpResult.error.message);
+        if (!data.is_active) {
+          setReferralCodeValid(false);
+          setError(`Referral code ${ref} is no longer active. Please contact support.`);
+          return;
+        }
+        
+        setReferralCodeValid(true);
+        setPartnerName(data.partner_name || '');
+        setError(null);
+      } catch (err) {
+        setReferralCodeValid(false);
+        setError('Error validating referral code. Please contact support.');
+      }
+    };
+
+    if (ref) {
+      validateReferralCode();
+    }
+  }, [ref]);
+
+  const handleStartOnboarding = async () => {
+    if (!email) {
+      setError('Missing email. Please contact support.');
+      setStatus('error');
+      return;
+    }
+
+    // If referral code is invalid, don't proceed
+    if (ref && referralCodeValid === false) {
+      return;
+    }
+
+    setStatus('creating');
+    setError(null);
+
+    try {
+      // Check if user already exists by trying to sign up first
+      const password = Math.random().toString(36).slice(-10) + 'A1!'; // Generate a strong random password
+      const signUpResult = await authHelpers.signUp(email, password, name || email.split('@')[0]);
+      
+      if (signUpResult.error) {
+        // If user already exists, try to sign in with magic link instead
+        if (signUpResult.error.message.toLowerCase().includes('user already registered')) {
+          // Send magic link for existing user
+          const { error: magicLinkError } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/onboard?email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&ref=${encodeURIComponent(ref)}`
+          });
+          if (magicLinkError) {
+            setError('Failed to send magic link. Please try again.');
             setStatus('error');
             return;
           }
-        }
-        
-        // User was created successfully, set flag for password setup
-        localStorage.setItem('needs_password_setup', 'true');
-        
-        // Store referral code in user_referrals table
-        if (ref && signUpResult.data.user) {
-          try {
-            await supabase.from('user_referrals').upsert({
-              user_id: signUpResult.data.user.id,
-              ref_code: ref
-            }, { onConflict: 'user_id' });
-          } catch (e) {
-            // Ignore referral tracking errors
-          }
-        }
-        
-        setStatus('redirecting');
-        // Redirect to Stripe checkout
-        const product = stripeProducts[0];
-        if (!product) {
-          setError('No product configured.');
+          setError('An account with this email already exists. Please check your email for a magic link to continue.');
+          setStatus('error');
+          return;
+        } else {
+          setError(signUpResult.error.message);
           setStatus('error');
           return;
         }
-        const session = await createCheckoutSession({
-          priceId: product.priceId,
-          mode: product.mode,
-          successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl: `${window.location.origin}/`,
-          couponCode: undefined,
-          promotionCode: undefined,
-        });
-        if (session && session.url) {
-          window.location.href = session.url;
-        } else {
-          setError('Failed to create Stripe checkout session.');
-          setStatus('error');
+      }
+      
+      // User was created successfully, set flag for password setup
+      localStorage.setItem('needs_password_setup', 'true');
+      
+      // Store referral code in user_referrals table if valid
+      if (ref && signUpResult.data.user && referralCodeValid) {
+        try {
+          await supabase.from('user_referrals').upsert({
+            user_id: signUpResult.data.user.id,
+            ref_code: ref
+          }, { onConflict: 'user_id' });
+        } catch (e) {
+          console.warn('Failed to store referral tracking:', e);
+          // Don't fail the onboarding for referral tracking errors
         }
-      } catch (err: any) {
-        setError(err.message || 'An unexpected error occurred.');
+      }
+      
+      setStatus('redirecting');
+      // Redirect to Stripe checkout
+      const product = stripeProducts[0];
+      if (!product) {
+        setError('No product configured.');
+        setStatus('error');
+        return;
+      }
+      const session = await createCheckoutSession({
+        priceId: product.priceId,
+        mode: product.mode,
+        successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${window.location.origin}/`,
+      });
+      if (session && session.url) {
+        window.location.href = session.url;
+      } else {
+        setError('Failed to create Stripe checkout session.');
         setStatus('error');
       }
-    };
-    validateReferralCode();
-  }, [ref, email, name]);
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred.');
+      setStatus('error');
+    }
+  };
 
   if (authLoading) {
     return (
@@ -148,18 +164,35 @@ export const OnboardPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-4 text-center">Welcome to the App!</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Welcome to CISSP.app!</h2>
         <p className="mb-2">We detected you are coming from LearnWorlds.</p>
         <div className="mb-4">
           <div><b>Email:</b> {email || <span className="text-red-500">(missing)</span>}</div>
-          <div><b>Name:</b> {name || <span className="text-red-500">(missing)</span>}</div>
+          <div><b>Name:</b> {name || <span className="text-gray-400">(not provided)</span>}</div>
           <div><b>Referral Code:</b> {ref || <span className="text-gray-400">(none)</span>}</div>
+          {partnerName && <div><b>Partner:</b> {partnerName}</div>}
         </div>
+        
+        {/* Referral code validation status */}
+        {ref && (
+          <div className="mb-4">
+            {referralCodeValid === null && (
+              <div className="text-blue-600 text-sm">Validating referral code...</div>
+            )}
+            {referralCodeValid === true && (
+              <div className="text-green-600 text-sm">✓ Valid referral code</div>
+            )}
+            {referralCodeValid === false && (
+              <div className="text-red-600 text-sm">✗ Invalid referral code</div>
+            )}
+          </div>
+        )}
+
         {status === 'init' && (
           <button
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
-            onClick={() => setStatus('creating')}
-            disabled={!email}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleStartOnboarding}
+            disabled={!email || (ref && referralCodeValid === false)}
           >
             Start Onboarding & Payment
           </button>
