@@ -24,12 +24,13 @@ export const OnboardPage: React.FC = () => {
     setRef(params.get('ref') || '');
   }, []);
 
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      // Already logged in, redirect to main app
-      navigate('/');
-    }
-  }, [isAuthenticated, user, navigate]);
+  // Remove the automatic redirect to main app - we want to redirect to payment instead
+  // useEffect(() => {
+  //   if (isAuthenticated && user) {
+  //     // Already logged in, redirect to main app
+  //     navigate('/');
+  //   }
+  // }, [isAuthenticated, user, navigate]);
 
   useEffect(() => {
     const validateReferralCode = async () => {
@@ -62,37 +63,47 @@ export const OnboardPage: React.FC = () => {
         return;
       }
       try {
-        // Try to sign in first
-        let signInResult = await authHelpers.signIn(email, ''); // Empty password, will fail if not magic link
-        if (signInResult.error) {
-          // If user not found, sign up
-          if (signInResult.error.message.toLowerCase().includes('invalid login credentials')) {
-            const password = Math.random().toString(36).slice(-10) + 'A1!'; // Generate a strong random password
-            const signUpResult = await authHelpers.signUp(email, password, name || email.split('@')[0]);
-            if (signUpResult.error) {
-              setError(signUpResult.error.message);
+        // Check if user already exists by trying to sign up first
+        const password = Math.random().toString(36).slice(-10) + 'A1!'; // Generate a strong random password
+        const signUpResult = await authHelpers.signUp(email, password, name || email.split('@')[0]);
+        
+        if (signUpResult.error) {
+          // If user already exists, try to sign in with magic link instead
+          if (signUpResult.error.message.toLowerCase().includes('user already registered')) {
+            // Send magic link for existing user
+            const { error: magicLinkError } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: `${window.location.origin}/onboard?email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&ref=${encodeURIComponent(ref)}`
+            });
+            if (magicLinkError) {
+              setError('Failed to send magic link. Please try again.');
               setStatus('error');
               return;
             }
-            // Set flag for password setup
-            localStorage.setItem('needs_password_setup', 'true');
+            setError('Please check your email for a magic link to continue.');
+            setStatus('error');
+            return;
           } else {
-            setError(signInResult.error.message);
+            setError(signUpResult.error.message);
             setStatus('error');
             return;
           }
         }
-        // Optionally, store referral code in user_referrals table
-        if (ref && user) {
+        
+        // User was created successfully, set flag for password setup
+        localStorage.setItem('needs_password_setup', 'true');
+        
+        // Store referral code in user_referrals table
+        if (ref && signUpResult.data.user) {
           try {
             await supabase.from('user_referrals').upsert({
-              user_id: user.id,
+              user_id: signUpResult.data.user.id,
               ref_code: ref
             }, { onConflict: 'user_id' });
           } catch (e) {
             // Ignore referral tracking errors
           }
         }
+        
         setStatus('redirecting');
         // Redirect to Stripe checkout
         const product = stripeProducts[0];
