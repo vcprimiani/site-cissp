@@ -70,7 +70,7 @@ const SetPasswordPage: React.FC = () => {
     } else {
       setSuccess(true);
       setTimeout(() => {
-        navigate('/');
+        window.location.href = '/';
       }, 1000);
     }
   };
