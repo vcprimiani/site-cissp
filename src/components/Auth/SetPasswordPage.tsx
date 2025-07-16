@@ -56,15 +56,22 @@ const SetPasswordPage: React.FC = () => {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
+    const { error: updateError } = await supabase.auth.updateUser({ password });
+    if (updateError) {
+      setLoading(false);
+      setError(updateError.message);
+      return;
+    }
+    // Immediately sign in with the new password
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) {
-      setError(error.message);
+    if (signInError) {
+      setError('Password updated, but failed to sign in: ' + signInError.message);
     } else {
       setSuccess(true);
       setTimeout(() => {
         navigate('/');
-      }, 1500);
+      }, 1000);
     }
   };
 
