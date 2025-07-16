@@ -230,38 +230,47 @@ function App() {
           <>
             <DevBanner />
             {isAuthenticated && appState.currentUser ? (
-              <div className="mt-12">
-                {/* 🚨 CRITICAL: Main app uses hooks, so it MUST be wrapped in PageWrapper */}
-                <PageWrapper>
-                  <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-                    <Header
-                      mode={appState.mode}
-                      onModeChange={handleModeChange}
-                      currentUser={appState.currentUser}
-                      onLogout={() => {}} // Logout is handled by the useAuth hook
-                      hasActiveSubscription={hasActiveSubscription}
-                      subscriptionLoading={subscriptionLoading}
-                    />
-                    <main>
-                      {appState.mode === 'question-bank' ? (
-                        <QuestionBankMode 
-                          appState={appState} 
-                          onUpdateState={handleUpdateState}
-                          hasActiveSubscription={hasActiveSubscription}
-                          subscriptionLoading={subscriptionLoading}
-                        />
-                      ) : (
-                        <QuizMode 
-                          appState={appState} 
-                          onUpdateState={handleUpdateState}
-                          hasActiveSubscription={hasActiveSubscription}
-                          subscriptionLoading={subscriptionLoading}
-                        />
-                      )}
-                    </main>
-                  </div>
-                </PageWrapper>
-              </div>
+              // Check subscription status for authenticated users
+              !subscriptionLoading && !hasActiveSubscription ? (
+                // User is authenticated but doesn't have active subscription - show paywall
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+                  <PaywallPage />
+                </div>
+              ) : (
+                // User is authenticated and has active subscription - show main app
+                <div className="mt-12">
+                  {/* 🚨 CRITICAL: Main app uses hooks, so it MUST be wrapped in PageWrapper */}
+                  <PageWrapper>
+                    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+                      <Header
+                        mode={appState.mode}
+                        onModeChange={handleModeChange}
+                        currentUser={appState.currentUser}
+                        onLogout={() => {}} // Logout is handled by the useAuth hook
+                        hasActiveSubscription={hasActiveSubscription}
+                        subscriptionLoading={subscriptionLoading}
+                      />
+                      <main>
+                        {appState.mode === 'question-bank' ? (
+                          <QuestionBankMode 
+                            appState={appState} 
+                            onUpdateState={handleUpdateState}
+                            hasActiveSubscription={hasActiveSubscription}
+                            subscriptionLoading={subscriptionLoading}
+                          />
+                        ) : (
+                          <QuizMode 
+                            appState={appState} 
+                            onUpdateState={handleUpdateState}
+                            hasActiveSubscription={hasActiveSubscription}
+                            subscriptionLoading={subscriptionLoading}
+                          />
+                        )}
+                      </main>
+                    </div>
+                  </PageWrapper>
+                </div>
+              )
             ) : (
               <>
                 <LandingPage onGetStarted={() => {
