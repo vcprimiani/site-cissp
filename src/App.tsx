@@ -132,7 +132,8 @@ function App() {
     setAppState(prev => ({ ...prev, ...updates }));
   };
 
-  // Show loading spinner while checking authentication and subscription
+  // Remove all top-level if/else blocks that return LandingPage or AuthForm for unauthenticated users
+  // Only show loading spinner while checking authentication and subscription
   if (authLoading || (isAuthenticated && subscriptionLoading)) {
     return (
       <>
@@ -177,25 +178,6 @@ function App() {
     );
   }
 
-  // Show auth form if not authenticated
-  if (!isAuthenticated || !appState.currentUser) {
-    // Show auth form if showAuth is true, otherwise show landing page
-    if (appState.showAuth) {
-      return <>
-        <DevBanner />
-        <AuthForm onBackToLanding={() => setAppState(prev => ({ ...prev, showAuth: false }))} />
-      </>;
-    }
-    // Always show landing page for unauthenticated users
-    return <>
-      <DevBanner />
-      <LandingPage onGetStarted={() => {
-        // This will show the AuthForm component
-        setAppState(prev => ({ ...prev, showAuth: true }));
-      }} />
-    </>;
-  }
-
   // Show reset password page if the path is /reset-password
   if (currentPath === '/reset-password') {
     return <>
@@ -203,39 +185,6 @@ function App() {
       <ResetPassword />
     </>;
   }
-
-  // Add onboarding route for LearnWorlds SSO/magic link
-  // if (currentPath === '/onboard') {
-  //   return <OnboardPage />;
-  // }
-
-  // Add referral report page (direct URL only, no link)
-  if (currentPath === '/referral-report') {
-    return <ReferralReport />;
-  }
-
-  // Add referral code admin page (direct URL only, no link)
-  if (currentPath === '/admin/referral-codes') {
-    return <ReferralCodeAdmin />;
-  }
-
-  // Show progress page if the path is /progress
-  // if (currentPath === '/progress' && isAuthenticated && appState.currentUser) {
-  //   return <>
-  //     <DevBanner />
-  //     <PageWrapper>
-  //       <Header
-  //         mode={appState.mode}
-  //         onModeChange={handleModeChange}
-  //         currentUser={appState.currentUser}
-  //         onLogout={() => {}}
-  //         hasActiveSubscription={hasActiveSubscription}
-  //         subscriptionLoading={subscriptionLoading}
-  //       />
-  //       <ProgressDashboard userId={appState.currentUser.id} />
-  //     </PageWrapper>
-  //   </>;
-  // }
 
   // Show admin page if the path is /admin
   if (currentPath === '/admin') {
@@ -265,68 +214,35 @@ function App() {
     );
   }
 
-  // Show error if subscription check fails
-  if (isAuthenticated && !subscriptionLoading && subscriptionError) {
-    return (
-      <>
-        <DevBanner />
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-red-100">
-          <div className="text-center">
-            <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-red-700 font-semibold">
-              There was a problem checking your subscription. Please try refreshing the page or contact support.
-            </p>
-            <pre className="text-xs text-red-500 mt-2">{subscriptionError}</pre>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  // Show full app for authenticated users with active subscription
+  // Use only the React Router <Routes> block for all routing
   return (
     <Router>
       <Routes>
         <Route path="/onboard" element={<OnboardPage />} />
+        <Route path="/referral-report" element={<ReferralReport />} />
+        <Route path="/admin/referral-codes" element={<ReferralCodeAdmin />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/success" element={<SuccessPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/admin" element={
+          <PageWrapper>
+            <AdminAccess 
+              hasActiveSubscription={hasActiveSubscription}
+              subscriptionLoading={subscriptionLoading}
+            />
+          </PageWrapper>
+        } />
         <Route path="/" element={
           <>
             <DevBanner />
-            <div className="mt-12">
-              {/* 🚨 CRITICAL: Main app uses hooks, so it MUST be wrapped in PageWrapper */}
-              <PageWrapper>
-                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-                  <Header
-                    mode={appState.mode}
-                    onModeChange={handleModeChange}
-                    currentUser={appState.currentUser}
-                    onLogout={() => {}} // Logout is handled by the useAuth hook
-                    hasActiveSubscription={hasActiveSubscription}
-                    subscriptionLoading={subscriptionLoading}
-                  />
-                  <main>
-                    {appState.mode === 'question-bank' ? (
-                      <QuestionBankMode 
-                        appState={appState} 
-                        onUpdateState={handleUpdateState}
-                        hasActiveSubscription={hasActiveSubscription}
-                        subscriptionLoading={subscriptionLoading}
-                      />
-                    ) : (
-                      <QuizMode 
-                        appState={appState} 
-                        onUpdateState={handleUpdateState}
-                        hasActiveSubscription={hasActiveSubscription}
-                        subscriptionLoading={subscriptionLoading}
-                      />
-                    )}
-                  </main>
-                </div>
-              </PageWrapper>
-            </div>
-            <ToastContainer toasts={toasts} onClose={removeToast} />
+            <LandingPage onGetStarted={() => {
+              setAppState(prev => ({ ...prev, showAuth: true }));
+            }} />
+            {/* Optionally, show AuthForm as a modal/overlay if appState.showAuth is true */}
+            {appState.showAuth && <AuthForm onBackToLanding={() => setAppState(prev => ({ ...prev, showAuth: false }))} />}
           </>
         } />
-        {/* Fallback route for landing page, etc. */}
+        {/* Add other routes as needed */}
       </Routes>
     </Router>
   );
