@@ -229,11 +229,49 @@ function App() {
         <Route path="/" element={
           <>
             <DevBanner />
-            <LandingPage onGetStarted={() => {
-              setAppState(prev => ({ ...prev, showAuth: true }));
-            }} />
-            {/* Optionally, show AuthForm as a modal/overlay if appState.showAuth is true */}
-            {appState.showAuth && <AuthForm onBackToLanding={() => setAppState(prev => ({ ...prev, showAuth: false }))} />}
+            {isAuthenticated && appState.currentUser ? (
+              <div className="mt-12">
+                {/* 🚨 CRITICAL: Main app uses hooks, so it MUST be wrapped in PageWrapper */}
+                <PageWrapper>
+                  <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+                    <Header
+                      mode={appState.mode}
+                      onModeChange={handleModeChange}
+                      currentUser={appState.currentUser}
+                      onLogout={() => {}} // Logout is handled by the useAuth hook
+                      hasActiveSubscription={hasActiveSubscription}
+                      subscriptionLoading={subscriptionLoading}
+                    />
+                    <main>
+                      {appState.mode === 'question-bank' ? (
+                        <QuestionBankMode 
+                          appState={appState} 
+                          onUpdateState={handleUpdateState}
+                          hasActiveSubscription={hasActiveSubscription}
+                          subscriptionLoading={subscriptionLoading}
+                        />
+                      ) : (
+                        <QuizMode 
+                          appState={appState} 
+                          onUpdateState={handleUpdateState}
+                          hasActiveSubscription={hasActiveSubscription}
+                          subscriptionLoading={subscriptionLoading}
+                        />
+                      )}
+                    </main>
+                  </div>
+                </PageWrapper>
+              </div>
+            ) : (
+              <>
+                <LandingPage onGetStarted={() => {
+                  setAppState(prev => ({ ...prev, showAuth: true }));
+                }} />
+                {/* Optionally, show AuthForm as a modal/overlay if appState.showAuth is true */}
+                {appState.showAuth && <AuthForm onBackToLanding={() => setAppState(prev => ({ ...prev, showAuth: false }))} />}
+              </>
+            )}
+            <ToastContainer toasts={toasts} onClose={removeToast} />
           </>
         } />
         {/* Add other routes as needed */}
