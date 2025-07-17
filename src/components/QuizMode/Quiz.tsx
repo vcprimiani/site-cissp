@@ -620,21 +620,78 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
       {/* Main Content */}
       <div className="flex-1 py-8 flex justify-center items-start">
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex justify-center">
-          <div className="w-full max-w-4xl mx-auto rounded-2xl shadow-xl bg-white/90 p-4 md:p-8 flex flex-col md:flex-row gap-8">
-            {/* Main Question Content */}
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex justify-center w-full">
+          <div className="w-full max-w-7xl mx-auto rounded-2xl shadow-xl bg-white/90 p-4 md:p-8 flex flex-col md:flex-row gap-8">
+            {/* Controls Card (Sidebar on desktop, top on mobile) */}
+            <div className="w-full md:w-80 flex-shrink-0 mb-8 md:mb-0">
+              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 flex flex-col gap-6 shadow-md">
+                {/* Quiz Header Info */}
+                <div className="w-full">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <Target className="w-5 h-5 text-blue-600" />
+                    <span className="font-semibold text-gray-900">Quiz</span>
+                  </div>
+                  {hasPersistedQuiz() && (
+                    <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block">
+                      Resumed
+                    </div>
+                  )}
+                </div>
+                {/* Timers */}
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Total Time</div>
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <Clock className="w-4 h-4" />
+                      <span className="font-mono text-lg font-semibold">{formatTime(elapsedTime)}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Question Time</div>
+                    <div className="flex items-center space-x-2">
+                      <RotateCcw className="w-4 h-4" />
+                      <span className={`font-mono text-lg font-semibold ${questionElapsedTime >= 85 ? 'text-red-600' : 'text-gray-600'}`}>{formatTime(questionElapsedTime)}</span>
+                    </div>
+                  </div>
+                </div>
+                {/* Text Size Controls */}
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-gray-500">Text Size</span>
+                  <button onClick={() => setTextSize(Math.max(0.8, textSize - 0.1))} className="px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300">-</button>
+                  <span className="text-sm font-mono">{Math.round(textSize * 100)}%</span>
+                  <button onClick={() => setTextSize(Math.min(2, textSize + 0.1))} className="px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300">+</button>
+                </div>
+                {/* Domain & Difficulty */}
+                <div className="w-full space-y-3">
+                  <span className="w-full px-3 py-2 rounded-lg text-sm font-medium block text-center" style={{ backgroundColor: domainColor.primary, color: 'white' }}>
+                    🏛️ {currentQuestion.domain}
+                  </span>
+                  <span className="w-full px-3 py-2 rounded-lg text-sm font-medium block text-center" style={{ backgroundColor: difficultyColor.primary, color: 'white' }}>
+                    {currentQuestion.difficulty === 'Easy' && '🟢'}
+                    {currentQuestion.difficulty === 'Medium' && '🟡'}
+                    {currentQuestion.difficulty === 'Hard' && '🔴'}
+                    {currentQuestion.difficulty}
+                  </span>
+                </div>
+                {/* Flag Button */}
+                <div className="w-full">
+                  <button onClick={handleFlagClick} disabled={flagsLoading} className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${isFlagged ? 'bg-red-500 text-white border border-red-600 shadow-lg hover:bg-red-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'}`}> <Flag className={`w-4 h-4 ${isFlagged ? 'text-white' : 'text-gray-600'}`} /> <span>{isFlagged ? '🚩 Question Flagged' : 'Flag Question'}</span></button>
+                </div>
+                {/* Rating UI */}
+                {currentQuestion && currentUser && <RatingButton questionId={currentQuestion.id} userId={currentUser.id} />}
+                {/* Navigation Buttons */}
+                <div className="w-full space-y-3">
+                  <button onClick={handlePreviousQuestion} disabled={currentIndex === 0} className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"><ArrowLeft className="w-4 h-4" /><span>Previous</span></button>
+                  <button onClick={handleExit} className="w-full px-4 py-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200">Exit Quiz</button>
+                </div>
+              </div>
+            </div>
+            {/* Main Question Content (Wide) */}
             <div className="flex-1 min-w-0">
-
               {/* Question Text */}
               <div className="mb-6">
-                <span 
-                  className="leading-relaxed text-gray-900 font-medium"
-                  style={{ fontSize: `${textSize * 1.25}rem` }}
-                >
-                  {currentQuestion.question}
-                </span>
+                <span className="leading-relaxed text-gray-900 font-medium" style={{ fontSize: `${textSize * 1.25}rem` }}>{currentQuestion.question}</span>
               </div>
-
               {/* Answer Options */}
               <div className="space-y-3 mb-6">
                 {currentQuestion.options.map((option, index) => (
@@ -734,7 +791,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
               )}
 
               {/* Action Buttons */}
-              <div className="flex justify-between">
+              <div className="flex justify-between mt-8">
                 {!showResult ? (
                   <div className="flex space-x-3">
                     <button
@@ -764,176 +821,9 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                     <Briefcase className="w-4 h-4 text-blue-600" />
                     <span className="font-medium text-blue-900 text-sm">Manager's Strategic Perspective</span>
                   </div>
-                  <div className="max-w-none">
-                    {formatManagerPerspective(managerPerspectives[currentQuestion?.id || ''])}
-                  </div>
+                  <div className="max-w-none">{formatManagerPerspective(managerPerspectives[currentQuestion?.id || ''])}</div>
                 </div>
               )}
-            </div>
-
-            {/* Quick Actions (formerly sidebar) */}
-            <div className="flex-1 w-full max-w-sm flex-shrink-0 flex flex-col gap-6">
-              {/* Quiz Header Info */}
-              <div className="w-full">
-                <div className="flex items-center space-x-2 mb-3">
-                  <Target className="w-5 h-5 text-blue-600" />
-                  <span className="font-semibold text-gray-900">Quiz</span>
-                </div>
-                {hasPersistedQuiz() && (
-                  <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block">
-                    Resumed
-                  </div>
-                )}
-              </div>
-
-              {/* Timers and Text Size Controls */}
-              <div className="flex items-start justify-between">
-                {/* Timers */}
-                <div className="space-y-4 flex-1">
-                  {/* Total Timer */}
-                  <div>
-                    <div className="text-xs text-gray-500 mb-1">Total Time</div>
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <Clock className="w-4 h-4" />
-                      <span className="font-mono text-lg font-semibold">{formatTime(elapsedTime)}</span>
-                    </div>
-                  </div>
-
-                  {/* Per-Question Timer */}
-                  <div>
-                    <div className="text-xs text-gray-500 mb-1">Question Time</div>
-                    <div className="flex items-center space-x-2">
-                      <RotateCcw className="w-4 h-4" />
-                      <span 
-                        className={`font-mono text-lg font-semibold ${
-                          questionElapsedTime >= 85 ? 'text-red-600' : 'text-gray-600'
-                        }`}
-                      >
-                        {formatTime(questionElapsedTime)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Text Size Controls */}
-                <div
-                  className="backdrop-blur bg-white/70 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-xl shadow px-3 py-2 flex flex-col items-center min-w-[110px]"
-                  style={{ boxShadow: '0 2px 12px 0 rgba(80,120,255,0.06)' }}
-                >
-                  <div className="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1 tracking-wide select-none" style={{letterSpacing: '0.01em'}}>Text Size</div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleTextSizeChange('decrease')}
-                      disabled={currentTextSizeIndex === 0}
-                      className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
-                      title="Decrease text size"
-                      style={{ boxShadow: '0 1px 4px 0 rgba(80,120,255,0.04)' }}
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span
-                      className="font-bold text-base text-gray-900 dark:text-white transition-all duration-200 select-none"
-                      style={{ minWidth: 36, display: 'inline-block', textAlign: 'center' }}
-                    >
-                      {Math.round(textSize * 100)}%
-                    </span>
-                    <button
-                      onClick={() => handleTextSizeChange('increase')}
-                      disabled={currentTextSizeIndex === textSizeOptions.length - 1}
-                      className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
-                      title="Increase text size"
-                      style={{ boxShadow: '0 1px 4px 0 rgba(80,120,255,0.04)' }}
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="w-full mb-2">
-                <div className="text-xs text-gray-500 mb-1 text-center">Progress</div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
-                  />
-                </div>
-                <div className="text-xs text-gray-600 mt-1 text-center">
-                  Question {currentIndex + 1} of {questions.length}
-                </div>
-              </div>
-
-              {/* Domain and Difficulty Badges */}
-              <div className="w-full space-y-3">
-                <span
-                  className="w-full px-3 py-2 rounded-lg text-sm font-medium block text-center"
-                  style={{
-                    backgroundColor: domainColor.primary,
-                    color: 'white'
-                  }}
-                >
-                  🏛️ {currentQuestion.domain}
-                </span>
-                <span
-                  className="w-full px-3 py-2 rounded-lg text-sm font-medium block text-center"
-                  style={{
-                    backgroundColor: difficultyColor.primary,
-                    color: 'white'
-                  }}
-                >
-                  {currentQuestion.difficulty === 'Easy' && '🟢'}
-                  {currentQuestion.difficulty === 'Medium' && '🟡'}
-                  {currentQuestion.difficulty === 'Hard' && '🔴'}
-                  {currentQuestion.difficulty}
-                </span>
-              </div>
-
-
-
-              {/* Flag Question Button */}
-              <div className="w-full">
-                <button
-                  onClick={handleFlagClick}
-                  disabled={flagsLoading}
-                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isFlagged
-                      ? 'bg-red-500 text-white border border-red-600 shadow-lg hover:bg-red-600'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
-                  }`}
-                >
-                  <Flag className={`w-4 h-4 ${isFlagged ? 'text-white' : 'text-gray-600'}`} />
-                  <span>
-                    {isFlagged ? '🚩 Question Flagged' : 'Flag Question'}
-                  </span>
-                </button>
-              </div>
-
-              {/* Thumbs Up/Down Rating UI */}
-              {currentQuestion && currentUser && (
-                <RatingButton questionId={currentQuestion.id} userId={currentUser.id} />
-              )}
-
-              {/* Navigation Buttons */}
-              <div className="w-full space-y-3">
-                {/* Back Button */}
-                <button
-                  onClick={handlePreviousQuestion}
-                  disabled={currentIndex === 0}
-                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Previous</span>
-                </button>
-
-                {/* Exit Button */}
-                <button
-                  onClick={handleExit}
-                  className="w-full px-4 py-3 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
-                >
-                  Exit Quiz
-                </button>
-              </div>
             </div>
           </div>
         </div>

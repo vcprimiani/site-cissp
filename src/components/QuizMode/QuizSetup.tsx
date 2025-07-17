@@ -684,8 +684,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                         </div>
                         
                         {/* Start Quiz button */}
-                        {/*
-                        <div className="flex justify-end">
+                        <div className="flex justify-end mt-6">
                           <button
                             onClick={generateQuiz}
                             disabled={filteredQuestions.length === 0 || (hasPersistedQuiz() === true && !!persistedState)}
@@ -699,7 +698,6 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                             <span>{hasPersistedQuiz() === true && !!persistedState ? 'Quiz Paused' : 'Start Quiz'}</span>
                           </button>
                         </div>
-                        */}
                       </div>
                     </div>
                   </div>
