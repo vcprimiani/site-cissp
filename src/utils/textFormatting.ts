@@ -123,7 +123,25 @@ export function parseOptionExplanations(explanation: string, options: string[]):
  * Returns true if valid, false otherwise.
  */
 export function isExplanationStructured(explanation: string, options: string[]): boolean {
-  return !!parseOptionExplanations(explanation, options);
+  // First check for the traditional Option A:" format
+  if (parseOptionExplanations(explanation, options)) {
+    return true;
+  }
+  
+  // Check for numbered section format (e.g., 1. Correct Answer:", "2. Why Other Options Are Wrong:")
+  const numberedSectionRegex = /\n?\s*(\d+\.[^:]+:)/g;
+  const matches = [...explanation.matchAll(numberedSectionRegex)];
+  
+  // If we have numbered sections, consider it structured
+  if (matches.length >= 2) {
+    return true;
+  }
+  
+  // Check for other structured formats
+  const hasStructuredKeywords = /(correct answer|why other options|key concepts|practical application|explanation)/i.test(explanation);
+  const hasMultipleSections = (explanation.match(/\n\s*\n/g) || []).length >= 1;
+  
+  return hasStructuredKeywords && hasMultipleSections;
 }
 
 /**

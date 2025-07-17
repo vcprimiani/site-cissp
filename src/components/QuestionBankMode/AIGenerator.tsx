@@ -1003,18 +1003,31 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                 {isExplanationStructured(currentQuestionPreview.explanation, currentQuestionPreview.options) ? (
                   <div className="mt-4">
                     <h5 className="font-semibold text-green-700 mb-2">Explanations:</h5>
-                    {Object.entries(parseOptionExplanations(currentQuestionPreview.explanation, currentQuestionPreview.options)!).map(([idx, text]) => (
-                      <div key={idx} className={`mb-2 p-2 rounded ${parseInt(idx) === currentQuestionPreview.correctAnswer ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
-                        <span className={`font-bold ${parseInt(idx) === currentQuestionPreview.correctAnswer ? 'text-green-700' : 'text-gray-700'}`}>Option {String.fromCharCode(65 + parseInt(idx))}:</span> {text}
-                      </div>
-                    ))}
+                    {(() => {
+                      // Try to parse as Option A/B/C/D format first
+                      const optionExplanations = parseOptionExplanations(currentQuestionPreview.explanation, currentQuestionPreview.options);
+                      if (optionExplanations) {
+                        return Object.entries(optionExplanations).map(([idx, text]) => (
+                          <div key={idx} className={`mb-2 p-2 rounded ${parseInt(idx) === currentQuestionPreview.correctAnswer ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
+                            <span className={`font-bold ${parseInt(idx) === currentQuestionPreview.correctAnswer ? 'text-green-700' : 'text-gray-700'}`}>Option {String.fromCharCode(65 + parseInt(idx))}:</span> {text}
+                          </div>
+                        ));
+                      } else {
+                        // Display as numbered sections
+                        return parseExplanationSections(currentQuestionPreview.explanation).map((section, idx) => (
+                          <div key={idx} className={`mb-2 p-2 rounded ${idx === 0 ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
+                            {section.header && <div className={`font-bold mb-1 ${idx === 0 ? 'text-green-700' : 'text-gray-700'}`}>{section.header}</div>}
+                            <div className="text-sm text-gray-700">{section.content}</div>
+                          </div>
+                        ));
+                      }
+                    })()}
                   </div>
                 ) : (
-                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-sm text-yellow-800 font-semibold mb-2">Warning: Explanation is not structured per option and will not be saved.</p>
+                  <div className="mt-4g-yellow-50rder border-yellow-200                   <p className="text-sm text-yellow-800 font-semibold mb-2">Warning: Explanation is not structured per option and will not be saved.</p>
                     {parseExplanationSections(currentQuestionPreview.explanation).map((section, idx) => (
                       <div key={idx} className="mb-2">
-                        {section.header && <div className="font-bold text-gray-800 mb-1">{section.header}</div>}
+                        {section.header && <div className="font-bold text-gray-8001{section.header}</div>}
                         {renderSectionContent(section.content).length > 1 ? (
                           <ul className="list-disc list-inside ml-4">
                             {renderSectionContent(section.content).map((item, i) => (
