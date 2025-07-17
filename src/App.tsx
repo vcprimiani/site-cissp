@@ -20,12 +20,20 @@ import { AdminAccess } from './components/Admin/AdminAccess';
 import { PageWrapper } from './components/Layout/PageWrapper';
 import { ToastContainer, useToast } from './components/UI/Toast';
 import { initializeToast } from './utils/toast';
+import { OnboardPage } from './components/Auth/OnboardPage';
+import { ReferralReport } from './components/Auth/ReferralReport';
+import { ReferralCodeAdmin } from './components/Admin/ReferralCodeAdmin';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import SetPasswordPage from './components/Auth/SetPasswordPage';
 
 // 🚨 CRITICAL FOR AI AGENTS: All pages/components that use hooks MUST be wrapped in PageWrapper
 // This prevents "must be used within Provider" errors
 // See: PROVIDER_PATTERN.md for complete documentation
 
 function App() {
+  // DEBUG: Log current path
+  const currentPath = window.location.pathname;
+  console.log('[DEBUG] App.tsx loaded. currentPath:', currentPath);
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { isActive: hasActiveSubscription, loading: subscriptionLoading, error: subscriptionError } = useSubscription();
   const [appState, setAppState] = useLocalStorage<AppState>('cissp-study-app', {
@@ -49,7 +57,6 @@ function App() {
   // Check for URL parameters to determine which page to show
   const urlParams = new URLSearchParams(window.location.search);
   const sessionId = urlParams.get('session_id');
-  const currentPath = window.location.pathname;
 
   // Update app state when auth state changes
   useEffect(() => {
@@ -125,7 +132,8 @@ function App() {
     setAppState(prev => ({ ...prev, ...updates }));
   };
 
-  // Show loading spinner while checking authentication and subscription
+  // Remove all top-level if/else blocks that return LandingPage or AuthForm for unauthenticated users
+  // Only show loading spinner while checking authentication and subscription
   if (authLoading || (isAuthenticated && subscriptionLoading)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
@@ -137,11 +145,6 @@ function App() {
         </div>
       </div>
     );
-  }
-
-  // Show success page if there's a session_id parameter OR if the path is /success (after successful payment)
-  if ((sessionId || currentPath === '/success') && isAuthenticated && appState.currentUser) {
-    return <SuccessPage />;
   }
 
   // Show pricing page if the path is /pricing
@@ -161,41 +164,10 @@ function App() {
     );
   }
 
-  // Show auth form if not authenticated
-  if (!isAuthenticated || !appState.currentUser) {
-    // Show auth form if showAuth is true, otherwise show landing page
-    if (appState.showAuth) {
-      return <AuthForm onBackToLanding={() => setAppState(prev => ({ ...prev, showAuth: false }))} />;
-    }
-    // Always show landing page for unauthenticated users
-    return <LandingPage onGetStarted={() => {
-      // This will show the AuthForm component
-      setAppState(prev => ({ ...prev, showAuth: true }));
-    }} />;
-  }
-
   // Show reset password page if the path is /reset-password
   if (currentPath === '/reset-password') {
     return <ResetPassword />;
   }
-
-  // Show progress page if the path is /progress
-  // if (currentPath === '/progress' && isAuthenticated && appState.currentUser) {
-  //   return <>
-  //     <DevBanner />
-  //     <PageWrapper>
-  //       <Header
-  //         mode={appState.mode}
-  //         onModeChange={handleModeChange}
-  //         currentUser={appState.currentUser}
-  //         onLogout={() => {}}
-  //         hasActiveSubscription={hasActiveSubscription}
-  //         subscriptionLoading={subscriptionLoading}
-  //       />
-  //       <ProgressDashboard userId={appState.currentUser.id} />
-  //     </PageWrapper>
-  //   </>;
-  // }
 
   // Show admin page if the path is /admin
   if (currentPath === '/admin') {
@@ -210,68 +182,96 @@ function App() {
           subscriptionLoading={subscriptionLoading}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* 🚨 CRITICAL: AdminAccess uses hooks, so it MUST be wrapped in PageWrapper */}
-            <PageWrapper>
-              <AdminAccess 
-                hasActiveSubscription={hasActiveSubscription}
-                subscriptionLoading={subscriptionLoading}
-              />
-            </PageWrapper>
-          </div>
-        </div>
-    );
-  }
-
-  // Show error if subscription check fails
-  if (isAuthenticated && !subscriptionLoading && subscriptionError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-red-100">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-red-700 font-semibold">
-            There was a problem checking your subscription. Please try refreshing the page or contact support.
-          </p>
-          <pre className="text-xs text-red-500 mt-2">{subscriptionError}</pre>
+          {/* 🚨 CRITICAL: AdminAccess uses hooks, so it MUST be wrapped in PageWrapper */}
+          <PageWrapper>
+            <AdminAccess 
+              hasActiveSubscription={hasActiveSubscription}
+              subscriptionLoading={subscriptionLoading}
+            />
+          </PageWrapper>
         </div>
       </div>
     );
   }
 
-  // Show full app for authenticated users with active subscription
+  // Use only the React Router <Routes> block for all routing
   return (
-    <div className="mt-12">
-      {/* 🚨 CRITICAL: Main app uses hooks, so it MUST be wrapped in PageWrapper */}
-      <PageWrapper>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-          <Header
-            mode={appState.mode}
-            onModeChange={handleModeChange}
-            currentUser={appState.currentUser}
-            onLogout={() => {}} // Logout is handled by the useAuth hook
-            hasActiveSubscription={hasActiveSubscription}
-            subscriptionLoading={subscriptionLoading}
-          />
-          <main>
-            {appState.mode === 'question-bank' ? (
-              <QuestionBankMode 
-                appState={appState} 
-                onUpdateState={handleUpdateState}
-                hasActiveSubscription={hasActiveSubscription}
-                subscriptionLoading={subscriptionLoading}
-              />
+    <Router>
+      <Routes>
+        <Route path="/onboard" element={<OnboardPage />} />
+        <Route path="/set-password" element={<SetPasswordPage />} />
+        <Route path="/referral-report" element={<ReferralReport />} />
+        <Route path="/admin/referral-codes" element={<ReferralCodeAdmin />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/success" element={<SuccessPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/admin" element={
+          <PageWrapper>
+            <AdminAccess 
+              hasActiveSubscription={hasActiveSubscription}
+              subscriptionLoading={subscriptionLoading}
+            />
+          </PageWrapper>
+        } />
+        <Route path="/" element={
+          <>
+            {isAuthenticated && appState.currentUser ? (
+              // Check subscription status for authenticated users
+              !subscriptionLoading && !hasActiveSubscription ? (
+                // User is authenticated but doesn't have active subscription - show paywall
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+                  <PaywallPage />
+                </div>
+              ) : (
+                // User is authenticated and has active subscription - show main app
+                <div className="mt-12">
+                  {/* 🚨 CRITICAL: Main app uses hooks, so it MUST be wrapped in PageWrapper */}
+                  <PageWrapper>
+                    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+                      <Header
+                        mode={appState.mode}
+                        onModeChange={handleModeChange}
+                        currentUser={appState.currentUser}
+                        onLogout={() => {}} // Logout is handled by the useAuth hook
+                        hasActiveSubscription={hasActiveSubscription}
+                        subscriptionLoading={subscriptionLoading}
+                      />
+                      <main>
+                        {appState.mode === 'question-bank' ? (
+                          <QuestionBankMode 
+                            appState={appState} 
+                            onUpdateState={handleUpdateState}
+                            hasActiveSubscription={hasActiveSubscription}
+                            subscriptionLoading={subscriptionLoading}
+                          />
+                        ) : (
+                          <QuizMode 
+                            appState={appState} 
+                            onUpdateState={handleUpdateState}
+                            hasActiveSubscription={hasActiveSubscription}
+                            subscriptionLoading={subscriptionLoading}
+                          />
+                        )}
+                      </main>
+                    </div>
+                  </PageWrapper>
+                </div>
+              )
             ) : (
-              <QuizMode 
-                appState={appState} 
-                onUpdateState={handleUpdateState}
-                hasActiveSubscription={hasActiveSubscription}
-                subscriptionLoading={subscriptionLoading}
-              />
+              <>
+                <LandingPage onGetStarted={() => {
+                  setAppState(prev => ({ ...prev, showAuth: true }));
+                }} />
+                {/* Optionally, show AuthForm as a modal/overlay if appState.showAuth is true */}
+                {appState.showAuth && <AuthForm onBackToLanding={() => setAppState(prev => ({ ...prev, showAuth: false }))} />}
+              </>
             )}
-          </main>
-        </div>
-      </PageWrapper>
-      <ToastContainer toasts={toasts} onClose={removeToast} />
-    </div>
+            <ToastContainer toasts={toasts} onClose={removeToast} />
+          </>
+        } />
+        {/* Add other routes as needed */}
+      </Routes>
+    </Router>
   );
 }
 

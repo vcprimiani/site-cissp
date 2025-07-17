@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle, ArrowRight, Loader } from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
+import { useNavigate } from 'react-router-dom';
 
 declare global {
   interface Window {
@@ -13,6 +14,16 @@ export const SuccessPage: React.FC = () => {
   const { subscription, loading, refreshSubscription, productName } = useSubscription();
   const [hasRefreshed, setHasRefreshed] = useState(false);
   const [conversionTracked, setConversionTracked] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect to set-password if needed
+    if (typeof window !== 'undefined' && localStorage.getItem('needs_password_setup') === 'true') {
+      localStorage.removeItem('needs_password_setup');
+      navigate('/set-password', { replace: true });
+      return;
+    }
+  }, [navigate]);
 
   useEffect(() => {
     // Refresh subscription data when the page loads
@@ -107,10 +118,6 @@ export const SuccessPage: React.FC = () => {
               <li className="flex items-center space-x-2">
                 <CheckCircle className="w-4 h-4 text-green-500" />
                 <span>Detailed explanations</span>
-              </li>
-              <li className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                <span>Progress tracking</span>
               </li>
             </ul>
           </div>
