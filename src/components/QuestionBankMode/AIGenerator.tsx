@@ -1024,10 +1024,13 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                     })()}
                   </div>
                 ) : (
-                  <div className="mt-4g-yellow-50rder border-yellow-200                   <p className="text-sm text-yellow-800 font-semibold mb-2">Warning: Explanation is not structured per option and will not be saved.</p>
+                  <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <p className="text-sm text-yellow-800 font-semibold mb-2">
+                      Warning: Explanation is not structured per option and will not be saved.
+                    </p>
                     {parseExplanationSections(currentQuestionPreview.explanation).map((section, idx) => (
                       <div key={idx} className="mb-2">
-                        {section.header && <div className="font-bold text-gray-8001{section.header}</div>}
+                        {section.header && <div className="font-bold text-gray-800 mb-1">{section.header}</div>}
                         {renderSectionContent(section.content).length > 1 ? (
                           <ul className="list-disc list-inside ml-4">
                             {renderSectionContent(section.content).map((item, i) => (
