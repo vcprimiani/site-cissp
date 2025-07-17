@@ -67,7 +67,7 @@ export const AdminAccess: React.FC<AdminAccessProps> = ({
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">Admin Panel</h2>
-              <p className="text-gray-600">Flagged Questions Management</p>
+              <p className="text-gray-600">Administrative Functions</p>
             </div>
           </div>
           <button
@@ -76,6 +76,48 @@ export const AdminAccess: React.FC<AdminAccessProps> = ({
           >
             Exit Admin
           </button>
+        </div>
+
+        {/* Admin Navigation */}
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Admin Functions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a
+              href="/admin/referral-codes"
+              className="flex items-center space-x-3 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-bold">R</span>
+              </div>
+              <div>
+                <div className="font-medium text-blue-900">Referral Codes</div>
+                <div className="text-sm text-blue-700">Manage referral codes and partners</div>
+              </div>
+            </a>
+            
+            <a
+              href="/referral-report"
+              className="flex items-center space-x-3 p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+            >
+              <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-bold">R</span>
+              </div>
+              <div>
+                <div className="font-medium text-green-900">Referral Report</div>
+                <div className="text-sm text-green-700">View referral signup analytics</div>
+              </div>
+            </a>
+            
+            <div className="flex items-center space-x-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-bold">F</span>
+              </div>
+              <div>
+                <div className="font-medium text-gray-900">Flagged Questions</div>
+                <div className="text-sm text-gray-700">Review and manage flagged content</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Admin Content */}

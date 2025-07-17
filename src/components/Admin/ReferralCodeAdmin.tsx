@@ -141,7 +141,15 @@ export const ReferralCodeAdmin: React.FC = () => {
             <Shield className="w-8 h-8 text-blue-600" />
             <h2 className="text-2xl font-bold text-gray-900">Referral Codes & Partners</h2>
           </div>
-          <button onClick={() => { setAdding(true); setEditId(null); setForm({}); }} className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"><Plus className="w-4 h-4 mr-1" /> Add Code</button>
+          <div className="flex items-center space-x-3">
+            <a
+              href="/admin"
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+            >
+              ← Back to Admin
+            </a>
+            <button onClick={() => { setAdding(true); setEditId(null); setForm({}); }} className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"><Plus className="w-4 h-4 mr-1" /> Add Code</button>
+          </div>
         </div>
         {/* Add/Edit Form */}
         {(adding || editId) && (

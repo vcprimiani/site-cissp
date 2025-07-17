@@ -17,12 +17,17 @@ interface CheckoutSessionResponse {
 export const createCheckoutSession = async (params: CreateCheckoutSessionParams): Promise<CheckoutSessionResponse> => {
   const { priceId, mode, successUrl, cancelUrl, couponCode, promotionCode } = params;
   
-  // Get the current user's session
+  console.log('Stripe: Creating checkout session with params:', { priceId, mode, successUrl, cancelUrl });
+  
+  // Get the current users session
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
   
   if (sessionError || !session) {
+    console.error('Stripe: Session error:', sessionError);
     throw new Error('User must be authenticated to create checkout session');
   }
+
+  console.log('Stripe: User session obtained, user ID:', session.user.id);
 
   // Default URLs
   const defaultSuccessUrl =
@@ -46,22 +51,46 @@ export const createCheckoutSession = async (params: CreateCheckoutSessionParams)
     requestBody.promotion_code = promotionCode;
   }
 
-  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`,
-    },
-    body: JSON.stringify(requestBody),
-  });
+  console.log('Stripe: Making request to edge function with body:', requestBody);
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to create checkout session');
+  const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`;
+  console.log('Stripe: Function URL:', functionUrl);
+
+  try {
+    const response = await fetch(functionUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    console.log('Stripe: Response status:', response.status);
+    console.log('Stripe: Response headers:', Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+        console.error('Stripe: Error response data:', errorData);
+      } catch (parseError) {
+        console.error('Stripe: Failed to parse error response:', parseError);
+      }
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    console.log('Stripe: Success response:', { sessionId: data.sessionId, hasUrl: !!data.url });
+    return data;
+  } catch (error: any) {
+    console.error('Stripe: Fetch error:', error);
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      throw new Error('Network error: Unable to reach the payment service. Please check your connection and try again.');
+    }
+    throw error;
   }
-
-  const data = await response.json();
-  return data;
 };
 
 export const redirectToCheckout = async (params: CreateCheckoutSessionParams): Promise<void> => {

@@ -18,9 +18,15 @@ export const OnboardPage: React.FC = () => {
   useEffect(() => {
     // Parse URL params
     const params = new URLSearchParams(window.location.search);
-    setEmail(params.get('email') || '');
-    setName(params.get('name') || '');
-    setRef(params.get('ref') || '');
+    const emailParam = params.get('email') || '';
+    const nameParam = params.get('name') || '';
+    const refParam = params.get('ref') || '';
+    
+    console.log('OnboardPage: Parsed URL params:', { email: emailParam, name: nameParam, ref: refParam });
+    
+    setEmail(emailParam);
+    setName(nameParam);
+    setRef(refParam);
   }, []);
 
   const handleStartOnboarding = async () => {
@@ -34,75 +40,97 @@ export const OnboardPage: React.FC = () => {
     setError(null);
 
       try {
+      console.log('OnboardPage: Starting onboarding for:', { email, name, ref });
+      
       // Generate a strong random password
       const password = Math.random().toString(36).slice(-10) + 'A1!';
+      console.log('OnboardPage: Generated password for signup');
       
       // Try to sign up the user
-        const signUpResult = await authHelpers.signUp(email, password, name || email.split('@')[0]);
+      console.log('OnboardPage: Attempting user signup...');
+      const signUpResult = await authHelpers.signUp(email, password, name || email.split('@')[0]);
+      console.log('OnboardPage: Signup result:', { 
+        success: !signUpResult.error, 
+        error: signUpResult.error?.message,
+        user: signUpResult.data?.user?.id 
+      });
         
-        if (signUpResult.error) {
+      if (signUpResult.error) {
         // If user already exists, send magic link
-          if (signUpResult.error.message.toLowerCase().includes('user already registered')) {
-            const { error: magicLinkError } = await supabase.auth.resetPasswordForEmail(email, {
-              redirectTo: `${window.location.origin}/onboard?email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&ref=${encodeURIComponent(ref)}`
-            });
+        if (signUpResult.error.message.toLowerCase().includes('user already registered') || 
+            signUpResult.error.message.toLowerCase().includes('already been registered')) {
+          console.log('OnboardPage: User already exists, sending magic link...');
           
-            if (magicLinkError) {
-              setError('Failed to send magic link. Please try again.');
-              setStatus('error');
-              return;
-            }
-          
+          const { error: magicLinkError } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/onboard?email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&ref=${encodeURIComponent(ref)}`
+          });
+          console.log('OnboardPage: Magic link result:', { error: magicLinkError?.message });
+        
+          if (magicLinkError) {
+            console.error('OnboardPage: Magic link error:', magicLinkError);
+            setError('Failed to send magic link. Please try again or contact support.');
+            setStatus('error');
+            return;
+          }
+        
           setError('An account with this email already exists. Please check your email for a magic link to continue.');
-            setStatus('error');
-            return;
-          } else {
-            setError(signUpResult.error.message);
-            setStatus('error');
-            return;
-          }
-        }
-        
-      // User was created successfully
-        localStorage.setItem('needs_password_setup', 'true');
-        
-      // Store referral info if provided (simple approach)
-        if (ref && signUpResult.data.user) {
-          try {
-            await supabase.from('user_referrals').upsert({
-              user_id: signUpResult.data.user.id,
-              ref_code: ref
-            }, { onConflict: 'user_id' });
-          } catch (e) {
-          console.warn('Failed to store referral tracking:', e);
-          // Don't fail onboarding for referral errors
-          }
-        }
-        
-        setStatus('redirecting');
-      
-        // Redirect to Stripe checkout
-        const product = stripeProducts[0];
-        if (!product) {
-          setError('No product configured.');
+          setStatus('error');
+          return;
+        } else {
+          console.error('OnboardPage: Signup error:', signUpResult.error);
+          setError(`Signup failed: ${signUpResult.error.message}`);
           setStatus('error');
           return;
         }
+      }
       
-        const session = await createCheckoutSession({
-          priceId: product.priceId,
-          mode: product.mode,
-          successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl: `${window.location.origin}/`,
-        });
+      // User was created successfully
+      console.log('OnboardPage: User created successfully, setting up session...');
+      localStorage.setItem('needs_password_setup', 'true');
       
-        if (session && session.url) {
-          window.location.href = session.url;
-        } else {
-          setError('Failed to create Stripe checkout session.');
-          setStatus('error');
+      // Store referral info if provided (simple approach)
+      if (ref && signUpResult.data.user) {
+        try {
+          console.log('OnboardPage: Storing referral info...');
+          await supabase.from('user_referrals').upsert({
+            user_id: signUpResult.data.user.id,
+            ref_code: ref
+          }, { onConflict: 'user_id' });
+          console.log('OnboardPage: Referral info stored successfully');
+        } catch (e) {
+          console.warn('OnboardPage: Failed to store referral tracking:', e);
+          // Dont fail onboarding for referral errors
         }
+      }
+      
+      setStatus('redirecting');
+    
+      // Redirect to Stripe checkout
+      const product = stripeProducts[0];
+      if (!product) {
+        setError('No product configured.');
+        setStatus('error');
+        return;
+      }
+    
+      console.log('OnboardPage: Creating Stripe checkout session...');
+      const session = await createCheckoutSession({
+        priceId: product.priceId,
+        mode: product.mode,
+        successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${window.location.origin}/`,
+      });
+      console.log('OnboardPage: Stripe session created:', { sessionId: session?.sessionId, hasUrl: !!session?.url });
+    
+      if (session && session.url) {
+        console.log('OnboardPage: Redirecting to Stripe checkout...');
+        window.location.href = session.url;
+      } else {
+        setError('Failed to create Stripe checkout session.');
+        setStatus('error');
+      }
       } catch (err: any) {
+        console.error('OnboardPage: Unexpected error:', err);
         setError(err.message || 'An unexpected error occurred.');
         setStatus('error');
       }

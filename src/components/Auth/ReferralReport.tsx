@@ -76,17 +76,25 @@ export const ReferralReport: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col items-center py-12">
         <div className="bg-white shadow-lg rounded-lg p-8 max-w-3xl w-full">
           {/* Branding and Logo */}
-          <div className="flex items-center mb-8 p-4 bg-white border border-gray-200 rounded shadow-sm space-x-4">
-            <img 
-              src="/Untitled design-7.png" 
-              alt="CISSP.app Logo" 
-              className="w-12 h-12 object-contain rounded-lg border border-gray-100 bg-gray-50"
-              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
-            />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">www.cissp.app</h1>
-              <p className="text-sm text-gray-600 font-medium">by <a href="https://CISSPStudyGroup.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">CISSPStudyGroup.com</a></p>
+          <div className="flex items-center justify-between mb-8 p-4 bg-white border border-gray-200 rounded shadow-sm">
+            <div className="flex items-center space-x-4">
+              <img 
+                src="/Untitled design-7.png" 
+                alt="CISSP.app Logo" 
+                className="w-12 h-12 object-contain rounded-lg border border-gray-100 bg-gray-50"
+                style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+              />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">www.cissp.app</h1>
+                <p className="text-sm text-gray-600 font-medium">by <a href="https://CISSPStudyGroup.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">CISSPStudyGroup.com</a></p>
+              </div>
             </div>
+            <a
+              href="/admin"
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+            >
+              ← Back to Admin
+            </a>
           </div>
 
           {/* Testing URLs for LearnWorlds Integration */}
