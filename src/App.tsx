@@ -154,7 +154,7 @@ function App() {
         <Header
           mode={appState.mode}
           onModeChange={handleModeChange}
-          currentUser={appState.currentUser}
+          currentUser={appState.currentUser!}
           onLogout={() => {}} // Logout is handled by the useAuth hook
           hasActiveSubscription={hasActiveSubscription}
           subscriptionLoading={subscriptionLoading}
@@ -176,7 +176,7 @@ function App() {
         <Header
           mode={appState.mode}
           onModeChange={handleModeChange}
-          currentUser={appState.currentUser}
+          currentUser={appState.currentUser!}
           onLogout={() => {}} // Logout is handled by the useAuth hook
           hasActiveSubscription={hasActiveSubscription}
           subscriptionLoading={subscriptionLoading}
@@ -231,7 +231,7 @@ function App() {
                       <Header
                         mode={appState.mode}
                         onModeChange={handleModeChange}
-                        currentUser={appState.currentUser}
+                        currentUser={appState.currentUser!}
                         onLogout={() => {}} // Logout is handled by the useAuth hook
                         hasActiveSubscription={hasActiveSubscription}
                         subscriptionLoading={subscriptionLoading}
@@ -259,11 +259,14 @@ function App() {
               )
             ) : (
               <>
-                <LandingPage onGetStarted={() => {
-                  setAppState(prev => ({ ...prev, showAuth: true }));
-                }} />
-                {/* Optionally, show AuthForm as a modal/overlay if appState.showAuth is true */}
-                {appState.showAuth && <AuthForm onBackToLanding={() => setAppState(prev => ({ ...prev, showAuth: false }))} />}
+                {appState.showAuth ? (
+                  <AuthForm onBackToLanding={() => setAppState(prev => ({ ...prev, showAuth: false }))} />
+                ) : (
+                  <LandingPage onGetStarted={() => {
+                    console.log('Get Started button clicked, showing auth form');
+                    setAppState(prev => ({ ...prev, showAuth: true }));
+                  }} />
+                )}
               </>
             )}
             <ToastContainer toasts={toasts} onClose={removeToast} />
