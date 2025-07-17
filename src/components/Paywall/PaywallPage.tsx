@@ -7,9 +7,10 @@ import { QuestionCard } from '../UI/QuestionCard';
 import { useQuestions } from '../../hooks/useQuestions';
 import { analyzeCISSPKeywords } from '../../services/keywordAnalysis';
 import { Question } from '../../types';
+import { trackBeginCheckout } from '../../utils/googleAds';
 
 export const PaywallPage: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { questions, loading: questionsLoading, error: questionsError } = useQuestions();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +63,24 @@ export const PaywallPage: React.FC = () => {
     setError(null);
 
     try {
+      // Track begin_checkout event with Enhanced Conversions
+      if (user?.email) {
+        trackBeginCheckout(
+          product.price || 15.99,
+          [{
+            item_id: product.id,
+            item_name: product.name,
+            price: product.price || 15.99,
+            quantity: 1
+          }],
+          'USD',
+          {
+            email: user.email
+          }
+        );
+        console.log('Paywall begin checkout tracked with email:', user.email);
+      }
+
       const checkoutParams: any = {
         priceId: product.priceId,
         mode: product.mode,

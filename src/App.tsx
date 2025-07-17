@@ -25,6 +25,8 @@ import { ReferralReport } from './components/Auth/ReferralReport';
 import { ReferralCodeAdmin } from './components/Admin/ReferralCodeAdmin';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SetPasswordPage from './components/Auth/SetPasswordPage';
+import { trackPageView } from './utils/googleAds';
+import { GoogleAdsTest } from './components/Test/GoogleAdsTest';
 
 // 🚨 CRITICAL FOR AI AGENTS: All pages/components that use hooks MUST be wrapped in PageWrapper
 // This prevents "must be used within Provider" errors
@@ -110,6 +112,17 @@ function App() {
         currentUser,
         isAuthenticated: true
       }));
+
+      // Track page view with Enhanced Conversions for authenticated users
+      if (user.email) {
+        trackPageView(
+          'CISSP Study App - Main',
+          window.location.href,
+          {
+            email: user.email
+          }
+        );
+      }
     } else if (!isAuthenticated && !authLoading) {
       setAppState(prev => ({
         ...prev,
@@ -213,6 +226,7 @@ function App() {
             />
           </PageWrapper>
         } />
+        <Route path="/test/google-ads" element={<GoogleAdsTest />} />
         <Route path="/" element={
           <>
             {isAuthenticated && appState.currentUser ? (

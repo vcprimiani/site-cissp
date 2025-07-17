@@ -3,6 +3,7 @@ import { Check, Loader, Crown, Tag } from 'lucide-react';
 import { StripeProduct } from '../../stripe-config';
 import { redirectToCheckout } from '../../services/stripe';
 import { useAuth } from '../../hooks/useAuth';
+import { trackBeginCheckout } from '../../utils/googleAds';
 
 interface PricingCardProps {
   product: StripeProduct;
@@ -17,7 +18,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
   currentPriceId,
   isActive = false 
 }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [couponCode, setCouponCode] = useState('');
@@ -40,6 +41,24 @@ export const PricingCard: React.FC<PricingCardProps> = ({
     setError(null);
 
     try {
+      // Track begin_checkout event with Enhanced Conversions
+      if (user?.email) {
+        trackBeginCheckout(
+          product.price || 15.99,
+          [{
+            item_id: product.id,
+            item_name: product.name,
+            price: product.price || 15.99,
+            quantity: 1
+          }],
+          'USD',
+          {
+            email: user.email
+          }
+        );
+        console.log('Begin checkout tracked with email:', user.email);
+      }
+
       const checkoutParams: any = {
         priceId: product.priceId,
         mode: product.mode,

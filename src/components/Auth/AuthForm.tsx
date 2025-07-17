@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { validatePassword, validateEmail } from '../../lib/supabase';
 import { Avatar } from '../UI/Avatar';
 import { LandingPage } from '../Landing/LandingPage';
+import { trackSignup } from '../../utils/googleAds';
 
 interface AuthFormProps {
   onBackToLanding?: () => void;
@@ -107,6 +108,12 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onBackToLanding }) => {
         const { error } = await signUp(formData.email, formData.password, formData.name);
         if (error) {
           setFormErrors({ submit: error });
+        } else {
+          // Track signup conversion with Enhanced Conversions
+          trackSignup({
+            email: formData.email
+          });
+          console.log('Signup conversion tracked with email:', formData.email);
         }
       }
     } catch (err: any) {

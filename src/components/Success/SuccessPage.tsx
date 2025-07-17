@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle, ArrowRight, Loader } from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
+import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-
-declare global {
-  interface Window {
-    gtag: (...args: any[]) => void;
-    dataLayer: any[];
-  }
-}
+import { trackPurchase } from '../../utils/googleAds';
 
 export const SuccessPage: React.FC = () => {
   const { subscription, loading, refreshSubscription, productName, isActive } = useSubscription();
+  const { user } = useAuth();
   const [hasRefreshed, setHasRefreshed] = useState(false);
   const [conversionTracked, setConversionTracked] = useState(false);
   const [redirectingToPassword, setRedirectingToPassword] = useState(false);
@@ -43,23 +39,20 @@ export const SuccessPage: React.FC = () => {
 
   // Track conversion when page loads (only once)
   useEffect(() => {
-    if (!conversionTracked && typeof window !== 'undefined' && window.gtag) {
+    if (!conversionTracked && user?.email) {
       // Get session ID from URL for transaction tracking
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session_id') || '';
       
-      // Fire conversion tracking
-      window.gtag('event', 'conversion', {
-        'send_to': 'AW-17287675778/ndgYCOGS1OcaEIL_s7NA',
-        'value': 15.99, // Monthly subscription price
-        'currency': 'USD',
-        'transaction_id': sessionId
+      // Track purchase conversion with Enhanced Conversions
+      trackPurchase(sessionId, 15.99, 'USD', {
+        email: user.email
       });
       
       setConversionTracked(true);
-      console.log('Conversion tracked for session:', sessionId);
+      console.log('Enhanced conversion tracked for session:', sessionId, 'with email:', user.email);
     }
-  }, [conversionTracked]);
+  }, [conversionTracked, user?.email]);
 
   const handleContinue = () => {
     console.log('SuccessPage: User clicked continue, redirecting to main app...');
