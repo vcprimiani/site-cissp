@@ -18,6 +18,8 @@ const SetPasswordPage: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     const emailParam = params.get('email') || localStorage.getItem('onboard_email') || '';
     setEmail(emailParam);
+    
+    console.log('SetPasswordPage: Email from params/storage:', emailParam);
   }, []);
 
   const handleSendMagicLink = async () => {
@@ -27,11 +29,15 @@ const SetPasswordPage: React.FC = () => {
     }
     setError(null);
     setLoading(true);
+    console.log('SetPasswordPage: Sending magic link to:', email);
+    
     const { error } = await supabase.auth.signInWithOtp({ email });
     setLoading(false);
     if (error) {
+      console.error('SetPasswordPage: Magic link error:', error);
       setError(error.message);
     } else {
+      console.log('SetPasswordPage: Magic link sent successfully');
       setMagicSent(true);
     }
   };
@@ -40,6 +46,7 @@ const SetPasswordPage: React.FC = () => {
     e.preventDefault();
     setError(null);
     setShowMagic(false);
+    
     if (!password || !confirm) {
       setError('Please fill in both fields.');
       return;
@@ -52,24 +59,38 @@ const SetPasswordPage: React.FC = () => {
       setError('Password must be at least 8 characters.');
       return;
     }
+    
     setLoading(true);
-    const { error: updateError } = await supabase.auth.updateUser({ password });
-    if (updateError) {
-      setLoading(false);
-      setError(updateError.message);
-      return;
-    }
-    // Immediately sign in with the new password
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (signInError) {
-      setShowMagic(true);
-      setError('Password updated, but failed to sign in: ' + signInError.message);
-    } else {
+    console.log('SetPasswordPage: Updating password for user');
+    
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      
+      if (updateError) {
+        console.error('SetPasswordPage: Password update error:', updateError);
+        setLoading(false);
+        setError(updateError.message);
+        return;
+      }
+      
+      console.log('SetPasswordPage: Password updated successfully');
+      
+      // Don't try to sign in immediately - just redirect to success
       setSuccess(true);
+      setLoading(false);
+      
+      // Clear the needs_password_setup flag
+      localStorage.removeItem('needs_password_setup');
+      
+      // Redirect after a short delay
       setTimeout(() => {
+        console.log('SetPasswordPage: Redirecting to main app');
         window.location.href = '/';
-      }, 1000);
+      }, 2000);
+    } catch (err: any) {
+      console.error('SetPasswordPage: Unexpected error:', err);
+      setLoading(false);
+      setError(err.message || 'An unexpected error occurred');
     }
   };
 
@@ -78,7 +99,11 @@ const SetPasswordPage: React.FC = () => {
       <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full">
         <h2 className="text-2xl font-bold mb-4 text-center">Set Your Password</h2>
         {success ? (
-          <div className="text-green-700 text-center font-semibold mb-4">Password updated! Redirecting...</div>
+          <div className="text-center">
+            <div className="text-green-700 font-semibold mb-4">✅ Password updated successfully!</div>
+            <div className="text-gray-600 text-sm mb-4">Redirecting you to the main application...</div>
+            <div className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          </div>
         ) : showMagic ? (
           <>
             <div className="text-red-700 font-semibold mb-4">Your session has expired or sign-in failed. Please log in again to set your password.</div>
