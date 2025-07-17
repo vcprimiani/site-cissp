@@ -12,7 +12,7 @@ export const OnboardPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [ref, setRef] = useState('');
-  const [status, setStatus] = useState<'init' | 'creating' | 'redirecting' | 'error'>('init');
+  const [status, setStatus] = useState<'init' | 'creating' | 'redirecting' | 'error' | 'magic_link_sent'>('init');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -73,8 +73,8 @@ export const OnboardPage: React.FC = () => {
             return;
           }
         
-          setError('An account with this email already exists. Please check your email for a magic link to continue.');
-          setStatus('error');
+          // Magic link sent successfully - show success message instead of error
+          setStatus('magic_link_sent');
           return;
         } else {
           console.error('OnboardPage: Signup error:', signUpResult.error);
@@ -182,6 +182,23 @@ export const OnboardPage: React.FC = () => {
           <div className="text-center">
             <div className="text-blue-600 font-semibold mb-2">Redirecting to payment...</div>
             <div className="text-sm text-gray-500">Please wait while we redirect you to complete your purchase.</div>
+          </div>
+        )}
+        
+        {status === 'magic_link_sent' && (
+          <div className="text-center">
+            <div className="text-green-600 font-semibold mb-2">Magic Link Sent!</div>
+            <div className="text-sm text-gray-600 mb-4">
+              An account with this email already exists. We've sent a magic link to your email address.
+              <br /><br />
+              Please check your inbox and click the link to continue with your onboarding.
+            </div>
+            <button
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+              onClick={() => setStatus('init')}
+            >
+              Try Again
+            </button>
           </div>
         )}
         
