@@ -354,7 +354,7 @@ Requirements:
 Format your response as JSON with this structure:
 {
   "domain": "Security and Risk Management",
-  "difficulty": "Medium",
+  "difficulty": "Hard",
   "question": "Your question here?",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": 0,

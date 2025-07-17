@@ -51,7 +51,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
   });
   const [advancedOptions, setAdvancedOptions] = useState<AIGenerationOptions>({
     domain: 'Security and Risk Management',
-    difficulty: 'Medium',
+    difficulty: 'Hard',
     questionType: 'scenario-based',
     scenarioType: 'technical',
     topic: '',
@@ -287,7 +287,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
           // Create generation options based on selected domain
           const generationOptions = selectedDomain ? {
             domain: selectedDomain,
-            difficulty: 'Medium' as const,
+            difficulty: 'Hard' as const,
             questionType: 'scenario-based' as const,
             scenarioType: 'technical' as const,
             topic: topic,

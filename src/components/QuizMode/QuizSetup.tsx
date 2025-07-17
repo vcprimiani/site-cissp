@@ -258,7 +258,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
       const domain = domains[Math.floor(Math.random() * domains.length)];
       const options = {
         domain,
-        difficulty: 'Medium' as 'Medium',
+        difficulty: 'Hard' as 'Hard',
         questionType: 'scenario-based' as 'scenario-based',
         scenarioType: 'technical' as 'technical',
         topic: `general concepts from ${domain}`,
