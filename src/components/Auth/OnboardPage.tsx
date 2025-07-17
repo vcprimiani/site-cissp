@@ -24,89 +24,89 @@ export const OnboardPage: React.FC = () => {
   }, []);
 
   const handleStartOnboarding = async () => {
-    if (!email) {
-      setError('Missing email. Please contact support.');
-      setStatus('error');
-      return;
-    }
+      if (!email) {
+        setError('Missing email. Please contact support.');
+        setStatus('error');
+        return;
+      }
 
     setStatus('creating');
     setError(null);
 
-    try {
+      try {
       // Generate a strong random password
       const password = Math.random().toString(36).slice(-10) + 'A1!';
       
       // Try to sign up the user
-      const signUpResult = await authHelpers.signUp(email, password, name || email.split('@')[0]);
-      
-      if (signUpResult.error) {
+        const signUpResult = await authHelpers.signUp(email, password, name || email.split('@')[0]);
+        
+        if (signUpResult.error) {
         // If user already exists, send magic link
-        if (signUpResult.error.message.toLowerCase().includes('user already registered')) {
-          const { error: magicLinkError } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/onboard?email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&ref=${encodeURIComponent(ref)}`
-          });
+          if (signUpResult.error.message.toLowerCase().includes('user already registered')) {
+            const { error: magicLinkError } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: `${window.location.origin}/onboard?email=${encodeURIComponent(email)}&name=${encodeURIComponent(name)}&ref=${encodeURIComponent(ref)}`
+            });
           
-          if (magicLinkError) {
-            setError('Failed to send magic link. Please try again.');
+            if (magicLinkError) {
+              setError('Failed to send magic link. Please try again.');
+              setStatus('error');
+              return;
+            }
+          
+          setError('An account with this email already exists. Please check your email for a magic link to continue.');
+            setStatus('error');
+            return;
+          } else {
+            setError(signUpResult.error.message);
             setStatus('error');
             return;
           }
-          
-          setError('An account with this email already exists. Please check your email for a magic link to continue.');
-          setStatus('error');
-          return;
-        } else {
-          setError(signUpResult.error.message);
-          setStatus('error');
-          return;
         }
-      }
-      
+        
       // User was created successfully
-      localStorage.setItem('needs_password_setup', 'true');
-      
+        localStorage.setItem('needs_password_setup', 'true');
+        
       // Store referral info if provided (simple approach)
-      if (ref && signUpResult.data.user) {
-        try {
-          await supabase.from('user_referrals').upsert({
-            user_id: signUpResult.data.user.id,
-            ref_code: ref
-          }, { onConflict: 'user_id' });
-        } catch (e) {
+        if (ref && signUpResult.data.user) {
+          try {
+            await supabase.from('user_referrals').upsert({
+              user_id: signUpResult.data.user.id,
+              ref_code: ref
+            }, { onConflict: 'user_id' });
+          } catch (e) {
           console.warn('Failed to store referral tracking:', e);
           // Don't fail onboarding for referral errors
+          }
         }
-      }
+        
+        setStatus('redirecting');
       
-      setStatus('redirecting');
+        // Redirect to Stripe checkout
+        const product = stripeProducts[0];
+        if (!product) {
+          setError('No product configured.');
+          setStatus('error');
+          return;
+        }
       
-      // Redirect to Stripe checkout
-      const product = stripeProducts[0];
-      if (!product) {
-        setError('No product configured.');
+        const session = await createCheckoutSession({
+          priceId: product.priceId,
+          mode: product.mode,
+          successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: `${window.location.origin}/`,
+        });
+      
+        if (session && session.url) {
+          window.location.href = session.url;
+        } else {
+          setError('Failed to create Stripe checkout session.');
+          setStatus('error');
+        }
+      } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred.');
         setStatus('error');
-        return;
       }
-      
-      const session = await createCheckoutSession({
-        priceId: product.priceId,
-        mode: product.mode,
-        successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${window.location.origin}/`,
-      });
-      
-      if (session && session.url) {
-        window.location.href = session.url;
-      } else {
-        setError('Failed to create Stripe checkout session.');
-        setStatus('error');
-      }
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
-      setStatus('error');
-    }
-  };
+    };
 
   if (authLoading) {
     return (
@@ -127,7 +127,7 @@ export const OnboardPage: React.FC = () => {
         
         <div className="mb-6 p-4 bg-gray-50 rounded-lg">
           <div className="text-sm">
-            <div><b>Email:</b> {email || <span className="text-red-500">(missing)</span>}</div>
+          <div><b>Email:</b> {email || <span className="text-red-500">(missing)</span>}</div>
             <div><b>Name:</b> {name || <span className="text-gray-400">(not provided)</span>}</div>
             <div><b>Referral:</b> {ref || <span className="text-gray-400">(none)</span>}</div>
           </div>
