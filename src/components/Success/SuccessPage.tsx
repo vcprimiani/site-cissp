@@ -11,16 +11,23 @@ declare global {
 }
 
 export const SuccessPage: React.FC = () => {
-  const { subscription, loading, refreshSubscription, productName } = useSubscription();
+  const { subscription, loading, refreshSubscription, productName, isActive } = useSubscription();
   const [hasRefreshed, setHasRefreshed] = useState(false);
   const [conversionTracked, setConversionTracked] = useState(false);
+  const [redirectingToPassword, setRedirectingToPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to set-password if needed
+    // Check if user needs to set password
     if (typeof window !== 'undefined' && localStorage.getItem('needs_password_setup') === 'true') {
+      console.log('SuccessPage: User needs password setup, redirecting...');
+      setRedirectingToPassword(true);
       localStorage.removeItem('needs_password_setup');
-      navigate('/set-password', { replace: true });
+      
+      // Add a small delay to ensure the page loads properly before redirect
+      setTimeout(() => {
+        navigate('/set-password', { replace: true });
+      }, 100);
       return;
     }
   }, [navigate]);
@@ -28,6 +35,7 @@ export const SuccessPage: React.FC = () => {
   useEffect(() => {
     // Refresh subscription data when the page loads
     if (!hasRefreshed) {
+      console.log('SuccessPage: Refreshing subscription data...');
       refreshSubscription();
       setHasRefreshed(true);
     }
@@ -54,10 +62,22 @@ export const SuccessPage: React.FC = () => {
   }, [conversionTracked]);
 
   const handleContinue = () => {
+    console.log('SuccessPage: User clicked continue, redirecting to main app...');
     // Clear the URL parameters and redirect to the main app
     window.history.replaceState({}, '', '/');
     window.location.href = '/';
   };
+  // Show loading while redirecting to password setup
+  if (redirectingToPassword) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="w-8 h-8 text-green-600 mx-auto mb-4 animate-spin" />
+          <p className="text-gray-600">Redirecting to password setup...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -94,7 +114,7 @@ export const SuccessPage: React.FC = () => {
               <h3 className="font-semibold text-green-900 mb-1">Active Subscription</h3>
               <p className="text-green-800 text-sm">{productName}</p>
               <p className="text-green-700 text-xs mt-1">
-                Status: {subscription.subscription_status}
+                Status: {subscription.status || 'Active'}
               </p>
             </div>
           )}

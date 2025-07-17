@@ -82,10 +82,15 @@ const SetPasswordPage: React.FC = () => {
       // Clear the needs_password_setup flag
       localStorage.removeItem('needs_password_setup');
       
+      // Also clear any onboarding email from localStorage
+      localStorage.removeItem('onboard_email');
+      
+      console.log('SetPasswordPage: Cleared localStorage flags, redirecting to main app...');
+      
       // Redirect after a short delay
       setTimeout(() => {
         console.log('SetPasswordPage: Redirecting to main app');
-        window.location.href = '/';
+        window.location.replace('/');
       }, 2000);
     } catch (err: any) {
       console.error('SetPasswordPage: Unexpected error:', err);
