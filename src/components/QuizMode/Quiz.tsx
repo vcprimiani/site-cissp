@@ -623,18 +623,18 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex justify-center w-full">
           <div className="w-full max-w-8xl mx-auto rounded-2xl shadow-xl bg-white/90 p-8 flex flex-col md:flex-row gap-8">
             {/* Controls Card (Sidebar on desktop, top on mobile) */}
-            <div className="w-full md:w-72 flex-shrink-0 mb-0">
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-2xl p-6 flex flex-col gap-6 shadow-lg backdrop-blur-sm">
+            <div className="w-full md:w-64 flex-shrink-0 mb0">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-4 flex flex-col gap-3 shadow-lg backdrop-blur-sm">
                 {/* Quiz Header Info */}
                 <div className="w-full">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <div className="w-8 h-8 gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                      <Target className="w-4 h-4" />
+                  <div className="flex items-center space-x-1.5 mb-2">
+                    <div className="w-6 h-6 gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                      <Target className="w-3 h-3" />
                     </div>
-                    <span className="font-bold text-gray-900 text-lg">Quiz</span>
+                    <span className="font-bold text-gray-90 text-base">Quiz</span>
                   </div>
                   {hasPersistedQuiz() && (
-                    <div className="text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block border border-blue-200">
+                    <div className="text-[10] text-blue-60 bg-blue-50 px-2 py-0.5 rounded-full inline-block border border-blue-200">
                       ⏸️ Resumed
                     </div>
                   )}
@@ -642,32 +642,32 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
                 {/* Progress Bar */}
                 <div className="w-full">
-                  <div className="text-xs text-gray-500 mb-2 font-medium">Progress</div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div className="text-[10] text-gray-500 mb-1 font-medium">Progress</div>
+                  <div className="w-full bg-gray-200 rounded-full h-10.5 overflow-hidden">
                     <div
                       className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transition-all duration-300 shadow-sm"
                       style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
                     />
                   </div>
-                  <div className="text-xs text-gray-600 text-center font-medium">
+                  <div className="text-[10] text-gray-600 text-center font-medium">
                     Question {currentIndex + 1} of {questions.length}
                   </div>
                 </div>
 
                 {/* Timers */}
-                <div className="space-y-4">
-                  <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-                    <div className="text-xs text-gray-500 mb-2 font-medium">Total Time</div>
-                    <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-blue-500" />
-                      <span className="font-mono text-lg font-bold">{formatTime(elapsedTime)}</span>
+                <div className="space-y-2">
+                  <div className="bg-white rounded-lg p-2.5 border border-gray-200 shadow-sm">
+                    <div className="text-[10] text-gray-500 mb-1 font-medium">Total Time</div>
+                    <div className="flex items-center space-x-1.5">
+                      <Clock className="w-3 h-3 text-blue-500" />
+                      <span className="font-mono text-sm font-bold">{formatTime(elapsedTime)}</span>
                     </div>
                   </div>
-                  <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-                    <div className="text-xs text-gray-500 mb-2 font-medium">Question Time</div>
-                    <div className="flex items-center space-x-2">
-                      <RotateCcw className="w-4 h-4 text-purple-500" />
-                      <span className={`font-mono text-lg font-bold ${questionElapsedTime >= 85 ? 'text-red-600' : 'text-gray-700'}`}>
+                  <div className="bg-white rounded-lg p-2.5 border border-gray-200 shadow-sm">
+                    <div className="text-[10] text-gray-500 mb-1 font-medium">Question Time</div>
+                    <div className="flex items-center space-x-1.5">
+                      <RotateCcw className="w-3 h-3 text-purple-500" />
+                      <span className={`font-mono text-sm font-bold ${questionElapsedTime >= 85 ? 'text-red-600' : 'text-gray-700'}`}>
                         {formatTime(questionElapsedTime)}
                       </span>
                     </div>
@@ -675,21 +675,21 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 </div>
 
                 {/* Text Size Controls */}
-                <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-                  <div className="text-xs text-gray-500 mb-3 font-medium">Text Size</div>
+                <div className="bg-white rounded-lg p-2.5 border border-gray-200 shadow-sm">
+                  <div className="text-[10] text-gray-500 mb-2 font-medium">Text Size</div>
                   <div className="flex items-center justify-between">
                     <button 
                       onClick={() => setTextSize(Math.max(0.8, textSize - 0.1))} 
-                      className="w-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 font-bold"
+                      className="w-6 bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 font-bold text-xs"
                     >
                       -
                     </button>
-                    <span className="text-sm font-bold text-gray-900 min-w-[3rem] text-center">
+                    <span className="text-xs font-bold text-gray-900 min-w-[20.5em] text-center">
                       {Math.round(textSize * 100)}%
                     </span>
                     <button 
                       onClick={() => setTextSize(Math.min(2, textSize + 0.1))} 
-                      className="w-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 font-bold"
+                      className="w-6 bg-gray-100 hover:bg-gray-200 rounded flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 font-bold text-xs"
                     >
                       +
                     </button>
@@ -697,26 +697,26 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 </div>
 
                 {/* Domain & Difficulty */}
-                <div className="w-full space-y-3">
-                  <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
+                <div className="w-full space-y-2">
+                  <div className="bg-white rounded-lg p-2 border border-gray-200 shadow-sm">
                     <span 
-                      className="w-full px-3 py-2 rounded-lg text-sm font-medium block text-center"
+                      className="w-full px-2 py-1 rounded text-xs font-medium block text-center"
                       style={{ 
                         backgroundColor: domainColor.primary, 
                         color: 'white',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                       }}
                     >
                       🏛️ {currentQuestion.domain}
                     </span>
                   </div>
-                  <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
+                  <div className="bg-white rounded-lg p-2 border border-gray-200 shadow-sm">
                     <span 
-                      className="w-full px-3 py-2 rounded-lg text-sm font-medium block text-center"
+                      className="w-full px-2 py-1 rounded text-xs font-medium block text-center"
                       style={{ 
                         backgroundColor: difficultyColor.primary, 
                         color: 'white',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                       }}
                     >
                       {currentQuestion.difficulty === 'Easy' && '🟢'}
@@ -732,33 +732,33 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                   <button 
                     onClick={handleFlagClick} 
                     disabled={flagsLoading}
-                    className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${isFlagged ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border border-red-600 shadow-lg hover:from-red-600 to-red-700 transform hover:scale-[1.02]' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 hover:border-gray-400 hover:shadow-md'}`}
+                    className={`w-full flex items-center justify-center space-x-1.5 px-3-2 rounded-lg text-xs font-semibold transition-all duration-20 ${isFlagged ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border border-red-600 shadow-lg hover:from-red-600 to-red-700 transform hover:scale-[1.02]' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 hover:border-gray-400 hover:shadow-md'}`}
                   > 
-                    <Flag className={`w-4 h-4 ${isFlagged ? 'text-white' : 'text-gray-600'}`} /> 
-                    <span>{isFlagged ? '🚩 Question Flagged' : 'Flag Question'}</span>
+                    <Flag className={`w-3 h-3 ${isFlagged ? 'text-white' : 'text-gray-600'}`} /> 
+                    <span>{isFlagged ? '🚩 Flagged' : 'Flag'}</span>
                   </button>
                 </div>
 
                 {/* Rating UI */}
                 {currentQuestion && currentUser && (
-                  <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                  <div className="bg-white rounded-lg p-2.5 border border-gray-200 shadow-sm">
                     <RatingButton questionId={currentQuestion.id} userId={currentUser.id} />
                   </div>
                 )}
 
                 {/* Navigation Buttons */}
-                <div className="w-full space-y-3">
+                <div className="w-full space-y-2">
                   <button 
                     onClick={handlePreviousQuestion} 
                     disabled={currentIndex === 0} 
-                    className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-200 border border-gray-300 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed bg-white shadow-sm hover:shadow-md"
+                    className="w-full flex items-center justify-center space-x-1.5 px-3 py-2 text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all duration-200 border border-gray-300 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed bg-white shadow-sm hover:shadow-md"
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft className="w-3 h-3" />
                     <span>Previous</span>
                   </button>
                   <button 
                     onClick={handleExit} 
-                    className="w-full px-4 py-3 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-200 border border-gray-300 hover:border-gray-400 bg-white shadow-sm hover:shadow-md"
+                    className="w-full px-3 py-2 text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all duration-200 border border-gray-300 hover:border-gray-40 bg-white shadow-sm hover:shadow-md"
                   >
                     Exit Quiz
                   </button>

@@ -434,23 +434,23 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
           )}
 
           {/* Dashboard Container */}
-          <div className="max-w-6xl mx-auto space-y-4 px-2">
+          <div className="max-w-6xl mx-auto space-y-3 px-1">
             {/* Compact Header with Stats */}
-            <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-xl shadow p-3 border border-purple-100">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow">
-                    <Target className="w-4 h-4 text-white" />
+            <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-xl shadow p-2 border border-purple-100">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center space-x-1.5">
+                  <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow">
+                    <Target className="w-3.5 h-3.5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-gray-900 leading-tight">Quiz Dashboard</h2>
-                    <p className="text-xs text-gray-600 leading-tight">Personalized quizzes</p>
+                    <h2 className="text-base font-bold text-gray-900 leading-tight">Quiz Dashboard</h2>
+                    <p className="text-[11px] text-gray-600 leading-tight">Personalized quizzes</p>
                   </div>
                 </div>
                 {sessionStats.questionsUsed > 0 && (
                   <button
                     onClick={handleResetSession}
-                    className="flex items-center space-x-1 px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs font-medium"
+                    className="flex items-center space-x-1 px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-[11px] font-medium"
                   >
                     <RotateCcw className="w-3 h-3" />
                     <span>Reset</span>
@@ -458,34 +458,34 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                 )}
               </div>
               {/* Compact Stats Row */}
-              <div className="grid grid-cols-4 gap-2">
-                <div className="bg-white rounded p-2 border border-gray-100 text-center">
-                  <div className="flex items-center justify-center space-x-1 mb-1">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-[10px] text-gray-500">Used</span>
+              <div className="grid grid-cols-4 gap-1.5">
+                <div className="bg-white rounded p-1.5 border border-gray-100 text-center">
+                  <div className="flex items-center justify-center space-x-0.5 mb-0.5">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <span className="text-[9px] text-gray-500">Used</span>
                   </div>
-                  <div className="text-base font-bold text-blue-600">{sessionStats.questionsUsed}</div>
+                  <div className="text-sm font-bold text-blue-600">{sessionStats.questionsUsed}</div>
                 </div>
-                <div className="bg-white rounded p-2 border border-gray-100 text-center">
-                  <div className="flex items-center justify-center space-x-1 mb-1">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <span className="text-[10px] text-gray-500">Avail</span>
+                <div className="bg-white rounded p-1.5 border border-gray-100 text-center">
+                  <div className="flex items-center justify-center space-x-0.5 mb-0.5">
+                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                    <span className="text-[9px] text-gray-500">Avail</span>
                   </div>
-                  <div className="text-base font-bold text-purple-600">{filteredQuestions.length}</div>
+                  <div className="text-sm font-bold text-purple-600">{filteredQuestions.length}</div>
                 </div>
-                <div className="bg-white rounded p-2 border border-gray-100 text-center">
-                  <div className="flex items-center justify-center space-x-1 mb-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-[10px] text-gray-500">Total</span>
+                <div className="bg-white rounded p-1.5 border border-gray-100 text-center">
+                  <div className="flex items-center justify-center space-x-0.5 mb-0.5">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                    <span className="text-[9px] text-gray-500">Total</span>
                   </div>
-                  <div className="text-base font-bold text-green-600">{questions.length}</div>
+                  <div className="text-sm font-bold text-green-600">{questions.length}</div>
                 </div>
-                <div className="bg-white rounded p-2 border border-gray-100 text-center">
-                  <div className="flex items-center justify-center space-x-1 mb-1">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                    <span className="text-[10px] text-gray-500">Time</span>
+                <div className="bg-white rounded p-1.5 border border-gray-100 text-center">
+                  <div className="flex items-center justify-center space-x-0.5 mb-0.5">
+                    <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
+                    <span className="text-[9px] text-gray-500">Time</span>
                   </div>
-                  <div className="text-base font-bold text-orange-600">{formatSessionDuration(sessionStats.sessionDuration)}</div>
+                  <div className="text-sm font-bold text-orange-600">{formatSessionDuration(sessionStats.sessionDuration)}</div>
                 </div>
               </div>
             </div>
