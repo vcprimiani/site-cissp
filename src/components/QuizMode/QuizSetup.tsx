@@ -434,70 +434,60 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
           )}
 
           {/* Dashboard Container */}
-          <div className="max-w-6xl mx-auto space-y-8 px-4">
-            {/* Hero Header */}
-            <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-100">
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Target className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Quiz Dashboard</h2>
-                  <p className="text-gray-600">Test your knowledge with personalized quizzes and track your progress</p>
-                </div>
-              </div>
-
-              {/* Stats Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-xs font-medium text-gray-500">Used Today</span>
+          <div className="max-w-6xl mx-auto space-y-4 px-2">
+            {/* Compact Header with Stats */}
+            <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 rounded-xl shadow p-3 border border-purple-100">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow">
+                    <Target className="w-4 h-4 text-white" />
                   </div>
-                  <div className="text-2xl font-bold text-blue-600">{sessionStats.questionsUsed}</div>
-                </div>
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <span className="text-xs font-medium text-gray-500">Available</span>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900 leading-tight">Quiz Dashboard</h2>
+                    <p className="text-xs text-gray-600 leading-tight">Personalized quizzes</p>
                   </div>
-                  <div className="text-2xl font-bold text-purple-600">{filteredQuestions.length}</div>
                 </div>
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-xs font-medium text-gray-500">Total</span>
-                  </div>
-                  <div className="text-2xl font-bold text-green-600">{questions.length}</div>
-                </div>
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                    <span className="text-xs font-medium text-gray-500">Duration</span>
-                  </div>
-                  <div className="text-2xl font-bold text-orange-600">{formatSessionDuration(sessionStats.sessionDuration)}</div>
-                </div>
-              </div>
-
-              {/* Session Reset */}
-              {sessionStats.questionsUsed > 0 && (
-                <div className="flex items-center justify-between bg-blue-50 rounded-xl p-4 border border-blue-200">
-                  <div className="flex items-center space-x-3">
-                    <Calendar className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm font-medium text-blue-900">Active Study Session</p>
-                      <p className="text-xs text-blue-700">Started {sessionStats.sessionStartTime.toLocaleString()}</p>
-                    </div>
-                  </div>
+                {sessionStats.questionsUsed > 0 && (
                   <button
                     onClick={handleResetSession}
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 font-medium text-sm"
+                    className="flex items-center space-x-1 px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs font-medium"
                   >
-                    <RotateCcw className="w-4 h-4" />
-                    <span>Reset Session</span>
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Reset</span>
                   </button>
+                )}
+              </div>
+              {/* Compact Stats Row */}
+              <div className="grid grid-cols-4 gap-2">
+                <div className="bg-white rounded p-2 border border-gray-100 text-center">
+                  <div className="flex items-center justify-center space-x-1 mb-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-[10px] text-gray-500">Used</span>
+                  </div>
+                  <div className="text-base font-bold text-blue-600">{sessionStats.questionsUsed}</div>
                 </div>
-              )}
+                <div className="bg-white rounded p-2 border border-gray-100 text-center">
+                  <div className="flex items-center justify-center space-x-1 mb-1">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-[10px] text-gray-500">Avail</span>
+                  </div>
+                  <div className="text-base font-bold text-purple-600">{filteredQuestions.length}</div>
+                </div>
+                <div className="bg-white rounded p-2 border border-gray-100 text-center">
+                  <div className="flex items-center justify-center space-x-1 mb-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-[10px] text-gray-500">Total</span>
+                  </div>
+                  <div className="text-base font-bold text-green-600">{questions.length}</div>
+                </div>
+                <div className="bg-white rounded p-2 border border-gray-100 text-center">
+                  <div className="flex items-center justify-center space-x-1 mb-1">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span className="text-[10px] text-gray-500">Time</span>
+                  </div>
+                  <div className="text-base font-bold text-orange-600">{formatSessionDuration(sessionStats.sessionDuration)}</div>
+                </div>
+              </div>
             </div>
 
             {/* Quiz Setup and Quick Actions Row */}
