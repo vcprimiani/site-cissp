@@ -746,6 +746,34 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                   </div>
                 )}
 
+                {/* Polling Controls */}
+                <div className="bg-white rounded-lg p-2.5 border border-gray-200 shadow-sm">
+                  <div className="text-[10] text-gray-500 mb-2 font-medium">Participant Polling</div>
+                  <div className="flex items-center justify-between mb-2">
+                    <button 
+                      onClick={() => setShowTallies(!showTallies)}
+                      className={`px-2 py-1 text-xs font-medium rounded transition-all duration-200 ${
+                        showTallies 
+                          ? 'bg-blue-100 text-blue-700 border border-blue-300' 
+                          : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
+                      }`}
+                    >
+                      {showTallies ? 'Hide' : 'Show'} Tallies
+                    </button>
+                    <button 
+                      onClick={resetTallies}
+                      className="px-2 py-1 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-all duration-200"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                  {showTallies && (
+                    <div className="text-xs text-gray-600">
+                      Total: {getTotalParticipants()} participants
+                    </div>
+                  )}
+                </div>
+
                 {/* Navigation Buttons */}
                 <div className="w-full space-y-2">
                   <button 
@@ -782,47 +810,78 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
               <div className="space-y-4 mb-8">
                 {currentQuestion.options.map((option, index) => (
                   <div key={index} className="relative">
-                    <button
-                      onClick={() => handleAnswerSelect(index)}
-                      disabled={showResult}
-                      className={`w-full text-left p-6 rounded-xl border-2 transition-all duration-200 ${
-                        selectedAnswer === index
-                          ? showResult
-                            ? index === currentQuestion.correctAnswer
-                              ? 'border-green-500 bg-green-50 text-green-900 shadow-lg'
-                              : 'border-red-500 bg-red-50 text-red-900 shadow-lg'
-                            : 'border-blue-500 bg-blue-50 text-blue-900 shadow-lg'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                      } ${showResult ? 'cursor-default' : 'cursor-pointer hover:shadow-md'}`}
-                    >
-                      <div className="flex items-start space-x-4">
-                        <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-sm flex-shrink-0 ${
+                    <div className="flex items-start space-x-4">
+                      <button
+                        onClick={() => handleAnswerSelect(index)}
+                        disabled={showResult}
+                        className={`flex-1 text-left p-6 rounded-xl border-2 transition-all duration-200 ${
                           selectedAnswer === index
                             ? showResult
                               ? index === currentQuestion.correctAnswer
-                                ? 'bg-green-500 text-white'
-                                : 'bg-red-500 text-white'
-                              : 'bg-blue-500 text-white'
-                            : 'border-gray-300 text-gray-100'
-                        }`}>
-                          {String.fromCharCode(65 + index)}
+                                ? 'border-green-500 bg-green-50 text-green-900 shadow-lg'
+                                : 'border-red-500 bg-red-50 text-red-900 shadow-lg'
+                              : 'border-blue-500 bg-blue-50 text-blue-900 shadow-lg'
+                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        } ${showResult ? 'cursor-default' : 'cursor-pointer hover:shadow-md'}`}
+                      >
+                        <div className="flex items-start space-x-4">
+                          <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-sm flex-shrink-0 ${
+                            selectedAnswer === index
+                              ? showResult
+                                ? index === currentQuestion.correctAnswer
+                                  ? 'bg-green-500 text-white'
+                                  : 'bg-red-500 text-white'
+                                : 'bg-blue-500 text-white'
+                              : 'border-gray-300 text-gray-100'
+                          }`}>
+                            {String.fromCharCode(65 + index)}
+                          </div>
+                          <div className="flex-1">
+                            <span className="block" style={{ fontSize: `${textSize}rem` }}>
+                              {option}
+                            </span>
+                            {showResult && (
+                              <div className="mt-2 text-sm">
+                                {index === currentQuestion.correctAnswer ? (
+                                  <span className="text-green-600 font-semibold">✓ Correct Answer</span>
+                                ) : selectedAnswer === index ? (
+                                  <span className="text-red-600 font-semibold">✗ Your Answer</span>
+                                ) : null}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <span className="block" style={{ fontSize: `${textSize}rem` }}>
-                            {option}
-                          </span>
-                          {showResult && (
-                            <div className="mt-2 text-sm">
-                              {index === currentQuestion.correctAnswer ? (
-                                <span className="text-green-600 font-semibold">✓ Correct Answer</span>
-                              ) : selectedAnswer === index ? (
-                                <span className="text-red-600 font-semibold">✗ Your Answer</span>
-                              ) : null}
-                            </div>
-                          )}
+                      </button>
+                      
+                      {/* Tally Controls */}
+                      {showTallies && (
+                        <div className="flex flex-col items-center space-y-1 ml-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTallyChange(index, true);
+                            }}
+                            className="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200"
+                            title="Add participant"
+                          >
+                            +
+                          </button>
+                          <div className="text-xs font-bold text-gray-700 min-w-[1.5rem] text-center">
+                            {tallyCounts[index]}
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTallyChange(index, false);
+                            }}
+                            className="w-6 h-6 bg-red-100 hover:bg-red-200 text-red-700 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200"
+                            title="Remove participant"
+                          >
+                            -
+                          </button>
                         </div>
-                      </div>
-                    </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
