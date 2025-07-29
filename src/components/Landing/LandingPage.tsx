@@ -333,7 +333,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   className="w-full sm:w-auto flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg disabled:opacity-50"
                 >
                   <Play className="w-5 h-5" />
-                  <span>{loading ? 'Loading...' : 'Start Free Trial - No Credit Card'}</span>
+                  <span>{loading ? 'Loading...' : 'Start Free Trial'}</span>
                   <ArrowRight className="w-5 h-5" />
                 </button>
                 <p className="text-sm text-gray-500 mt-2 text-center sm:text-left">
@@ -430,7 +430,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             </div>
             <div className="bg-white rounded-xl p-8 shadow text-center">
               <div className="flex items-center justify-center mb-4"><TrendingUp className="w-8 h-8 text-green-600" /></div>
-              <h3 className="font-semibold text-gray-900 mb-2">3. Upgrade for Unlimited Practice</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">3. Start Free Trial for Unlimited Practice</h3>
               <p className="text-gray-600">Unlock unlimited questions, advanced analytics, and all premium features.</p>
             </div>
           </div>
@@ -749,10 +749,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               className="w-full max-w-md mx-auto flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg disabled:opacity-50"
             >
               <Crown className="w-5 h-5" />
-              <span>{loading ? 'Loading...' : 'Register & Subscribe'}</span>
+              <span>{loading ? 'Loading...' : 'Start Free Trial'}</span>
               <ArrowRight className="w-5 h-5" />
             </button>
-            <p className="text-sm text-gray-600 mt-2">Create your account to access premium features and subscribe.</p>
+            <p className="text-sm text-gray-600 mt-2">Create your account to access premium features and start your free trial.</p>
             
             <p className="text-sm text-gray-500 mt-4">
               🔒 Secure payments • Cancel anytime • No long-term commitment
@@ -821,8 +821,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
           <div className="space-y-8">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Do I need to enter a credit card to start?</h3>
-              <p className="text-gray-600">No, you can start your free trial instantly without a credit card.</p>
+              <h3 className="font-semibold text-gray-900 mb-2">How do I get started?</h3>
+              <p className="text-gray-600">Simply click "Start Free Trial" to create your account and begin studying immediately.</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Is this platform officially endorsed by (ISC)²?</h3>
