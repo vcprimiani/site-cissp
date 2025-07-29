@@ -573,7 +573,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
             onClick={handleUpgradeClick}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-semibold shadow"
           >
-            Upgrade Now
+            Start Free Trial
           </button>
         </div>
       )}
@@ -702,7 +702,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
                   onClick={handleUpgradeClick}
                   className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
                 >
-                  Upgrade Now
+                  Start Free Trial
                 </button>
               </div>
             </div>
@@ -736,7 +736,7 @@ export const AIGenerator: React.FC<AIGeneratorProps> = ({
               className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
               onClick={handleUpgradeClick}
             >
-              Upgrade Now
+              Start Free Trial
             </button>
           </div>
         )}

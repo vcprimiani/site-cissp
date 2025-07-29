@@ -358,7 +358,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
               }}
               className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium shadow"
             >
-              Upgrade Now
+              Start Free Trial
             </button>
           </div>
           <Quiz
@@ -746,7 +746,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                   }}
                   className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
                 >
-                  Upgrade Now
+                  Start Free Trial
                 </button>
               </div>
             </div>

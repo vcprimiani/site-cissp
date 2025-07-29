@@ -146,7 +146,7 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
                 }}
                 className="px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-300 text-gray-900 font-semibold rounded-lg shadow hover:from-yellow-500 hover:to-yellow-400 transition-all text-lg mt-2"
               >
-                Upgrade Now
+                Start Free Trial
               </button>
               <div className="mt-4 text-sm text-gray-500">Premium unlocks unlimited quizzes, Casey explanations, and more.</div>
             </div>

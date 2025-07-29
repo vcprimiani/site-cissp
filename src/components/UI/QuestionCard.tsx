@@ -285,7 +285,7 @@ Study more at: https://site.cisspstudygroup.com`;
                     await redirectToCheckout({ priceId: product.priceId, mode: product.mode });
                   }}
                 >
-                  Upgrade Now
+                  Start Free Trial
                 </button>
               </div>
             )}
