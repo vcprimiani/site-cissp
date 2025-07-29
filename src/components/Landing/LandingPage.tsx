@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Brain, 
   Target, 
@@ -56,6 +56,33 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   const [loading, setLoading] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [showCouponField, setShowCouponField] = useState(false);
+
+  // Load Stripe pricing table script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://js.stripe.com/v3/pricing-table.js';
+    script.async = true;
+    
+    script.onload = () => {
+      // Initialize the pricing table after script loads
+      const pricingTableElement = document.getElementById('stripe-pricing-table');
+      if (pricingTableElement && (window as any).Stripe) {
+        const stripe = (window as any).Stripe('pk_live_51PONTuFZjU9QP2AzUbdSaPSPfPzObDwFZb868pklh0rEcxEOUEW9DieYgYS9bAkHKB0AH7l03yXMVH8qQLeay4Cx00jdMJcB6c');
+        stripe.loadStripePricingTable({
+          pricingTableId: 'prctbl_1Rq3IgFZjU9QP2AzIqWnKOpS',
+          element: pricingTableElement
+        });
+      }
+    };
+    
+    document.head.appendChild(script);
+
+    return () => {
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
 
   // Get the first (and only) product from our stripe config
   const product = stripeProducts[0];
@@ -703,7 +730,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
 
       {/* Pricing Section */}
       <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             Simple, Transparent Pricing
           </h2>
@@ -711,47 +738,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             Everything you need to pass CISSP, in one affordable package
           </p>
           
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border-2 border-blue-200 relative">
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-                Most Popular
-              </span>
+          {/* Stripe Pricing Table */}
+          <div className="flex justify-center">
+            <div 
+              id="stripe-pricing-table"
+              data-pricing-table-id="prctbl_1Rq3IgFZjU9QP2AzIqWnKOpS"
+              data-publishable-key="pk_live_51PONTuFZjU9QP2AzUbdSaPSPfPzObDwFZb868pklh0rEcxEOUEW9DieYgYS9bAkHKB0AH7l03yXMVH8qQLeay4Cx00jdMJcB6c">
             </div>
-            
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <Crown className="w-6 h-6 text-blue-600" />
-              <h3 className="text-2xl font-bold text-gray-900">Premium Subscription</h3>
-            </div>
-            
-            <div className="text-5xl font-bold text-blue-600 mb-2">
-              ${product?.price?.toFixed(2) || '15.99'}
-            </div>
-            <div className="text-gray-600 mb-8">per month</div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 text-left">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center space-x-3">
-                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="text-gray-700">{benefit}</span>
-                </div>
-              ))}
-            </div>
-            
-            <button
-              onClick={onGetStarted}
-              disabled={loading}
-              className="w-full max-w-md mx-auto flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg disabled:opacity-50"
-            >
-              <Crown className="w-5 h-5" />
-              <span>{loading ? 'Loading...' : 'Start Free Trial'}</span>
-              <ArrowRight className="w-5 h-5" />
-            </button>
-            <p className="text-sm text-gray-600 mt-2">Create your account to access premium features and start your free trial.</p>
-            
-            <p className="text-sm text-gray-500 mt-4">
-              🔒 Secure payments • Cancel anytime • No long-term commitment
-            </p>
           </div>
+          
+          <p className="text-sm text-gray-500 mt-6">
+            🔒 Secure payments • Cancel anytime • No long-term commitment
+          </p>
         </div>
       </section>
 
