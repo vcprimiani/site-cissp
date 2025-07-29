@@ -95,8 +95,15 @@ export const createCheckoutSession = async (params: CreateCheckoutSessionParams)
 
 export const redirectToCheckout = async (params: CreateCheckoutSessionParams): Promise<void> => {
   try {
-    const { url } = await createCheckoutSession(params);
-    window.location.href = url;
+    // Get the current user's email
+    const { data: { session } } = await supabase.auth.getSession();
+    const userEmail = session?.user?.email;
+    
+    // Use the new Stripe URL and append email as query parameter
+    const baseUrl = 'https://buy.stripe.com/eVqaEX2HwfXybFzfHhfEk04';
+    const checkoutUrl = userEmail ? `${baseUrl}?prefilled_email=${encodeURIComponent(userEmail)}` : baseUrl;
+    
+    window.location.href = checkoutUrl;
   } catch (error) {
     console.error('Error redirecting to checkout:', error);
     throw error;

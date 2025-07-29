@@ -3,7 +3,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { authHelpers } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { stripeProducts } from '../../stripe-config';
-import { createCheckoutSession } from '../../services/stripe';
+
 import { supabase } from '../../lib/supabase';
 
 export const OnboardPage: React.FC = () => {
@@ -113,22 +113,11 @@ export const OnboardPage: React.FC = () => {
         return;
       }
     
-      console.log('OnboardPage: Creating Stripe checkout session...');
-      const session = await createCheckoutSession({
-        priceId: product.priceId,
-        mode: product.mode,
-        successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${window.location.origin}/`,
-      });
-      console.log('OnboardPage: Stripe session created:', { sessionId: session?.sessionId, hasUrl: !!session?.url });
-    
-      if (session && session.url) {
-        console.log('OnboardPage: Redirecting to Stripe checkout...');
-        window.location.href = session.url;
-      } else {
-        setError('Failed to create Stripe checkout session.');
-        setStatus('error');
-      }
+      console.log('OnboardPage: Redirecting to Stripe checkout...');
+      // Use the new Stripe URL and append email as query parameter
+      const baseUrl = 'https://buy.stripe.com/eVqaEX2HwfXybFzfHhfEk04';
+      const checkoutUrl = email ? `${baseUrl}?prefilled_email=${encodeURIComponent(email)}` : baseUrl;
+      window.location.href = checkoutUrl;
       } catch (err: any) {
         console.error('OnboardPage: Unexpected error:', err);
         setError(err.message || 'An unexpected error occurred.');
