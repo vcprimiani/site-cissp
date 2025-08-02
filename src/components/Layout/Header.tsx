@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppMode, User } from '../../types';
-import { Database, Target, LogOut, Crown, Users, CheckCircle, XCircle, Settings, Volume2 } from 'lucide-react';
+import { Database, Target, LogOut, Crown, Users, CheckCircle, XCircle, Settings, Volume2, FileText } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { Avatar } from '../UI/Avatar';
 import { clearInvalidSession } from '../../lib/supabase';
@@ -111,6 +111,16 @@ export const Header: React.FC<HeaderProps> = ({
                 <Target className="w-4 h-4" />
               </button>
               <a
+                href="https://CISSPStudyGroup.com/mock-exam"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-md transition-all duration-200 text-gray-600 hover:text-gray-900"
+                title="Mock Exam"
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
+                <FileText className="w-4 h-4" />
+              </a>
+              <a
                 href="https://CISSPStudyGroup.com"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -148,6 +158,16 @@ export const Header: React.FC<HeaderProps> = ({
                 <Target className="w-4 h-4" />
                 <span className="hidden md:inline">Quiz</span>
               </button>
+              <a
+                href="https://CISSPStudyGroup.com/mock-exam"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+                title="Take a full mock exam"
+              >
+                <FileText className="w-4 h-4" />
+                <span className="hidden md:inline">Mock Exam</span>
+              </a>
             </div>
 
             {/* Separate Community button to the far right with a subtle outline glow */}
