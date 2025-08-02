@@ -114,12 +114,11 @@ export const Header: React.FC<HeaderProps> = ({
                 href="https://cissp-exam.netlify.app/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-md transition-all duration-200 text-gray-600 hover:text-gray-900 relative"
-                title="Beta Mock Exam"
+                className="p-2 rounded-md transition-all duration-200 text-gray-600 hover:text-gray-900"
+                title="Mock Exam"
                 style={{ display: 'flex', alignItems: 'center' }}
               >
                 <FileText className="w-4 h-4" />
-                <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-1 rounded-full font-bold">BETA</span>
               </a>
               <a
                 href="https://CISSPStudyGroup.com"
@@ -163,12 +162,11 @@ export const Header: React.FC<HeaderProps> = ({
                 href="https://cissp-exam.netlify.app/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-gray-600 hover:text-gray-900 relative"
-                title="Take a full beta mock exam"
+                className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+                title="Take a full mock exam"
               >
                 <FileText className="w-4 h-4" />
                 <span className="hidden md:inline">Mock Exam</span>
-                <span className="bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold ml-1">BETA</span>
               </a>
             </div>
 
