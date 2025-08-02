@@ -86,37 +86,37 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
 
   const features = [
     {
-      icon: Target,
-      title: 'Full Mock Exams',
-      description: 'Complete 4-hour CISSP exam simulations',
-      details: 'Practice with realistic exam environments, timing, and question distribution across all 8 domains with detailed performance analysis.',
+      icon: Brain,
+      title: 'Casey - AI Cybersecurity Expert',
+      description: 'Your personal CISSP study assistant available 24/7',
+      details: 'Ask Casey anything about CISSP concepts, get instant explanations, and receive personalized guidance for your study journey.',
       color: 'from-purple-600 to-blue-600',
       bgColor: 'bg-purple-50',
       textColor: 'text-purple-600'
     },
     {
-      icon: Lightbulb,
-      title: 'Unlimited AI-Generated Questions',
-      description: 'High-quality practice questions powered by university-grade AI',
-      details: 'Generate unlimited realistic CISSP questions using the same OpenAI models trusted by top universities worldwide.',
+      icon: Target,
+      title: 'Interactive Quiz Mode',
+      description: 'Take quizzes with detailed scoring and progress tracking',
+      details: 'Practice with timed quizzes, get instant feedback, track your progress across all domains, and review detailed explanations.',
       color: 'from-green-600 to-emerald-600',
       bgColor: 'bg-green-50',
       textColor: 'text-green-600'
     },
     {
       icon: Database,
-      title: 'Comprehensive Practice App',
-      description: 'Complete study platform with advanced features',
-      details: 'Interactive quizzes, progress tracking, bookmarking, and personalized learning paths designed for CISSP success.',
+      title: 'Question Bank Management',
+      description: 'Organize and manage your CISSP question collection',
+      details: 'Build a comprehensive database of practice questions with smart categorization, search capabilities, and bookmarking features.',
       color: 'from-blue-600 to-cyan-600',
       bgColor: 'bg-blue-50',
       textColor: 'text-blue-600'
     },
     {
-      icon: Brain,
-      title: 'Casey AI Assistant',
-      description: 'Your personal cybersecurity study expert available 24/7',
-      details: 'Ask Casey anything about CISSP concepts, get instant explanations, and receive personalized guidance for your study journey.',
+      icon: Lightbulb,
+      title: 'AI Question Generator',
+      description: 'Generate unlimited CISSP practice questions with advanced AI',
+      details: 'Create realistic exam-style questions across all 8 CISSP domains with customizable difficulty and focus areas.',
       color: 'from-indigo-600 to-purple-600',
       bgColor: 'bg-indigo-50',
       textColor: 'text-indigo-600'
@@ -236,10 +236,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   ];
 
   const benefits = [
-    'Full 4-hour mock exam simulations',
-    'Unlimited AI-generated questions',
-    'University-grade OpenAI models',
-    'Complete practice app with all features',
+    'Unlimited AI question generation',
     'Casey AI assistant available 24/7',
     'All 8 CISSP domains covered',
     'Advanced question customization',
@@ -248,8 +245,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
     'Manager\'s perspective insights',
     'Keyword highlighting feature',
     'Bookmark and save questions',
+    'Daily free quiz for all users',
+    'Session tracking and persistence',
     'Cross-platform sync (iOS, Android, Web)',
-    '7-day free trial included'
+    'Unlimited full-length mock exams (coming soon)',
+    'Cancel anytime - no commitment'
   ];
 
   return (
@@ -316,13 +316,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               
               <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
                 Master CISSP with
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> University-Grade AI </span>
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> AI-Powered </span>
                 Study Tools
               </h1>
               
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Join thousands studying for CISSP using the same OpenAI models trusted by top universities worldwide. 
-                Full mock exams, unlimited AI-generated questions, and comprehensive practice tools.
+                Join thousands studying for CISSP using Casey AI, your personal cybersecurity expert. 
+                Generate unlimited questions, get instant explanations, and track progress across all 8 domains.
               </p>
               
               {/* Single Strong CTA */}
@@ -333,7 +333,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   className="w-full sm:w-auto flex items-center justify-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg disabled:opacity-50"
                 >
                   <Play className="w-5 h-5" />
-                  <span>{loading ? 'Loading...' : 'Start Free Trial'}</span>
+                  <span>{loading ? 'Loading...' : 'Start Free Trial - No Credit Card'}</span>
                   <ArrowRight className="w-5 h-5" />
                 </button>
                 <p className="text-sm text-gray-500 mt-2 text-center sm:text-left">
@@ -345,15 +345,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <div className="flex flex-wrap items-center justify-center sm:justify-start space-x-6 text-sm text-gray-600 mb-8">
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>Full mock exams</span>
+                  <span>Free daily quiz</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>Unlimited AI questions</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>University-grade AI</span>
+                  <span>Instant access</span>
                 </div>
               </div>
             </div>
@@ -414,65 +410,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* University-Grade AI Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-semibold inline-block mb-4">
-              🎓 UNIVERSITY-GRADE AI
-            </div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Powered by the Same AI Models Trusted by Top Universities
-            </h2>
-            <p className="text-xl text-gray-600 mb-8">
-              We use OpenAI's advanced models that are now trusted for education by leading universities worldwide
-            </p>
-          </div>
-          
-          <div className="bg-white rounded-2xl p-8 shadow-xl border border-blue-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  ChatGPT for Education
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  OpenAI has introduced ChatGPT for Education, bringing the same powerful AI models used by top universities to educational platforms worldwide. Our platform leverages these same advanced models to provide you with the highest quality CISSP study experience.
-                </p>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Same AI models as top universities</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Advanced question generation</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Intelligent explanations</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Personalized learning paths</span>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6">
-                <h4 className="font-semibold text-blue-900 mb-3">Why This Matters</h4>
-                <p className="text-blue-800 text-sm mb-4">
-                  When you study with our platform, you're getting the same level of AI assistance that students at top universities receive. This means higher quality questions, more accurate explanations, and a study experience that truly prepares you for the CISSP exam.
-                </p>
-                <div className="bg-white rounded-lg p-3">
-                  <p className="text-xs text-gray-600">
-                    "OpenAI is working with universities to bring ChatGPT to education, ensuring students have access to the same powerful AI tools used in professional environments."
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* How It Works Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -482,19 +419,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-xl p-8 shadow text-center">
-              <div className="flex items-center justify-center mb-4"><Target className="w-8 h-8 text-blue-600" /></div>
-              <h3 className="font-semibold text-gray-900 mb-2">1. Take Full Mock Exams</h3>
-              <p className="text-gray-600">Practice with complete 4-hour exam simulations that mirror the real CISSP test.</p>
+              <div className="flex items-center justify-center mb-4"><UserCheck className="w-8 h-8 text-blue-600" /></div>
+              <h3 className="font-semibold text-gray-900 mb-2">1. Create an Account</h3>
+              <p className="text-gray-600">Sign up in seconds and access your dashboard instantly.</p>
             </div>
             <div className="bg-white rounded-xl p-8 shadow text-center">
-              <div className="flex items-center justify-center mb-4"><Lightbulb className="w-8 h-8 text-purple-600" /></div>
-              <h3 className="font-semibold text-gray-900 mb-2">2. Generate Unlimited AI Questions</h3>
-              <p className="text-gray-600">Create high-quality practice questions using university-grade AI models.</p>
+              <div className="flex items-center justify-center mb-4"><Sparkles className="w-8 h-8 text-purple-600" /></div>
+              <h3 className="font-semibold text-gray-900 mb-2">2. Try Some Questions Free</h3>
+              <p className="text-gray-600">Explore quizzes, AI explanations, and daily practice at no cost.</p>
             </div>
             <div className="bg-white rounded-xl p-8 shadow text-center">
-              <div className="flex items-center justify-center mb-4"><Database className="w-8 h-8 text-green-600" /></div>
-              <h3 className="font-semibold text-gray-900 mb-2">3. Use Complete Practice App</h3>
-              <p className="text-gray-600">Access comprehensive study tools with progress tracking and personalized learning.</p>
+              <div className="flex items-center justify-center mb-4"><TrendingUp className="w-8 h-8 text-green-600" /></div>
+              <h3 className="font-semibold text-gray-900 mb-2">3. Upgrade for Unlimited Practice</h3>
+              <p className="text-gray-600">Unlock unlimited questions, advanced analytics, and all premium features.</p>
             </div>
           </div>
         </div>
@@ -600,10 +537,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Our Three Core Features
+              What Makes Casey AI Unique
             </h2>
             <p className="text-xl text-gray-600">
-              Discover the key features that make our platform the most effective CISSP study tool.
+              Discover the key features that make Casey AI the most effective CISSP study tool.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -705,16 +642,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* Full Mock Exams Section */}
+      {/* Mock Exam Coming Soon Banner */}
       <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-purple-200">
             <div className="text-center mb-8">
               <div className="bg-purple-100 text-purple-800 px-4 py-1 rounded-full text-sm font-semibold inline-block mb-4">
-                🎯 AVAILABLE NOW
+                🚀 COMING SOON
               </div>
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                Full 4-Hour Mock Exam Simulations
+                Unlimited Full-Length Mock Exams
               </h2>
               <p className="text-xl text-gray-600 mb-6">
                 Practice with realistic CISSP exam simulations that mirror the real test environment
@@ -754,16 +691,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             
             <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-6 text-center">
               <h3 className="text-lg font-semibold text-purple-900 mb-2">
-                🎯 Start Your Mock Exam Today
+                🎯 Early Access for Subscribers
               </h3>
               <p className="text-purple-800 mb-4">
-                Begin your CISSP preparation with realistic exam simulations available right now!
+                Subscribe now and get priority access to unlimited mock exams when they launch!
               </p>
               <button
                 onClick={onGetStarted}
                 className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 font-semibold"
               >
-                Start Mock Exam
+                Get Early Access
               </button>
             </div>
           </div>
@@ -828,10 +765,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-            Ready to Master CISSP with University-Grade AI?
+            Ready to Study Smarter?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join thousands of security professionals using the same AI models trusted by top universities worldwide.
+            Join thousands of security professionals using Casey AI to enhance their CISSP preparation.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -855,24 +792,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
 
           {/* Value Proposition */}
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
-            <h3 className="text-lg font-semibold text-white mb-2">🎯 Why Choose Our Platform?</h3>
+            <h3 className="text-lg font-semibold text-white mb-2">🎯 Why Choose Casey AI?</h3>
             <p className="text-blue-100 text-sm">
-              Full mock exams, unlimited AI-generated questions, and comprehensive practice tools powered by university-grade AI models.
+              AI-powered study assistance, unlimited practice questions, and personalized learning paths designed for CISSP preparation.
             </p>
           </div>
           
           <div className="flex items-center justify-center space-x-8 text-blue-100 text-sm">
             <div className="flex items-center space-x-1">
               <CheckCircle className="w-4 h-4" />
-              <span>Full mock exams</span>
+              <span>Free daily quiz included</span>
             </div>
             <div className="flex items-center space-x-1">
               <CheckCircle className="w-4 h-4" />
-              <span>University-grade AI</span>
+              <span>Instant access</span>
             </div>
             <div className="flex items-center space-x-1">
               <CheckCircle className="w-4 h-4" />
-              <span>7-day free trial</span>
+              <span>Cancel anytime</span>
             </div>
           </div>
         </div>
@@ -884,8 +821,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
           <div className="space-y-8">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">What makes your AI questions different?</h3>
-              <p className="text-gray-600">We use the same OpenAI models trusted by top universities worldwide, ensuring the highest quality and most accurate CISSP practice questions.</p>
+              <h3 className="font-semibold text-gray-900 mb-2">Do I need to enter a credit card to start?</h3>
+              <p className="text-gray-600">No, you can start your free trial instantly without a credit card.</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Is this platform officially endorsed by (ISC)²?</h3>
@@ -896,8 +833,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <p className="text-gray-600">Yes, your progress syncs across iOS, Android, and web browsers.</p>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">What makes our platform different?</h3>
-              <p className="text-gray-600">We offer full mock exams, unlimited AI-generated questions using university-grade models, and a comprehensive practice app - all in one platform.</p>
+              <h3 className="font-semibold text-gray-900 mb-2">What makes Casey AI different?</h3>
+              <p className="text-gray-600">Casey AI combines unlimited AI-generated questions, instant explanations, and personalized analytics to help you study smarter, not harder.</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Can I cancel anytime?</h3>
