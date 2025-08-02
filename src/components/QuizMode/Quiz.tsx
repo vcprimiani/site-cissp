@@ -121,6 +121,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   };
 
   const isLastQuestion = currentIndex === questions.length - 1;
+  const allQuestionsAnswered = userAnswers.every(answer => answer !== null);
 
   // Save state whenever it changes
   useEffect(() => {
@@ -146,6 +147,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     });
   }, [currentIndex, userAnswers, selectedAnswer, showResult, questionStartTime, questionTimes, elapsedTime, questionElapsedTime, tallyCounts, showTallies, isEnhancedExplanation, enhancedExplanation, loadingEnhancedExplanation, enhancedExplanationError, textSize]);
 
+
+
   // Timer effect
   useEffect(() => {
     // Only run timer if not showing result (i.e., not in review mode)
@@ -170,8 +173,17 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   // Reset selected answer and tallies when question changes
   useEffect(() => {
-    setSelectedAnswer(userAnswers[currentIndex]);
-    setShowResult(false);
+    // Restore the saved answer for this question
+    const savedAnswer = userAnswers[currentIndex];
+    setSelectedAnswer(savedAnswer);
+    
+    // If there's a saved answer, show the result (user has already answered this question)
+    if (savedAnswer !== null) {
+      setShowResult(true);
+    } else {
+      setShowResult(false);
+    }
+    
     // Only reset timer when moving to a new question, not when just showing result
     setQuestionStartTime(Date.now());
     setQuestionElapsedTime(0); // Reset per-question timer
@@ -183,6 +195,39 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     setLoadingEnhancedExplanation(false);
     setEnhancedExplanationError(null);
   }, [currentIndex, userAnswers]);
+
+  // Handle quiz completion when resuming with all questions answered
+  useEffect(() => {
+    if (allQuestionsAnswered && isLastQuestion && showResult) {
+      // If we're resuming a quiz where all questions are answered and we're on the last question
+      // with results shown, we should complete the quiz
+      const handleResumeCompletion = async () => {
+        const timeSpent = Math.floor((Date.now() - questionStartTime) / 1000);
+        const finalTimes = [...questionTimes];
+        finalTimes[currentIndex] = timeSpent;
+        
+        const results: QuizResults = {
+          totalQuestions: questions.length,
+          correctAnswers: userAnswers.reduce<number>((count, answer, index) => 
+            answer !== null && answer === questions[index].correctAnswer ? count + 1 : count, 0
+          ),
+          timeSpent: Math.floor((Date.now() - startTime) / 1000),
+          questionResults: questions.map((q, index) => ({
+            question: q,
+            userAnswer: userAnswers[index],
+            isCorrect: userAnswers[index] !== null && userAnswers[index] === q.correctAnswer,
+            timeSpent: finalTimes[index] || 0
+          }))
+        };
+        
+        clearPersistedState();
+        onComplete(results);
+      };
+      
+      // Small delay to ensure state is fully updated
+      setTimeout(handleResumeCompletion, 100);
+    }
+  }, [allQuestionsAnswered, isLastQuestion, showResult, userAnswers, questions, currentIndex, questionStartTime, questionTimes, startTime, clearPersistedState, onComplete]);
 
   // Error handling for missing/corrupted persisted state
   useEffect(() => {
@@ -357,7 +402,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     newAnswers[currentIndex] = selectedAnswer;
     setUserAnswers(newAnswers);
 
-    if (isLastQuestion) {
+    if (isLastQuestion && allQuestionsAnswered) {
       // Quiz complete - clear persisted state and calculate results
       clearPersistedState();
       
@@ -392,6 +437,10 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
       onComplete(results);
+    } else if (isLastQuestion && !allQuestionsAnswered) {
+      // On last question but not all questions answered - stay on current question
+      setSelectedAnswer(null);
+      setShowResult(false);
     } else {
       // Next question
       setCurrentIndex(prev => prev + 1);
@@ -825,6 +874,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                                 ? 'border-green-500 bg-green-50 text-green-900 shadow-lg'
                                 : 'border-red-500 bg-red-50 text-red-900 shadow-lg'
                               : 'border-blue-500 bg-blue-50 text-blue-900 shadow-lg'
+                            : showResult && index === currentQuestion.correctAnswer
+                            ? 'border-green-500 bg-green-50 text-green-900 shadow-lg'
                             : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                         } ${showResult ? 'cursor-default' : 'cursor-pointer hover:shadow-md'}`}
                       >
@@ -836,6 +887,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                                   ? 'bg-green-500 text-white'
                                   : 'bg-red-500 text-white'
                                 : 'bg-blue-500 text-white'
+                              : showResult && index === currentQuestion.correctAnswer
+                              ? 'bg-green-500 text-white'
                               : 'border-gray-300 text-gray-100'
                           }`}>
                             {String.fromCharCode(65 + index)}
@@ -848,7 +901,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                               <div className="mt-2 text-sm">
                                 {index === currentQuestion.correctAnswer ? (
                                   <span className="text-green-600 font-semibold">✓ Correct Answer</span>
-                                ) : selectedAnswer === index ? (
+                                ) : selectedAnswer === index && index !== currentQuestion.correctAnswer ? (
                                   <span className="text-red-600 font-semibold">✗ Your Answer</span>
                                 ) : null}
                               </div>
