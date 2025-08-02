@@ -236,7 +236,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   ];
 
   const benefits = [
-    'Full 4-hour mock exam simulations',
+         'Full 3-hour mock exam simulations',
     'Unlimited AI-generated questions',
     'University-grade OpenAI models',
     'Complete practice app with all features',
@@ -361,10 +361,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                          {/* Hero Image/Demo - Three Core Features */}
              <div className="relative">
                <div className="bg-white rounded-2xl shadow-2xl p-6 border border-gray-200">
-                 <div className="text-center mb-6">
-                   <h3 className="text-xl font-bold text-gray-900 mb-2">Our Three Core Features</h3>
-                   <p className="text-sm text-gray-600">Everything you need to master CISSP</p>
-                 </div>
+                                   <div className="text-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Everything you need to master CISSP</h3>
+                    <p className="text-sm text-gray-600">Complete study platform with advanced features</p>
+                  </div>
                  
                  <div className="space-y-4 mb-6">
                    <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
@@ -372,8 +372,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                        <Target className="w-5 h-5 text-white" />
                      </div>
                      <div>
-                       <p className="font-semibold text-gray-900 text-sm">Full Mock Exams</p>
-                       <p className="text-xs text-gray-600">4-hour exam simulations</p>
+                                               <p className="font-semibold text-gray-900 text-sm">Full Mock Exams</p>
+                        <p className="text-xs text-gray-600">3-hour exam simulations</p>
                      </div>
                      <div className="ml-auto bg-green-100 px-2 py-1 rounded-full">
                        <span className="text-xs font-medium text-green-800">Available</span>
@@ -448,26 +448,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">
                   ChatGPT for Education
                 </h3>
-                <p className="text-gray-600 mb-6">
-                  OpenAI has introduced ChatGPT for Education, bringing the same powerful AI models used by top universities to educational platforms worldwide. Our platform leverages these same advanced models to provide you with the highest quality CISSP study experience.
-                </p>
+                                 <p className="text-gray-600 mb-6">
+                   OpenAI has introduced ChatGPT for Education, bringing the same powerful AI models used by top universities to educational platforms worldwide. Our platform combines university-grade AI models with our proprietary bank of seed questions and advanced mechanisms to ensure randomness and quality, providing you with the highest quality CISSP study experience.
+                 </p>
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Same AI models as top universities</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Advanced question generation</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Intelligent explanations</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Personalized learning paths</span>
-                  </div>
+                                     <div className="flex items-center space-x-3">
+                     <CheckCircle className="w-5 h-5 text-green-500" />
+                     <span className="text-gray-700">University-grade AI models</span>
+                   </div>
+                   <div className="flex items-center space-x-3">
+                     <CheckCircle className="w-5 h-5 text-green-500" />
+                     <span className="text-gray-700">Proprietary seed question bank</span>
+                   </div>
+                   <div className="flex items-center space-x-3">
+                     <CheckCircle className="w-5 h-5 text-green-500" />
+                     <span className="text-gray-700">Advanced quality mechanisms</span>
+                   </div>
+                   <div className="flex items-center space-x-3">
+                     <CheckCircle className="w-5 h-5 text-green-500" />
+                     <span className="text-gray-700">Intelligent explanations</span>
+                   </div>
                 </div>
               </div>
               <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6">
@@ -496,8 +496,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-xl p-8 shadow text-center">
               <div className="flex items-center justify-center mb-4"><Target className="w-8 h-8 text-blue-600" /></div>
-              <h3 className="font-semibold text-gray-900 mb-2">1. Take Full Mock Exams</h3>
-              <p className="text-gray-600">Practice with complete 4-hour exam simulations that mirror the real CISSP test.</p>
+                             <h3 className="font-semibold text-gray-900 mb-2">1. Take Full Mock Exams</h3>
+               <p className="text-gray-600">Practice with complete 3-hour exam simulations that mirror the real CISSP test.</p>
             </div>
             <div className="bg-white rounded-xl p-8 shadow text-center">
               <div className="flex items-center justify-center mb-4"><Lightbulb className="w-8 h-8 text-purple-600" /></div>
@@ -545,40 +545,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 </div>
               </div>
               
-              <button
-                onClick={onGetStarted}
-                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold"
-              >
-                See How Casey AI Solves This
-              </button>
+                             <button
+                 onClick={onGetStarted}
+                 className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold"
+               >
+                 See How AI Solves This
+               </button>
             </div>
             
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">The Casey AI Solution</h3>
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <CheckCircle className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">AI-Generated Questions</h4>
-                    <p className="text-gray-600">Unlimited, realistic questions across all 8 domains</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <CheckCircle className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">24/7 Expert Assistant</h4>
-                    <p className="text-gray-600">Casey explains complex concepts instantly</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <CheckCircle className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Personalized Learning</h4>
-                    <p className="text-gray-600">Track progress and focus on weak areas</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+                         <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8">
+               <h3 className="text-2xl font-bold text-gray-900 mb-6">The AI Solution</h3>
+               <div className="space-y-4">
+                 <div className="flex items-start space-x-3">
+                   <CheckCircle className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
+                   <div>
+                     <h4 className="font-semibold text-gray-900">AI-Generated Questions</h4>
+                     <p className="text-gray-600">Unlimited, realistic questions across all 8 domains</p>
+                   </div>
+                 </div>
+                 <div className="flex items-start space-x-3">
+                   <CheckCircle className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
+                   <div>
+                     <h4 className="font-semibold text-gray-900">24/7 Expert Assistant</h4>
+                     <p className="text-gray-600">AI explains complex concepts instantly</p>
+                   </div>
+                 </div>
+                 <div className="flex items-start space-x-3">
+                   <CheckCircle className="w-6 h-6 text-green-500 mt-1 flex-shrink-0" />
+                   <div>
+                     <h4 className="font-semibold text-gray-900">Personalized Learning</h4>
+                     <p className="text-gray-600">Track progress and focus on weak areas</p>
+                   </div>
+                 </div>
+               </div>
+             </div>
           </div>
         </div>
       </section>
@@ -611,14 +611,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       {/* Feature Highlights (interactive cards) */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Our Three Core Features
-            </h2>
-            <p className="text-xl text-gray-600">
-              Discover the key features that make our platform the most effective CISSP study tool.
-            </p>
-          </div>
+                     <div className="text-center mb-12">
+             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+               Advanced Study Features
+             </h2>
+             <p className="text-xl text-gray-600">
+               Discover the key features that make our platform the most effective CISSP study tool.
+             </p>
+           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <div
@@ -726,9 +726,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <div className="bg-purple-100 text-purple-800 px-4 py-1 rounded-full text-sm font-semibold inline-block mb-4">
                 🎯 AVAILABLE NOW
               </div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                Full 4-Hour Mock Exam Simulations
-              </h2>
+                             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                 Full 3-Hour Mock Exam Simulations
+               </h2>
               <p className="text-xl text-gray-600 mb-6">
                 Practice with realistic CISSP exam simulations that mirror the real test environment
               </p>
@@ -736,10 +736,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="w-5 h-5 text-purple-600" />
-                  <span className="text-gray-700">Full 4-hour exam simulations</span>
-                </div>
+                                 <div className="flex items-center space-x-3">
+                   <CheckCircle className="w-5 h-5 text-purple-600" />
+                   <span className="text-gray-700">Full 3-hour exam simulations</span>
+                 </div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="w-5 h-5 text-purple-600" />
                   <span className="text-gray-700">Real exam environment & timing</span>
@@ -857,13 +857,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <span>{loading ? 'Loading...' : 'Start Free Trial'}</span>
               <ArrowRight className="w-5 h-5" />
             </button>
-            <button 
-              onClick={onGetStarted}
-              className="flex items-center justify-center space-x-2 px-8 py-4 border-2 border-white text-white rounded-xl hover:bg-white hover:text-blue-600 transition-all duration-200 font-semibold"
-            >
-              <BookOpen className="w-5 h-5" />
-              <span>Try Daily Quiz</span>
-            </button>
+            
           </div>
 
           {/* Value Proposition */}
