@@ -29,6 +29,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   const { bookmarkedIds, toggleBookmark } = useBookmarks();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('');
+  const [filterDomain, setFilterDomain] = useState('');
   const [showColorKey, setShowColorKey] = useState(false);
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
@@ -41,11 +42,13 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
         q.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
       // Difficulty filter
       const difficultyMatch = !filterDifficulty || q.difficulty === filterDifficulty;
+      // Domain filter
+      const domainMatch = !filterDomain || q.domain === filterDomain;
       // Bookmark filter
       const bookmarkMatch = !showBookmarksOnly || bookmarkedIds.includes(q.id);
-      return searchMatch && difficultyMatch && bookmarkMatch;
+      return searchMatch && difficultyMatch && domainMatch && bookmarkMatch;
     });
-  }, [questions, searchTerm, filterDifficulty, showBookmarksOnly, bookmarkedIds]);
+  }, [questions, searchTerm, filterDifficulty, filterDomain, showBookmarksOnly, bookmarkedIds]);
 
   const toggleQuestionExpanded = (questionId: string) => {
     setExpandedQuestions((prev: Set<string>) => {
@@ -161,9 +164,24 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
             <option value="Medium">Medium</option>
             <option value="Hard">Hard</option>
           </select>
-          {(filterDifficulty || searchTerm) && (
+          <select
+            value={filterDomain}
+            onChange={e => setFilterDomain(e.target.value)}
+            className="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 bg-white shadow-sm"
+          >
+            <option value="">All Domains</option>
+            <option value="Security and Risk Management">Security and Risk Management</option>
+            <option value="Asset Security">Asset Security</option>
+            <option value="Security Architecture and Engineering">Security Architecture and Engineering</option>
+            <option value="Communication and Network Security">Communication and Network Security</option>
+            <option value="Identity and Access Management (IAM)">Identity and Access Management (IAM)</option>
+            <option value="Security Assessment and Testing">Security Assessment and Testing</option>
+            <option value="Security Operations">Security Operations</option>
+            <option value="Software Development Security">Software Development Security</option>
+          </select>
+          {(filterDifficulty || filterDomain || searchTerm) && (
             <button
-              onClick={() => { setFilterDifficulty(''); setSearchTerm(''); }}
+              onClick={() => { setFilterDifficulty(''); setFilterDomain(''); setSearchTerm(''); }}
               className="px-4 py-2 rounded-lg border border-gray-200 bg-gray-100 text-gray-700 text-sm hover:bg-gray-200 transition-all duration-200"
             >
               Clear Filters
