@@ -358,58 +358,71 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               </div>
             </div>
             
-            {/* Hero Image/Demo */}
-            <div className="relative">
-              <div className="bg-white rounded-2xl shadow-2xl p-6 border border-gray-200">
-                <div className="flex items-center space-x-3 mb-4">
-                  <Brain className="w-6 h-6 text-purple-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">Casey AI Assistant</h3>
-                  <div className="flex items-center space-x-1 bg-green-100 px-2 py-1 rounded-full">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-xs font-medium text-green-800">Online</span>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 gap-3 mb-6">
-                  <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-                    <MessageSquare className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <p className="font-medium text-gray-900 text-sm">24/7 Expert Help</p>
-                      <p className="text-xs text-gray-600">Ask anything about CISSP</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
-                    <Target className="w-5 h-5 text-green-600" />
-                    <div>
-                      <p className="font-medium text-gray-900 text-sm">Personalized Guidance</p>
-                      <p className="text-xs text-gray-600">Tailored to your needs</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
-                    <Shield className="w-5 h-5 text-purple-600" />
-                    <div>
-                      <p className="font-medium text-gray-900 text-sm">Exam-Focused</p>
-                      <p className="text-xs text-gray-600">CISSP-specific insights</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">💬 Chat with Casey</h4>
-                  <p className="text-blue-800 text-sm">
-                    "Hi! I'm Casey, your cybersecurity study expert. Ask me anything about CISSP concepts, exam strategies, or get help with practice questions."
-                  </p>
-                </div>
-              </div>
-              
-              {/* Floating elements */}
-              <div className="absolute -top-4 -right-4 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
-                ✨ AI Powered
-              </div>
-              <div className="absolute -bottom-4 -left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
-                🎯 Exam Ready
-              </div>
-            </div>
+                         {/* Hero Image/Demo - Three Core Features */}
+             <div className="relative">
+               <div className="bg-white rounded-2xl shadow-2xl p-6 border border-gray-200">
+                 <div className="text-center mb-6">
+                   <h3 className="text-xl font-bold text-gray-900 mb-2">Our Three Core Features</h3>
+                   <p className="text-sm text-gray-600">Everything you need to master CISSP</p>
+                 </div>
+                 
+                 <div className="space-y-4 mb-6">
+                   <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                     <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+                       <Target className="w-5 h-5 text-white" />
+                     </div>
+                     <div>
+                       <p className="font-semibold text-gray-900 text-sm">Full Mock Exams</p>
+                       <p className="text-xs text-gray-600">4-hour exam simulations</p>
+                     </div>
+                     <div className="ml-auto bg-green-100 px-2 py-1 rounded-full">
+                       <span className="text-xs font-medium text-green-800">Available</span>
+                     </div>
+                   </div>
+                   
+                   <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                     <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-emerald-600 rounded-full flex items-center justify-center">
+                       <Lightbulb className="w-5 h-5 text-white" />
+                     </div>
+                     <div>
+                       <p className="font-semibold text-gray-900 text-sm">Unlimited AI Questions</p>
+                       <p className="text-xs text-gray-600">University-grade AI models</p>
+                     </div>
+                     <div className="ml-auto bg-blue-100 px-2 py-1 rounded-full">
+                       <span className="text-xs font-medium text-blue-800">Unlimited</span>
+                     </div>
+                   </div>
+                   
+                   <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+                     <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-full flex items-center justify-center">
+                       <Database className="w-5 h-5 text-white" />
+                     </div>
+                     <div>
+                       <p className="font-semibold text-gray-900 text-sm">Complete Practice App</p>
+                       <p className="text-xs text-gray-600">All study tools included</p>
+                     </div>
+                     <div className="ml-auto bg-purple-100 px-2 py-1 rounded-full">
+                       <span className="text-xs font-medium text-purple-800">Complete</span>
+                     </div>
+                   </div>
+                 </div>
+                 
+                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+                   <h4 className="font-medium text-blue-900 mb-2">🎯 Start Your Journey</h4>
+                   <p className="text-blue-800 text-sm">
+                     Begin with a free trial and experience all three core features designed to help you pass CISSP on your first attempt.
+                   </p>
+                 </div>
+               </div>
+               
+               {/* Floating elements */}
+               <div className="absolute -top-4 -right-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
+                 🎓 University AI
+               </div>
+               <div className="absolute -bottom-4 -left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
+                 🎯 Exam Ready
+               </div>
+             </div>
           </div>
         </div>
       </section>
