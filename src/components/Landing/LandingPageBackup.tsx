@@ -192,11 +192,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       title: 'Study Group Tools',
       description: 'Participant tallies and presentation features for group study sessions'
     },
-    {
-      icon: Calendar,
-      title: 'Daily Free Quiz',
-      description: 'Free daily practice quiz for all users with 3 questions'
-    },
+
     {
       icon: Shield,
       title: 'Secure & Private',
@@ -245,7 +241,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
     'Manager\'s perspective insights',
     'Keyword highlighting feature',
     'Bookmark and save questions',
-    'Daily free quiz for all users',
+
     'Session tracking and persistence',
     'Cross-platform sync (iOS, Android, Web)',
     'Unlimited full-length mock exams (coming soon)',
@@ -345,7 +341,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <div className="flex flex-wrap items-center justify-center sm:justify-start space-x-6 text-sm text-gray-600 mb-8">
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>Free daily quiz</span>
+  
                 </div>
                 <div className="flex items-center space-x-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
@@ -786,7 +782,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               className="flex items-center justify-center space-x-2 px-8 py-4 border-2 border-white text-white rounded-xl hover:bg-white hover:text-blue-600 transition-all duration-200 font-semibold"
             >
               <BookOpen className="w-5 h-5" />
-              <span>Try Daily Quiz</span>
+              
             </button>
           </div>
 
@@ -801,7 +797,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           <div className="flex items-center justify-center space-x-8 text-blue-100 text-sm">
             <div className="flex items-center space-x-1">
               <CheckCircle className="w-4 h-4" />
-              <span>Free daily quiz included</span>
+              
             </div>
             <div className="flex items-center space-x-1">
               <CheckCircle className="w-4 h-4" />
@@ -869,7 +865,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <ul className="space-y-2 text-sm text-gray-400">
                 <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Daily Quiz</a></li>
+
                 <li><a href="#" className="hover:text-white transition-colors">Casey AI</a></li>
               </ul>
             </div>
