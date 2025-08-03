@@ -192,7 +192,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       title: 'Study Group Tools',
       description: 'Participant tallies and presentation features for group study sessions'
     },
-
+    {
+      icon: Calendar,
+      title: 'Daily Free Quiz',
+      description: 'Free daily practice quiz for all users with 3 questions'
+    },
     {
       icon: Shield,
       title: 'Secure & Private',
@@ -935,7 +939,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <ul className="space-y-2 text-sm text-gray-400">
                 <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-
+                <li><a href="#" className="hover:text-white transition-colors">Daily Quiz</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Casey AI</a></li>
               </ul>
             </div>

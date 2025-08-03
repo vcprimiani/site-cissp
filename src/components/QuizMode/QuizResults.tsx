@@ -101,22 +101,45 @@ site.cisspstudygroup.com
             ))}
           </ul>
         ) : (
-          <div className="text-sm text-gray-700">{renderSectionContent(section.content)[0]}</div>
+          <p className="text-sm text-gray-700">{section.content}</p>
         )}
       </div>
     ));
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="bg-white rounded-2xl shadow-xl p-8">
-        {/* Error Display */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Warning for mismatched results */}
+        {!validResults && (
+          <div className="bg-red-100 border border-red-300 text-red-800 rounded-xl p-4 mb-6 text-center">
+            <strong>Warning:</strong> There was a problem restoring your quiz results. The score may be inaccurate.
+          </div>
+        )}
         {saveError && (
           <div className="bg-red-100 border border-red-300 text-red-800 rounded-xl p-4 mb-4 text-center">
             {saveError}
           </div>
         )}
-        
+        {/* Daily Quiz Upsell for Unsubscribed Users */}
+        {isDailyQuiz && isUnsubscribed && (
+          <div className="bg-gradient-to-r from-yellow-100 to-pink-100 border-2 border-yellow-300 rounded-2xl shadow-xl p-8 mb-8 text-center animate-fade-in">
+            <div className="flex flex-col items-center mb-4">
+              <span className="text-5xl mb-2">🎉</span>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Great job on your Daily Quiz!</h2>
+              <p className="text-lg text-gray-700 mb-2">You scored <span className="font-bold text-purple-700">{results.correctAnswers} / {results.totalQuestions}</span> ({percentage}%)</p>
+              <p className="text-base text-gray-600 mb-4">You only get <span className="font-bold">3 free questions per day</span> as a free member.</p>
+              <p className="text-base text-gray-700 mb-4">Upgrade to unlock <span className="font-bold text-green-700">unlimited quizzes</span>, detailed analytics, and more fun study features!</p>
+              <button
+                onClick={() => window.location.href = '/pricing'}
+                className="mt-2 px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-300 text-gray-900 font-semibold rounded-lg shadow hover:from-yellow-500 hover:to-yellow-400 transition-all text-lg"
+              >
+                Upgrade Now & Keep Studying 🚀
+              </button>
+              <div className="mt-4 text-sm text-gray-500">Come back tomorrow for another free quiz!</div>
+            </div>
+          </div>
+        )}
         {/* Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -194,100 +217,101 @@ site.cisspstudygroup.com
               <SocialShareButtons
                 title={`CISSP Quiz Results - ${percentage}% Score`}
                 text={getShareMessage()}
-                url="https://site.cisspstudygroup.com"
+                hashtags={['CISSP', 'Cybersecurity', 'StudyGroup', 'Certification', 'InfoSec']}
+                variant="compact"
+                size="md"
+                className="justify-center"
               />
             </div>
           </div>
         </div>
 
-        {/* Question Review */}
+        {/* Detailed Results */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Question Review</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Question Review</h2>
           <div className="space-y-6">
-            {results.questionResults.map((result, index) => (
-              <div
-                key={index}
-                className={`border-2 rounded-xl p-6 ${
-                  result.isCorrect
-                    ? 'border-green-200 bg-green-50'
-                    : 'border-red-200 bg-red-50'
-                }`}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        result.isCorrect
-                          ? 'bg-green-500 text-white'
-                          : 'bg-red-500 text-white'
-                      }`}
-                    >
+            {results.questionResults.map((result, index) => {
+              const domainColor = getDomainColor(result.question.domain);
+              const difficultyColor = getDifficultyColor(result.question.difficulty);
+              
+              return (
+                <div
+                  key={index}
+                  className={`border-2 rounded-xl p-6 ${
+                    result.isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
                       {result.isCorrect ? (
-                        <CheckCircle className="w-5 h-5" />
+                        <CheckCircle className="w-6 h-6 text-green-600" />
                       ) : (
-                        <XCircle className="w-5 h-5" />
+                        <XCircle className="w-6 h-6 text-red-600" />
                       )}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
+                      <span className="font-medium text-gray-900">
                         Question {index + 1}
-                      </h3>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDomainColor(result.question.domain)}`}>
-                          {result.question.domain}
-                        </span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(result.question.difficulty)}`}>
-                          {result.question.difficulty}
-                        </span>
-                        <span className="text-gray-500">
-                          {formatTime(result.timeSpent)}
-                        </span>
-                      </div>
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <span
+                        className="px-2 py-1 rounded text-xs font-medium"
+                        style={{
+                          backgroundColor: domainColor.primary,
+                          color: 'white'
+                        }}
+                      >
+                        {result.question.domain}
+                      </span>
+                      <span
+                        className="px-2 py-1 rounded text-xs font-medium"
+                        style={{
+                          backgroundColor: difficultyColor.primary,
+                          color: 'white'
+                        }}
+                      >
+                        {result.question.difficulty}
+                      </span>
                     </div>
                   </div>
-                </div>
 
-                <div className="mb-4">
-                  <p className="text-gray-900 mb-4">{result.question.question}</p>
-                  <div className="space-y-2">
-                    {result.question.options.map((option, optionIndex) => (
+                  <p className="text-gray-900 mb-4 font-medium">
+                    {result.question.question}
+                  </p>
+
+                  <div className="grid grid-cols-1 gap-2 mb-4">
+                    {result.question.options.map((option: string, optionIndex: number) => (
                       <div
                         key={optionIndex}
-                        className={`p-3 rounded-lg border-2 ${
+                        className={`p-3 rounded-lg border ${
                           optionIndex === result.question.correctAnswer
-                            ? 'border-green-500 bg-green-100 text-green-800'
-                            : optionIndex === result.userAnswer && !result.isCorrect
-                            ? 'border-red-500 bg-red-100 text-red-800'
-                            : 'border-gray-200 bg-white text-gray-700'
+                            ? 'border-green-300 bg-green-100'
+                            : result.userAnswer === optionIndex && optionIndex !== result.question.correctAnswer
+                            ? 'border-red-300 bg-red-100'
+                            : 'border-gray-200 bg-white'
                         }`}
                       >
-                        <div className="flex items-center space-x-3">
-                          <span className="font-medium">
-                            {String.fromCharCode(65 + optionIndex)}.
-                          </span>
-                          <span>{option}</span>
-                          {optionIndex === result.question.correctAnswer && (
-                            <CheckCircle className="w-5 h-5 text-green-600 ml-auto" />
-                          )}
-                          {optionIndex === result.userAnswer && !result.isCorrect && (
-                            <XCircle className="w-5 h-5 text-red-600 ml-auto" />
-                          )}
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-900">{option}</span>
+                          <div className="flex items-center space-x-2">
+                            {optionIndex === result.question.correctAnswer && (
+                              <span className="text-green-600 text-sm font-medium">Correct</span>
+                            )}
+                            {result.userAnswer === optionIndex && optionIndex !== result.question.correctAnswer && (
+                              <span className="text-red-600 text-sm font-medium">Your Answer</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                </div>
 
-                {result.question.explanation && (
-                  <div className="bg-white rounded-lg p-4 border border-gray-200">
-                    <h4 className="font-semibold text-gray-900 mb-2">Explanation</h4>
-                    <div className="text-gray-700 text-sm">
-                      {renderFormattedExplanation(result.question.explanation)}
-                    </div>
+                  <div className="bg-white rounded-lg p-3 border">
+                    <h4 className="font-medium text-gray-900 mb-2">Explanation:</h4>
+                    {renderFormattedExplanation(result.question.explanation)}
                   </div>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
