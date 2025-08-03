@@ -231,7 +231,7 @@ function App() {
           <>
             {isAuthenticated && appState.currentUser ? (
               // Allow both subscribed and unsubscribed users to access the main app
-              // Unsubscribed users will see the daily quiz, subscribed users get full access
+              // Unsubscribed users will see upgrade prompt, subscribed users get full access
               <div className="mt-12">
                 {/* 🚨 CRITICAL: Main app uses hooks, so it MUST be wrapped in PageWrapper */}
                 <PageWrapper>
