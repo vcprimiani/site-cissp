@@ -115,28 +115,15 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     if (filteredQuestions.length === 0) return;
     
     const questionsToUse = Math.min(numberOfQuestions, filteredQuestions.length);
-    
-    // Sort by recency first, then take random sample from recent questions
-    const sortedByRecency = [...filteredQuestions].sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-    
-    // Take 70% from recent questions, 30% from all questions
-    const recentCount = Math.ceil(questionsToUse * 0.7);
-    const recentQuestions = sortedByRecency.slice(0, Math.ceil(sortedByRecency.length * 0.3));
-    const allQuestions = sortedByRecency;
-    
-    const recentSelection = recentQuestions.sort(() => Math.random() - 0.5).slice(0, recentCount);
-    const remainingCount = questionsToUse - recentCount;
-    const remainingSelection = allQuestions.sort(() => Math.random() - 0.5).slice(0, remainingCount);
-    
-    const selectedQuestions = [...recentSelection, ...remainingSelection];
+    const shuffledQuestions = [...filteredQuestions]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, questionsToUse);
 
     // Mark these questions as used in the session
-    markQuestionsAsUsed(selectedQuestions);
+    markQuestionsAsUsed(shuffledQuestions);
 
     setQuizSession({
-      questions: selectedQuestions,
+      questions: shuffledQuestions,
       currentIndex: 0,
       startTime: new Date(),
       isActive: true
