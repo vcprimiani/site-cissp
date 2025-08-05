@@ -13,7 +13,6 @@ interface PersistedQuizState {
   elapsedTime: number;
   questionElapsedTime?: number;
   tallyCounts: number[];
-  showTallies: boolean;
   isActive: boolean;
   isEnhancedExplanation?: boolean;
   enhancedExplanation?: string | null;
@@ -56,7 +55,6 @@ export const useQuizPersistence = () => {
       questionTimes: [],
       elapsedTime: 0,
       tallyCounts: [0, 0, 0, 0],
-      showTallies: false,
       keywords: [],
       showKeywords: false,
       isActive: true

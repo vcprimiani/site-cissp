@@ -61,7 +61,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
   
   // Tally tracking for participant responses
   const [tallyCounts, setTallyCounts] = useState<number[]>(persistedState?.tallyCounts || [0, 0, 0, 0]);
-  const [showTallies, setShowTallies] = useState(persistedState?.showTallies || false);
+  const [showTallies, setShowTallies] = useState(true); // Always show tallies
 
 
 
@@ -137,7 +137,6 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       elapsedTime,
       questionElapsedTime,
       tallyCounts,
-      showTallies,
       isActive: true,
       isEnhancedExplanation,
       enhancedExplanation,
@@ -145,7 +144,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       enhancedExplanationError,
       textSize
     });
-  }, [currentIndex, userAnswers, selectedAnswer, showResult, questionStartTime, questionTimes, elapsedTime, questionElapsedTime, tallyCounts, showTallies, isEnhancedExplanation, enhancedExplanation, loadingEnhancedExplanation, enhancedExplanationError, textSize]);
+  }, [currentIndex, userAnswers, selectedAnswer, showResult, questionStartTime, questionTimes, elapsedTime, questionElapsedTime, tallyCounts, isEnhancedExplanation, enhancedExplanation, loadingEnhancedExplanation, enhancedExplanationError, textSize]);
 
 
 
@@ -802,17 +801,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                 {/* Polling Controls */}
                 <div className="bg-white rounded-lg p-2.5 border border-gray-200 shadow-sm">
                   <div className="text-[10] text-gray-500 mb-2 font-medium">Participant Polling</div>
-                  <div className="flex items-center justify-between mb-2">
-                    <button 
-                      onClick={() => setShowTallies(!showTallies)}
-                      className={`px-2 py-1 text-xs font-medium rounded transition-all duration-200 ${
-                        showTallies 
-                          ? 'bg-blue-100 text-blue-700 border border-blue-300' 
-                          : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
-                      }`}
-                    >
-                      {showTallies ? 'Hide' : 'Show'} Tallies
-                    </button>
+                  <div className="flex items-center justify-end mb-2">
                     <button 
                       onClick={resetTallies}
                       className="px-2 py-1 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-all duration-200"
@@ -820,11 +809,9 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                       Reset
                     </button>
                   </div>
-                  {showTallies && (
-                    <div className="text-xs text-gray-600">
-                      Total: {getTotalParticipants()} participants
-                    </div>
-                  )}
+                  <div className="text-xs text-gray-600">
+                    Total: {getTotalParticipants()} participants
+                  </div>
                 </div>
 
                 {/* Navigation Buttons */}
@@ -911,33 +898,31 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                       </button>
                       
                       {/* Tally Controls */}
-                      {showTallies && (
-                        <div className="flex flex-col items-center space-y-1 ml-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleTallyChange(index, true);
-                            }}
-                            className="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200"
-                            title="Add participant"
-                          >
-                            +
-                          </button>
-                          <div className="text-xs font-bold text-gray-700 min-w-[1.5rem] text-center">
-                            {tallyCounts[index]}
-                          </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleTallyChange(index, false);
-                            }}
-                            className="w-6 h-6 bg-red-100 hover:bg-red-200 text-red-700 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200"
-                            title="Remove participant"
-                          >
-                            -
-                          </button>
+                      <div className="flex flex-col items-center space-y-1 ml-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTallyChange(index, true);
+                          }}
+                          className="w-6 h-6 bg-green-100 hover:bg-green-200 text-green-700 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200"
+                          title="Add participant"
+                        >
+                          +
+                        </button>
+                        <div className="text-xs font-bold text-gray-700 min-w-[1.5rem] text-center">
+                          {tallyCounts[index]}
                         </div>
-                      )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTallyChange(index, false);
+                          }}
+                          className="w-6 h-6 bg-red-100 hover:bg-red-200 text-red-700 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200"
+                          title="Remove participant"
+                        >
+                          -
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
