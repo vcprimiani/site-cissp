@@ -791,12 +791,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                   </button>
                 </div>
 
-                {/* Rating UI */}
-                {currentQuestion && currentUser && (
-                  <div className="bg-white rounded-lg p-2.5 border border-gray-200 shadow-sm">
-                    <RatingButton questionId={currentQuestion.id} userId={currentUser.id} />
-                  </div>
-                )}
+
 
 
 
