@@ -798,21 +798,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                   </div>
                 )}
 
-                {/* Polling Controls */}
-                <div className="bg-white rounded-lg p-2.5 border border-gray-200 shadow-sm">
-                  <div className="text-[10] text-gray-500 mb-2 font-medium">Participant Polling</div>
-                  <div className="flex items-center justify-end mb-2">
-                    <button 
-                      onClick={resetTallies}
-                      className="px-2 py-1 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-all duration-200"
-                    >
-                      Reset
-                    </button>
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    Total: {getTotalParticipants()} participants
-                  </div>
-                </div>
+
 
                 {/* Navigation Buttons */}
                 <div className="w-full space-y-2">
