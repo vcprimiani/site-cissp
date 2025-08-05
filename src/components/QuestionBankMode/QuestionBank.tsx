@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Question } from '../../types';
-import { Search, Filter, BookOpen, Crown, Lock, Plus, Minus, Loader } from 'lucide-react';
+import { Search, Filter, BookOpen, Crown, Lock, Plus, Minus, Loader, ChevronLeft, ChevronRight } from 'lucide-react';
 import { QuestionCard } from '../UI/QuestionCard';
 import { ColorKey } from '../UI/ColorKey';
 import { useBookmarks } from '../../hooks/useBookmarks';
@@ -15,6 +15,13 @@ interface QuestionBankProps {
   onDeleteQuestion: (questionId: string) => Promise<boolean>;
   hasActiveSubscription: boolean;
   subscriptionLoading: boolean;
+  // Pagination props
+  currentPage: number;
+  totalPages: number;
+  totalQuestions: number;
+  onGoToPage: (page: number) => Promise<void>;
+  onNextPage: () => Promise<void>;
+  onPreviousPage: () => Promise<void>;
 }
 
 export const QuestionBank: React.FC<QuestionBankProps> = ({
@@ -24,7 +31,13 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   onUpdateQuestion,
   onDeleteQuestion,
   hasActiveSubscription,
-  subscriptionLoading
+  subscriptionLoading,
+  currentPage,
+  totalPages,
+  totalQuestions,
+  onGoToPage,
+  onNextPage,
+  onPreviousPage
 }: QuestionBankProps) => {
   const { bookmarkedIds, toggleBookmark } = useBookmarks();
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,7 +96,8 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-blue-600">Total Questions</p>
-                <p className="text-2xl font-bold text-blue-900">{questions.length}</p>
+                <p className="text-2xl font-bold text-blue-900">{totalQuestions}</p>
+                <p className="text-xs text-blue-700">Showing {questions.length} on this page</p>
               </div>
               <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-white" />
@@ -223,6 +237,67 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
           </div>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between bg-white rounded-xl p-4 border border-gray-200">
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <span>Page {currentPage + 1} of {totalPages}</span>
+            <span>•</span>
+            <span>{totalQuestions} total questions</span>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={onPreviousPage}
+              disabled={currentPage === 0}
+              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Previous</span>
+            </button>
+            
+            {/* Page numbers */}
+            <div className="flex items-center space-x-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i;
+                } else if (currentPage < 3) {
+                  pageNum = i;
+                } else if (currentPage >= totalPages - 3) {
+                  pageNum = totalPages - 5 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => onGoToPage(pageNum)}
+                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      currentPage === pageNum
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-700'
+                    }`}
+                  >
+                    {pageNum + 1}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              onClick={onNextPage}
+              disabled={currentPage === totalPages - 1}
+              className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
+            >
+              <span>Next</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Tips/Features Section */}
       <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-blue-200">

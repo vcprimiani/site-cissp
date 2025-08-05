@@ -14,7 +14,20 @@ interface QuestionBankModeProps {
 
 export const QuestionBankMode: React.FC<QuestionBankModeProps> = ({ appState, onUpdateState, hasActiveSubscription, subscriptionLoading }) => {
   const [activeTab, setActiveTab] = useState<'questions' | 'generator'>('questions');
-  const { questions, loading, error, addQuestion, updateQuestion, deleteQuestion } = useQuestions();
+  const { 
+    questions, 
+    loading, 
+    error, 
+    addQuestion, 
+    updateQuestion, 
+    deleteQuestion,
+    currentPage,
+    totalPages,
+    totalQuestions,
+    goToPage,
+    nextPage,
+    previousPage
+  } = useQuestions();
   const [showBankInfo, setShowBankInfo] = useState(() => {
     return localStorage.getItem('question-bank-info-dismissed') !== 'true';
   });
@@ -108,6 +121,12 @@ export const QuestionBankMode: React.FC<QuestionBankModeProps> = ({ appState, on
             onDeleteQuestion={deleteQuestion}
             hasActiveSubscription={hasActiveSubscription}
             subscriptionLoading={subscriptionLoading}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalQuestions={totalQuestions}
+            onGoToPage={goToPage}
+            onNextPage={nextPage}
+            onPreviousPage={previousPage}
           />
         )}
         

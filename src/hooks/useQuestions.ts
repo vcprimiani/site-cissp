@@ -11,6 +11,13 @@ interface UseQuestionsReturn {
   updateQuestion: (id: string, updates: Partial<Question>) => Promise<boolean>;
   deleteQuestion: (id: string) => Promise<boolean>;
   refreshQuestions: () => Promise<void>;
+  // Pagination
+  currentPage: number;
+  totalPages: number;
+  totalQuestions: number;
+  goToPage: (page: number) => Promise<void>;
+  nextPage: () => Promise<void>;
+  previousPage: () => Promise<void>;
 }
 
 export const useQuestions = (): UseQuestionsReturn => {
@@ -18,17 +25,37 @@ export const useQuestions = (): UseQuestionsReturn => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const PAGE_SIZE = 100;
 
-  // Fetch questions from Supabase
-  const fetchQuestions = async () => {
+  // Fetch questions from Supabase with pagination
+  const fetchQuestions = async (page = 0) => {
     try {
       setLoading(true);
       setError(null);
 
+      // First, get total count
+      const { count, error: countError } = await supabase
+        .from('questions')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) {
+        throw countError;
+      }
+
+      setTotalQuestions(count || 0);
+      setTotalPages(Math.ceil((count || 0) / PAGE_SIZE));
+
+      // Then fetch the page of questions
       const { data, error: fetchError } = await supabase
         .from('questions')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
       if (fetchError) {
         throw fetchError;
@@ -56,11 +83,31 @@ export const useQuestions = (): UseQuestionsReturn => {
       }));
 
       setQuestions(transformedQuestions);
+      setCurrentPage(page);
     } catch (err: any) {
       console.error('Error fetching questions:', err);
       setError(err.message || 'Failed to fetch questions');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Pagination functions
+  const goToPage = async (page: number) => {
+    if (page >= 0 && page < totalPages) {
+      await fetchQuestions(page);
+    }
+  };
+
+  const nextPage = async () => {
+    if (currentPage < totalPages - 1) {
+      await fetchQuestions(currentPage + 1);
+    }
+  };
+
+  const previousPage = async () => {
+    if (currentPage > 0) {
+      await fetchQuestions(currentPage - 1);
     }
   };
 
@@ -184,7 +231,7 @@ export const useQuestions = (): UseQuestionsReturn => {
 
   // Refresh questions
   const refreshQuestions = async () => {
-    await fetchQuestions();
+    await fetchQuestions(0);
   };
 
   // Initial fetch when user changes
@@ -204,6 +251,13 @@ export const useQuestions = (): UseQuestionsReturn => {
     addQuestion,
     updateQuestion,
     deleteQuestion,
-    refreshQuestions
+    refreshQuestions,
+    // Pagination
+    currentPage,
+    totalPages,
+    totalQuestions,
+    goToPage,
+    nextPage,
+    previousPage
   };
 };
