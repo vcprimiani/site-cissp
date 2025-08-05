@@ -401,7 +401,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     newAnswers[currentIndex] = selectedAnswer;
     setUserAnswers(newAnswers);
 
-    if (isLastQuestion && allQuestionsAnswered) {
+    // Check if all questions are answered including the current one
+    const allQuestionsIncludingCurrent = [...newAnswers];
+    allQuestionsIncludingCurrent[currentIndex] = selectedAnswer;
+    const allAnswered = allQuestionsIncludingCurrent.every(answer => answer !== null);
+
+    if (isLastQuestion && allAnswered) {
       // Quiz complete - clear persisted state and calculate results
       clearPersistedState();
       
@@ -436,7 +441,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
       onComplete(results);
-    } else if (isLastQuestion && !allQuestionsAnswered) {
+    } else if (isLastQuestion && !allAnswered) {
       // On last question but not all questions answered - stay on current question
       setSelectedAnswer(null);
       setShowResult(false);
