@@ -158,6 +158,49 @@ Study more at: https://site.cisspstudygroup.com`;
                   <span className="sm:hidden">{question.flagCount}</span>
                 </div>
               )}
+
+              {/* Quality Score Indicator */}
+              {question.qualityScore && (
+                <div 
+                  className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs"
+                  style={{
+                    backgroundColor: question.qualityScore >= 80 ? '#dcfce7' : question.qualityScore >= 60 ? '#fef3c7' : '#fee2e2',
+                    color: question.qualityScore >= 80 ? '#166534' : question.qualityScore >= 60 ? '#92400e' : '#991b1b',
+                    borderColor: question.qualityScore >= 80 ? '#bbf7d0' : question.qualityScore >= 60 ? '#fde68a' : '#fecaca'
+                  }}
+                >
+                  <span className="font-medium">★</span>
+                  <span className="hidden sm:inline">Quality: {question.qualityScore}</span>
+                  <span className="sm:hidden">{question.qualityScore}</span>
+                </div>
+              )}
+
+              {/* Usage Count Indicator */}
+              {question.usageCount && question.usageCount > 0 && (
+                <div className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800 border border-blue-200">
+                  <span className="font-medium">📊</span>
+                  <span className="hidden sm:inline">{question.usageCount} uses</span>
+                  <span className="sm:hidden">{question.usageCount}</span>
+                </div>
+              )}
+
+              {/* Cross-Domain Indicator */}
+              {question.isCrossDomain && (
+                <div className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800 border border-purple-200">
+                  <span className="font-medium">🔄</span>
+                  <span className="hidden sm:inline">Cross-Domain</span>
+                  <span className="sm:hidden">CD</span>
+                </div>
+              )}
+
+              {/* Auto-Improved Indicator */}
+              {question.autoImproved && (
+                <div className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 border border-green-200">
+                  <span className="font-medium">🤖</span>
+                  <span className="hidden sm:inline">AI Improved</span>
+                  <span className="sm:hidden">AI</span>
+                </div>
+              )}
             </div>
 
             {/* Keywords Display */}
@@ -204,10 +247,33 @@ Study more at: https://site.cisspstudygroup.com`;
               ))}
             </div>
 
-            {/* Metadata */}
-            <p className="text-xs text-gray-500 font-medium">
-              Last updated {question.updatedAt.toLocaleDateString()}
-            </p>
+            {/* Enhanced Metadata */}
+            <div className="space-y-1">
+              <p className="text-xs text-gray-500 font-medium">
+                Last updated {question.updatedAt.toLocaleDateString()}
+              </p>
+              
+              {/* Additional metadata for premium users */}
+              {hasActiveSubscription && (
+                <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+                  {question.correctAnswerRate && (
+                    <span>Success Rate: {Math.round(question.correctAnswerRate * 100)}%</span>
+                  )}
+                  {question.averageResponseTime && (
+                    <span>Avg Time: {Math.round(question.averageResponseTime / 1000)}s</span>
+                  )}
+                  {question.complexityScore && (
+                    <span>Complexity: {question.complexityScore.toFixed(1)}</span>
+                  )}
+                  {question.questionType && (
+                    <span>Type: {question.questionType}</span>
+                  )}
+                  {question.formatType && (
+                    <span>Format: {question.formatType.replace('_', ' ')}</span>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Expand/Collapse Button */}

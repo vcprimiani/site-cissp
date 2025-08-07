@@ -80,7 +80,38 @@ export const useQuestions = (): UseQuestionsReturn => {
         flagReasons: item.flag_reasons || [],
         isFlagged: item.is_flagged || false,
         flaggedAt: item.flagged_at ? new Date(item.flagged_at) : undefined,
-        flagStatus: item.flag_status || 'pending'
+        flagStatus: item.flag_status || 'pending',
+        
+        // New fields from updated schema
+        questionType: item.question_type,
+        formatType: item.format_type,
+        discriminationIndex: item.discrimination_index,
+        distractorEffectiveness: item.distractor_effectiveness,
+        usageCount: item.usage_count,
+        correctAnswerRate: item.correct_answer_rate,
+        averageResponseTime: item.average_response_time,
+        lastUpdatedAt: item.last_updated_at ? new Date(item.last_updated_at) : undefined,
+        updateReason: item.update_reason,
+        sourceMaterials: item.source_materials,
+        difficultyRating: item.difficulty_rating,
+        complexityScore: item.complexity_score,
+        isCrossDomain: item.is_cross_domain,
+        domainPrimary: item.domain_primary,
+        domainSecondary: item.domain_secondary,
+        versionHistory: item.version_history,
+        reviewStatus: item.review_status,
+        reviewedBy: item.reviewed_by,
+        reviewedAt: item.reviewed_at ? new Date(item.reviewed_at) : undefined,
+        reviewNotes: item.review_notes,
+        qualityIssues: item.quality_issues,
+        improvementSuggestions: item.improvement_suggestions,
+        lastCritiquedAt: item.last_critiqued_at ? new Date(item.last_critiqued_at) : undefined,
+        critiqueCount: item.critique_count,
+        autoImproved: item.auto_improved,
+        improvementVersion: item.improvement_version,
+        qualityScore: item.quality_score,
+        citations: item.citations,
+        crossDomainTags: item.cross_domain_tags
       }));
 
       setQuestions(transformedQuestions);
@@ -158,7 +189,38 @@ export const useQuestions = (): UseQuestionsReturn => {
         flagReasons: data.flag_reasons || [],
         isFlagged: data.is_flagged || false,
         flaggedAt: data.flagged_at ? new Date(data.flagged_at) : undefined,
-        flagStatus: data.flag_status || 'pending'
+        flagStatus: data.flag_status || 'pending',
+        
+        // New fields from updated schema
+        questionType: data.question_type,
+        formatType: data.format_type,
+        discriminationIndex: data.discrimination_index,
+        distractorEffectiveness: data.distractor_effectiveness,
+        usageCount: data.usage_count,
+        correctAnswerRate: data.correct_answer_rate,
+        averageResponseTime: data.average_response_time,
+        lastUpdatedAt: data.last_updated_at ? new Date(data.last_updated_at) : undefined,
+        updateReason: data.update_reason,
+        sourceMaterials: data.source_materials,
+        difficultyRating: data.difficulty_rating,
+        complexityScore: data.complexity_score,
+        isCrossDomain: data.is_cross_domain,
+        domainPrimary: data.domain_primary,
+        domainSecondary: data.domain_secondary,
+        versionHistory: data.version_history,
+        reviewStatus: data.review_status,
+        reviewedBy: data.reviewed_by,
+        reviewedAt: data.reviewed_at ? new Date(data.reviewed_at) : undefined,
+        reviewNotes: data.review_notes,
+        qualityIssues: data.quality_issues,
+        improvementSuggestions: data.improvement_suggestions,
+        lastCritiquedAt: data.last_critiqued_at ? new Date(data.last_critiqued_at) : undefined,
+        critiqueCount: data.critique_count,
+        autoImproved: data.auto_improved,
+        improvementVersion: data.improvement_version,
+        qualityScore: data.quality_score,
+        citations: data.citations,
+        crossDomainTags: data.cross_domain_tags
       };
 
       // Add to local state (it will be at the top due to created_at ordering)

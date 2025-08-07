@@ -65,6 +65,37 @@ export interface Question {
   isFlagged: boolean;
   flaggedAt?: Date;
   flagStatus: 'pending' | 'reviewed' | 'dismissed' | 'actioned';
+  
+  // New fields from updated schema
+  questionType?: 'application' | 'knowledge' | 'analysis' | 'synthesis' | 'evaluation';
+  formatType?: 'scenario_based' | 'direct' | 'case_study' | 'matching' | 'fill_blank';
+  discriminationIndex?: number;
+  distractorEffectiveness?: Record<string, any>;
+  usageCount?: number;
+  correctAnswerRate?: number;
+  averageResponseTime?: number;
+  lastUpdatedAt?: Date;
+  updateReason?: string;
+  sourceMaterials?: string[];
+  difficultyRating?: number;
+  complexityScore?: number;
+  isCrossDomain?: boolean;
+  domainPrimary?: string;
+  domainSecondary?: string[];
+  versionHistory?: any[];
+  reviewStatus?: 'pending' | 'reviewed' | 'approved' | 'rejected';
+  reviewedBy?: string;
+  reviewedAt?: Date;
+  reviewNotes?: string;
+  qualityIssues?: string[];
+  improvementSuggestions?: string;
+  lastCritiquedAt?: Date;
+  critiqueCount?: number;
+  autoImproved?: boolean;
+  improvementVersion?: number;
+  qualityScore?: number;
+  citations?: any[];
+  crossDomainTags?: string[];
 }
 
 export interface FlagReason {

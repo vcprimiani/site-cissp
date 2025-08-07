@@ -43,6 +43,9 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('');
   const [filterDomain, setFilterDomain] = useState('');
+  const [filterQuestionType, setFilterQuestionType] = useState('');
+  const [filterQualityScore, setFilterQualityScore] = useState('');
+  const [filterCrossDomain, setFilterCrossDomain] = useState(false);
   const [showColorKey, setShowColorKey] = useState(false);
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
@@ -57,11 +60,20 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
       const difficultyMatch = !filterDifficulty || q.difficulty === filterDifficulty;
       // Domain filter
       const domainMatch = !filterDomain || q.domain === filterDomain;
+      // Question type filter
+      const questionTypeMatch = !filterQuestionType || q.questionType === filterQuestionType;
+      // Quality score filter
+      const qualityScoreMatch = !filterQualityScore || (q.qualityScore && 
+        (filterQualityScore === 'high' ? q.qualityScore >= 80 :
+         filterQualityScore === 'medium' ? q.qualityScore >= 60 :
+         filterQualityScore === 'low' ? q.qualityScore < 60 : true));
+      // Cross-domain filter
+      const crossDomainMatch = !filterCrossDomain || q.isCrossDomain;
       // Bookmark filter
       const bookmarkMatch = !showBookmarksOnly || bookmarkedIds.includes(q.id);
-      return searchMatch && difficultyMatch && domainMatch && bookmarkMatch;
+      return searchMatch && difficultyMatch && domainMatch && questionTypeMatch && qualityScoreMatch && crossDomainMatch && bookmarkMatch;
     });
-  }, [questions, searchTerm, filterDifficulty, filterDomain, showBookmarksOnly, bookmarkedIds]);
+  }, [questions, searchTerm, filterDifficulty, filterDomain, filterQuestionType, filterQualityScore, filterCrossDomain, showBookmarksOnly, bookmarkedIds]);
 
   const toggleQuestionExpanded = (questionId: string) => {
     setExpandedQuestions((prev: Set<string>) => {
@@ -167,7 +179,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
             className="bg-transparent outline-none flex-1 text-sm text-gray-700"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <select
             value={filterDifficulty}
             onChange={e => setFilterDifficulty(e.target.value)}
@@ -193,9 +205,47 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
             <option value="Security Operations">Security Operations</option>
             <option value="Software Development Security">Software Development Security</option>
           </select>
-          {(filterDifficulty || filterDomain || searchTerm) && (
+          <select
+            value={filterQuestionType}
+            onChange={e => setFilterQuestionType(e.target.value)}
+            className="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 bg-white shadow-sm"
+          >
+            <option value="">All Types</option>
+            <option value="application">Application</option>
+            <option value="knowledge">Knowledge</option>
+            <option value="analysis">Analysis</option>
+            <option value="synthesis">Synthesis</option>
+            <option value="evaluation">Evaluation</option>
+          </select>
+          <select
+            value={filterQualityScore}
+            onChange={e => setFilterQualityScore(e.target.value)}
+            className="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 bg-white shadow-sm"
+          >
+            <option value="">All Quality</option>
+            <option value="high">High Quality (80+)</option>
+            <option value="medium">Medium Quality (60-79)</option>
+            <option value="low">Low Quality (<60)</option>
+          </select>
+          <label className="flex items-center space-x-2 px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 bg-white shadow-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={filterCrossDomain}
+              onChange={e => setFilterCrossDomain(e.target.checked)}
+              className="rounded"
+            />
+            <span>Cross-Domain Only</span>
+          </label>
+          {(filterDifficulty || filterDomain || filterQuestionType || filterQualityScore || filterCrossDomain || searchTerm) && (
             <button
-              onClick={() => { setFilterDifficulty(''); setFilterDomain(''); setSearchTerm(''); }}
+              onClick={() => { 
+                setFilterDifficulty(''); 
+                setFilterDomain(''); 
+                setFilterQuestionType('');
+                setFilterQualityScore('');
+                setFilterCrossDomain(false);
+                setSearchTerm(''); 
+              }}
               className="px-4 py-2 rounded-lg border border-gray-200 bg-gray-100 text-gray-700 text-sm hover:bg-gray-200 transition-all duration-200"
             >
               Clear Filters
