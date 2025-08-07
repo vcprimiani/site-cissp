@@ -206,7 +206,7 @@ Study more at: https://site.cisspstudygroup.com`;
 
             {/* Metadata */}
             <p className="text-xs text-gray-500 font-medium">
-              Created {question.createdAt.toLocaleDateString()}
+              Last updated {question.updatedAt.toLocaleDateString()}
             </p>
           </div>
 

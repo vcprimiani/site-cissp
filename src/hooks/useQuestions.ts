@@ -54,7 +54,7 @@ export const useQuestions = (): UseQuestionsReturn => {
       const { data, error: fetchError } = await supabase
         .from('questions')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('updated_at', { ascending: false })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
       if (fetchError) {
@@ -74,6 +74,7 @@ export const useQuestions = (): UseQuestionsReturn => {
         createdBy: item.created_by,
         isActive: item.is_active,
         createdAt: new Date(item.created_at),
+        updatedAt: new Date(item.updated_at),
         flagCount: item.flag_count || 0,
         flaggedBy: item.flagged_by || [],
         flagReasons: item.flag_reasons || [],
@@ -151,6 +152,7 @@ export const useQuestions = (): UseQuestionsReturn => {
         createdBy: data.created_by,
         isActive: data.is_active,
         createdAt: new Date(data.created_at),
+        updatedAt: new Date(data.updated_at),
         flagCount: data.flag_count || 0,
         flaggedBy: data.flagged_by || [],
         flagReasons: data.flag_reasons || [],

@@ -57,6 +57,7 @@ export interface Question {
   tags: string[];
   createdBy: string;
   createdAt: Date;
+  updatedAt: Date;
   isActive: boolean;
   flagCount: number;
   flaggedBy: string[];
