@@ -225,7 +225,7 @@ export const QuestionBank: React.FC<QuestionBankProps> = ({
             <option value="">All Quality</option>
             <option value="high">High Quality (80+)</option>
             <option value="medium">Medium Quality (60-79)</option>
-            <option value="low">Low Quality (<60)</option>
+                            <option value="low">Low Quality (&lt;60)</option>
           </select>
           <label className="flex items-center space-x-2 px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 bg-white shadow-sm cursor-pointer">
             <input
