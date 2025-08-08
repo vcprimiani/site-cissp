@@ -98,7 +98,7 @@ const ProgressPage: React.FC = () => {
       setLoading(false);
     };
     loadHistory();
-  }, [user]);
+  }, [user?.id]);
 
   const clearHistory = () => {
     localStorage.removeItem('quiz-progress-history');

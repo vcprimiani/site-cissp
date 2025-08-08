@@ -21,6 +21,7 @@ interface QuizProps {
   onExit: () => void;
   onProgressChange?: (current: number, total: number) => void;
   currentUser?: any; // Accept currentUser as a prop
+  isResumed?: boolean;
 }
 
 interface QuizResults {
@@ -35,7 +36,7 @@ interface QuizResults {
   }[];
 }
 
-export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete, onExit, onProgressChange, currentUser }) => {
+export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete, onExit, onProgressChange, currentUser, isResumed = false }) => {
   const { persistedState, saveQuizState, clearPersistedState, hasPersistedQuiz } = useQuizPersistence();
   
   // Initialize state from initialIndex, persistedState, or 0
@@ -194,8 +195,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     setEnhancedExplanationError(null);
   }, [currentIndex, userAnswers]);
 
+  // Prevent duplicate session saves
+  const [hasSavedSession, setHasSavedSession] = useState(false);
+
   // Handle quiz completion when resuming with all questions answered
   useEffect(() => {
+    if (!isResumed) return;
     if (allQuestionsAnswered && isLastQuestion && showResult) {
       // If we're resuming a quiz where all questions are answered and we're on the last question
       // with results shown, we should complete the quiz
@@ -217,10 +222,11 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
             timeSpent: finalTimes[index] || 0
           }))
         };
-        // Save progress when completing via resume path
-        if (currentUser && currentUser.id) {
+        // Save progress when completing via resume path (guarded)
+        if (!hasSavedSession && currentUser && currentUser.id) {
           try {
-            await saveQuizProgress({ user_id: currentUser.id, results, dev_mode: true });
+            await saveQuizProgress({ user_id: currentUser.id, results });
+            setHasSavedSession(true);
           } catch (err) {
             console.error('Failed to save quiz progress on resume completion:', err);
           }
@@ -232,7 +238,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       // Small delay to ensure state is fully updated
       setTimeout(handleResumeCompletion, 100);
     }
-  }, [allQuestionsAnswered, isLastQuestion, showResult, userAnswers, questions, currentIndex, questionStartTime, questionTimes, startTime, clearPersistedState, onComplete]);
+  }, [isResumed, hasSavedSession, allQuestionsAnswered, isLastQuestion, showResult, userAnswers, questions, currentIndex, questionStartTime, questionTimes, startTime, clearPersistedState, onComplete, currentUser]);
 
   // Error handling for missing/corrupted persisted state
   useEffect(() => {
@@ -423,10 +429,11 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
           timeSpent: finalTimes[index] || 0
         }))
       };
-      // Save quiz progress to quiz_progress (session-level)
-      if (currentUser && currentUser.id) {
+      // Save quiz progress to quiz_sessions (session-level) guarded to prevent duplicates
+      if (!hasSavedSession && currentUser && currentUser.id) {
         try {
           await saveQuizProgress({ user_id: currentUser.id, results });
+          setHasSavedSession(true);
           console.log('Quiz progress saved to quiz_sessions');
         } catch (err) {
           console.error('Failed to save quiz progress:', err);
