@@ -1,26 +1,76 @@
 import OpenAI from 'openai';
 import { aiSecurity, formatTimeRemaining } from './aiSecurity';
 
-// OpenRouter configuration (GPT-5 family)
+// Config: prefer OpenRouter (GPT-5 family). Fallback to OpenAI if OpenRouter key is unset.
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const OPENROUTER_MODEL = import.meta.env.VITE_OPENROUTER_MODEL || 'openai/gpt-5-mini';
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
-if (!OPENROUTER_API_KEY) {
-  throw new Error('Missing OpenRouter API key. Set VITE_OPENROUTER_API_KEY in your environment.');
-}
+// Prefer OpenAI GPT-5 if key is present; otherwise use OpenRouter
+const useOpenAI = !!OPENAI_API_KEY;
+const useOpenRouter = !useOpenAI && !!OPENROUTER_API_KEY;
 
 const openai = new OpenAI({
-  apiKey: OPENROUTER_API_KEY,
-  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: useOpenAI ? OPENAI_API_KEY! : (OPENROUTER_API_KEY || ''),
+  baseURL: useOpenRouter ? 'https://openrouter.ai/api/v1' : undefined,
   dangerouslyAllowBrowser: true,
-  // Optional app identification headers recommended by OpenRouter
-  defaultHeaders: {
-    'HTTP-Referer': (typeof window !== 'undefined' && window.location?.origin) || 'https://site.cisspstudygroup.com',
-    'X-Title': 'CISSP Study App'
-  } as any
+  defaultHeaders: useOpenRouter
+    ? ({
+        'HTTP-Referer': (typeof window !== 'undefined' && window.location?.origin) || 'https://site.cisspstudygroup.com',
+        'X-Title': 'CISSP Study App'
+      } as any)
+    : undefined
 });
 
-const getModel = (override?: string) => override || OPENROUTER_MODEL;
+const mapModel = (override?: string) => {
+  const raw = (override || OPENROUTER_MODEL);
+  if (useOpenRouter) return raw;
+  // OpenAI: accept both 'openai/gpt-5-mini' and 'gpt-5-mini'
+  const desired = raw.replace(/^openai\//i, '').toLowerCase();
+  if (desired.includes('gpt-5-pro')) return 'gpt-5-pro';
+  if (desired.includes('gpt-5-nano')) return 'gpt-5-nano';
+  if (desired.includes('gpt-5-mini')) return 'gpt-5-mini';
+  if (desired.includes('gpt-5-chat')) return 'gpt-5-chat';
+  if (desired.includes('gpt-5')) return 'gpt-5';
+  // Sensible default
+  return 'gpt-5-mini';
+};
+
+// Unified request helper: OpenAI (responses API) vs OpenRouter (chat.completions)
+async function runModelRequest(systemPrompt: string, userPrompt: string, opts?: { maxTokens?: number; temperature?: number; modelId?: string; verbosity?: 'low'|'medium'|'high'; reasoningEffort?: 'minimal'|'medium'|'high' }) {
+  const model = mapModel(opts?.modelId);
+  const max_tokens = opts?.maxTokens ?? 1000;
+  const temperature = opts?.temperature ?? 0.7;
+
+  if (useOpenRouter) {
+    const completion = await openai.chat.completions.create({
+      model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      max_tokens,
+      temperature
+    });
+    const content = completion.choices[0]?.message?.content;
+    if (!content) throw new Error('No response generated');
+    return content as string;
+  }
+
+  // OpenAI GPT-5 via responses API
+  const response: any = await (openai as any).responses.create({
+    model,
+    input: `${systemPrompt}\n\nUser:\n${userPrompt}`,
+    reasoning: opts?.reasoningEffort ? { effort: opts.reasoningEffort } : undefined,
+    text: { verbosity: opts?.verbosity || 'medium' },
+    max_output_tokens: max_tokens,
+    temperature
+  });
+  // SDK returns content in different shapes; try to extract text
+  const output = response?.output?.[0]?.content?.[0]?.text || response?.output_text || response?.content || response?.choices?.[0]?.message?.content;
+  if (!output) throw new Error('No response generated');
+  return output as string;
+}
 
 export interface AIResponse {
   content: string;
@@ -133,28 +183,7 @@ Always be encouraging, professional, and focus on helping students truly underst
 
 ${context ? `Additional context: ${context}` : ''}`;
 
-      const completion = await openai.chat.completions.create({
-        model: getModel(modelId),
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.7
-      });
-
-      const content = completion.choices[0]?.message?.content;
-      
-      if (!content) {
-        throw new Error('No response generated');
-      }
-
+      const content = await runModelRequest(systemPrompt, prompt, { modelId, maxTokens: 1000, temperature: 0.7 });
       return { content };
     }, 'ai_response');
 
@@ -379,23 +408,13 @@ Format your response as JSON with this structure:
 }`;
       }
 
-      const completion = await openai.chat.completions.create({
-        model: getModel(),
-        messages: [
-          {
-            role: "system",
-            content: "You are an expert CISSP question writer with deep knowledge of cybersecurity. Create high-quality, exam-realistic questions that test practical understanding and real-world application of security concepts. Your explanations must be comprehensive, breaking down why the correct answer is right and why each incorrect option is wrong, including common misconceptions. Always respond with valid JSON only. IMPORTANT: Ensure all explanation sections are complete and no final questions are missing."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        max_tokens: 1500,
-        temperature: 0.8
-      });
+      const contentRaw = await runModelRequest(
+        "You are an expert CISSP question writer with deep knowledge of cybersecurity. Create high-quality, exam-realistic questions that test practical understanding and real-world application of security concepts. Your explanations must be comprehensive, breaking down why the correct answer is right and why each incorrect option is wrong, including common misconceptions. Always respond with valid JSON only. IMPORTANT: Ensure all explanation sections are complete and no final questions are missing.",
+        prompt,
+        { maxTokens: 1500, temperature: 0.8 }
+      );
 
-      let content = completion.choices[0]?.message?.content;
+      let content = contentRaw;
       
       if (!content) {
         throw new Error('No response generated');
