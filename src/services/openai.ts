@@ -1,10 +1,26 @@
 import OpenAI from 'openai';
 import { aiSecurity, formatTimeRemaining } from './aiSecurity';
 
+// OpenRouter configuration (GPT-5 family)
+const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+const OPENROUTER_MODEL = import.meta.env.VITE_OPENROUTER_MODEL || 'openai/gpt-5-mini';
+
+if (!OPENROUTER_API_KEY) {
+  throw new Error('Missing OpenRouter API key. Set VITE_OPENROUTER_API_KEY in your environment.');
+}
+
 const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
+  apiKey: OPENROUTER_API_KEY,
+  baseURL: 'https://openrouter.ai/api/v1',
+  dangerouslyAllowBrowser: true,
+  // Optional app identification headers recommended by OpenRouter
+  defaultHeaders: {
+    'HTTP-Referer': (typeof window !== 'undefined' && window.location?.origin) || 'https://site.cisspstudygroup.com',
+    'X-Title': 'CISSP Study App'
+  } as any
 });
+
+const getModel = (override?: string) => override || OPENROUTER_MODEL;
 
 export interface AIResponse {
   content: string;
@@ -91,7 +107,7 @@ const secureAIRequest = async <T>(
   }
 };
 
-export const generateAIResponse = async (prompt: string, context?: string): Promise<AIResponse> => {
+export const generateAIResponse = async (prompt: string, context?: string, modelId?: string): Promise<AIResponse> => {
   try {
     const result = await secureAIRequest(async () => {
       const systemPrompt = `You are an expert CISSP (Certified Information Systems Security Professional) instructor and mentor. You have deep knowledge of all 8 CISSP domains:
@@ -118,7 +134,7 @@ Always be encouraging, professional, and focus on helping students truly underst
 ${context ? `Additional context: ${context}` : ''}`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: getModel(modelId),
         messages: [
           {
             role: "system",
@@ -364,7 +380,7 @@ Format your response as JSON with this structure:
       }
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: getModel(),
         messages: [
           {
             role: "system",
