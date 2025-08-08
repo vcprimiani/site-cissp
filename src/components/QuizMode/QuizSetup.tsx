@@ -559,14 +559,24 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                       }`}
                       onClick={() => {
                         if (hasPersistedQuiz() === true && !!persistedState) return;
-                        // Find all hard questions from all domains
-                        const hardQuestions = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive);
-                        if (hardQuestions.length < 10) {
-                          alert('Not enough hard questions available.');
+                        const desiredCount = 10;
+                        // Start with hard questions that are available (not used in session/history)
+                        const hardAvailable = availableQuestions.filter(q => q.difficulty === 'Hard' && q.isActive && !q.isFlagged);
+                        let pool = [...hardAvailable];
+                        // If not enough, backfill from all active hard questions (ignore history)
+                        if (pool.length < desiredCount) {
+                          const allHard = questions.filter(q => q.difficulty === 'Hard' && q.isActive && !q.isFlagged);
+                          const seen = new Set(pool.map(q => q.id));
+                          const backfill = allHard.filter(q => !seen.has(q.id));
+                          pool = [...pool, ...backfill];
+                        }
+                        if (pool.length === 0) {
+                          alert('No hard questions available.');
                           return;
                         }
-                        // Shuffle and pick 10
-                        const shuffled = [...hardQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
+                        // Shuffle and pick up to desiredCount
+                        const pickCount = Math.min(desiredCount, pool.length);
+                        const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, pickCount);
                         markQuestionsAsUsed(shuffled);
                         setQuizSession({
                           questions: shuffled,
