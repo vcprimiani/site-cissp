@@ -393,7 +393,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     // Update question times
     setQuestionTimes(prev => {
       const newTimes = [...prev];
-      newTimes[currentIndex] = timeSpent;
+      const existing = Number.isFinite(newTimes[currentIndex]) ? newTimes[currentIndex] : 0;
+      newTimes[currentIndex] = existing + timeSpent;
       return newTimes;
     });
 
@@ -414,7 +415,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       clearPersistedState();
       
       const finalTimes = [...questionTimes];
-      finalTimes[currentIndex] = timeSpent;
+      const existing = Number.isFinite(finalTimes[currentIndex]) ? finalTimes[currentIndex] : 0;
+      finalTimes[currentIndex] = existing + timeSpent;
       
       // Ensure we have the most up-to-date answers including the current one
       const finalAnswers = [...newAnswers];
@@ -448,9 +450,13 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       window.scrollTo({ top: 0, behavior: 'smooth' });
       onComplete(results);
     } else if (isLastQuestion && !allAnswered) {
-      // On last question but not all questions answered - stay on current question
-      setSelectedAnswer(null);
-      setShowResult(false);
+      // Jump to the first unanswered question
+      const firstUnansweredIndex = newAnswers.findIndex(a => a === null);
+      if (firstUnansweredIndex !== -1) {
+        setCurrentIndex(firstUnansweredIndex);
+        setSelectedAnswer(newAnswers[firstUnansweredIndex]);
+        setShowResult(false);
+      }
     } else {
       // Next question
       setCurrentIndex(prev => prev + 1);
@@ -468,7 +474,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     // Update question times
     setQuestionTimes(prev => {
       const newTimes = [...prev];
-      newTimes[currentIndex] = timeSpent;
+      const existing = Number.isFinite(newTimes[currentIndex]) ? newTimes[currentIndex] : 0;
+      newTimes[currentIndex] = existing + timeSpent;
       return newTimes;
     });
 
@@ -487,6 +494,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   const handleShowResult = () => {
     if (selectedAnswer === null) return;
+    // Persist the answer immediately so it survives refresh/resume
+    setUserAnswers(prev => {
+      const updated = [...prev];
+      updated[currentIndex] = selectedAnswer;
+      return updated;
+    });
     setShowResult(true);
   };
 
