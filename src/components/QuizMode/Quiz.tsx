@@ -12,7 +12,7 @@ import { getQuestionRating, setQuestionRating, getQuestionRatingAggregate } from
 import { useRatings } from '../../hooks/useRatings';
 import { showToast } from '../../utils/toast';
 import { RatingButton } from '../UI/RatingButton';
-import { saveQuizProgress } from '../../services/progress';
+import { saveQuizProgress, updateStreakOnQuiz } from '../../services/progress';
 
 interface QuizProps {
   questions: Question[];
@@ -433,6 +433,8 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       if (!hasSavedSession && currentUser && currentUser.id) {
         try {
           await saveQuizProgress({ user_id: currentUser.id, results });
+          // best-effort streak update (non-blocking)
+          updateStreakOnQuiz(currentUser.id).catch(() => {});
           setHasSavedSession(true);
           console.log('Quiz progress saved to quiz_sessions');
         } catch (err) {

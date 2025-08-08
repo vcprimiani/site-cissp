@@ -7,7 +7,7 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { AppState } from '../../types';
 import { PaywallPage } from '../Paywall/PaywallPage';
 import { BookmarksProvider } from '../../hooks/useBookmarks';
-import { fetchQuizProgress } from '../../services/progress';
+import { fetchQuizProgress, getOrInitUserStudyGoals, updateDailyTarget } from '../../services/progress';
 import { generateAIResponse } from '../../services/openai';
 
 interface ProgressEntry {
@@ -69,6 +69,7 @@ const ProgressPage: React.FC = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiPlan, setAiPlan] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [goals, setGoals] = useState<{ daily_target: number; streak_current: number; streak_best: number } | null>(null);
 
   useEffect(() => {
     const loadHistory = async () => {
@@ -82,6 +83,8 @@ const ProgressPage: React.FC = () => {
             timestamp: new Date(entry.timestamp).getTime(),
             results: entry.results
           })));
+          const g = await getOrInitUserStudyGoals(user.id);
+          setGoals({ daily_target: g.daily_target, streak_current: g.streak_current, streak_best: g.streak_best });
         } catch (err: any) {
           setError('Failed to load progress from cloud.');
           setHistory([]);
@@ -225,6 +228,28 @@ const ProgressPage: React.FC = () => {
               </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Progress</h1>
               <p className="text-gray-600">Track your quiz performance and improvement over time</p>
+              {goals && (
+                <div className="mt-3 text-sm text-gray-700 flex flex-wrap items-center justify-center gap-3">
+                  <span className="px-3 py-1 rounded-full bg-green-50 border border-green-200">Streak: <strong>{goals.streak_current}</strong> days (Best {goals.streak_best})</span>
+                  <span className="px-3 py-1 rounded-full bg-blue-50 border border-blue-200">Daily target: 
+                    <input
+                      type="number"
+                      min={3}
+                      max={100}
+                      value={goals.daily_target}
+                      onChange={async (e) => {
+                        const val = Math.max(3, Math.min(100, parseInt(e.target.value || '0', 10)));
+                        setGoals(prev => prev ? { ...prev, daily_target: val } : prev);
+                        if (user?.id) {
+                          try { await updateDailyTarget(user.id, val); } catch {}
+                        }
+                      }}
+                      className="ml-2 w-16 px-2 py-0.5 text-center border rounded"
+                    />
+                    questions
+                  </span>
+                </div>
+              )}
             </div>
             {/* Summary Card */}
             <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 flex flex-col md:flex-row items-center justify-between gap-8">

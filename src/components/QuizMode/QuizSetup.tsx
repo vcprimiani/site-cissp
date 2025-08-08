@@ -113,9 +113,23 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
 
   const generateQuiz = () => {
     if (filteredQuestions.length === 0) return;
-    
-    const questionsToUse = Math.min(numberOfQuestions, filteredQuestions.length);
-    const shuffledQuestions = [...filteredQuestions]
+
+    // Adaptive preference: prioritize domains saved by Progress page
+    const preferredRaw = localStorage.getItem('adaptive-preferred-domains');
+    let source = [...filteredQuestions];
+    if (preferredRaw) {
+      try {
+        const preferred: string[] = JSON.parse(preferredRaw);
+        const inPreferred = source.filter(q => preferred.includes(q.domain));
+        const notPreferred = source.filter(q => !preferred.includes(q.domain));
+        source = [...inPreferred, ...notPreferred];
+      } catch {}
+      // Clear once consumed
+      localStorage.removeItem('adaptive-preferred-domains');
+    }
+
+    const questionsToUse = Math.min(numberOfQuestions, source.length);
+    const shuffledQuestions = [...source]
       .sort(() => Math.random() - 0.5)
       .slice(0, questionsToUse);
 
