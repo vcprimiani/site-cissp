@@ -242,7 +242,7 @@ export const Header: React.FC<HeaderProps> = ({
                   {showSettings && (
                     <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                       <a
-                        href="/progress"
+                        href="/?tab=progress"
                         className="block px-4 py-3 text-gray-800 hover:bg-blue-50 rounded-t-lg text-sm font-medium"
                         onClick={() => setShowSettings(false)}
                       >

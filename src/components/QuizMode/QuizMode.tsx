@@ -3,7 +3,8 @@ import { Quiz } from './Quiz';
 import { AIAssistant as CaseyAssistant } from './AIAssistant';
 import { QuizSetup } from './QuizSetup';
 import { AppState } from '../../types';
-import { Target, Brain, Clock, Trophy } from 'lucide-react';
+import { Target, Brain, Clock, Trophy, BarChart2 } from 'lucide-react';
+import ProgressTab from './ProgressTab';
 
 interface QuizModeProps {
   appState: AppState;
@@ -13,7 +14,13 @@ interface QuizModeProps {
 }
 
 export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, hasActiveSubscription, subscriptionLoading }) => {
-  const [activeTab, setActiveTab] = useState<'setup' | 'ai'>('setup');
+  const [activeTab, setActiveTab] = useState<'setup' | 'ai' | 'progress'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'progress') return 'progress';
+    if (tab === 'ai') return 'ai';
+    return 'setup';
+  });
   const [incorrectQuestions, setIncorrectQuestions] = useState<any[]>([]);
 
   // Load incorrect questions from localStorage
@@ -25,6 +32,15 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
       } catch (error) {
         console.error('Error loading incorrect questions:', error);
       }
+    }
+  }, []);
+
+  // One-shot flags to open specific tabs
+  useEffect(() => {
+    const aiFlag = localStorage.getItem('ai-open-review');
+    if (aiFlag) {
+      setActiveTab('ai');
+      localStorage.removeItem('ai-open-review');
     }
   }, []);
 
@@ -70,6 +86,12 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
       icon: Brain,
       description: 'Ask Casey for instant explanations and CISSP help',
       badge: incorrectQuestions.length > 0 ? incorrectQuestions.length : undefined
+    },
+    {
+      id: 'progress',
+      label: 'Progress',
+      icon: BarChart2,
+      description: 'Track mastery, weak domains, streaks and AI guidance'
     }
   ];
 
@@ -151,6 +173,15 @@ export const QuizMode: React.FC<QuizModeProps> = ({ appState, onUpdateState, has
               <div className="mt-4 text-sm text-gray-500">Premium unlocks unlimited quizzes, Casey explanations, and more.</div>
             </div>
           )
+        )}
+
+        {activeTab === 'progress' && (
+          <ProgressTab
+            appState={appState}
+            hasActiveSubscription={hasActiveSubscription}
+            subscriptionLoading={subscriptionLoading}
+            incorrectQuestions={incorrectQuestions}
+          />
         )}
       </div>
     </div>
