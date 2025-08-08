@@ -13,6 +13,85 @@ import { redirectToCheckout } from '../../services/stripe';
 import { stripeProducts } from '../../stripe-config';
 import { generateAIQuestion } from '../../services/openai';
 
+/**
+ * Computes a selection weight for a question that prioritizes:
+ * - Higher difficulty (Hard > Medium > Easy)
+ * - "Decent" question length (not too short, not excessively long)
+ */
+function computeQuestionWeight(question: Question): number {
+  const difficultyMultiplierMap: Record<Question['difficulty'], number> = {
+    Easy: 1,
+    Medium: 2,
+    Hard: 5,
+  };
+
+  const base = difficultyMultiplierMap[question.difficulty] ?? 1;
+
+  const textLength = (question.question || '').length;
+  let lengthMultiplier = 1;
+  if (textLength < 80) {
+    lengthMultiplier = 0.6; // too short
+  } else if (textLength < 120) {
+    lengthMultiplier = 1.1; // okay
+  } else if (textLength <= 300) {
+    lengthMultiplier = 1.5; // ideal range
+  } else if (textLength <= 420) {
+    lengthMultiplier = 1.1; // slightly long but fine
+  } else {
+    lengthMultiplier = 0.8; // very long
+  }
+
+  // Small jitter to break ties and add variability
+  const jitter = 0.9 + Math.random() * 0.2; // [0.9, 1.1)
+
+  return base * lengthMultiplier * jitter;
+}
+
+/**
+ * Selects N unique questions with probability proportional to computed weights.
+ * Falls back to uniform shuffle if weights collapse to zero.
+ */
+function selectWeightedRandom(questions: Question[], count: number): Question[] {
+  if (count <= 0 || questions.length === 0) return [];
+
+  const pool: Question[] = [...questions];
+  const weights: number[] = pool.map(computeQuestionWeight);
+  const selected: Question[] = [];
+
+  const pickIndexByWeight = (ws: number): number => {
+    // This helper is unused; keeping function-local helpers minimal
+    return -1;
+  };
+
+  for (let i = 0; i < count && pool.length > 0; i++) {
+    const totalWeight = weights.reduce((sum, w) => sum + (w > 0 ? w : 0), 0);
+    if (!isFinite(totalWeight) || totalWeight <= 0) {
+      // Fallback to uniform selection
+      const idx = Math.floor(Math.random() * pool.length);
+      selected.push(pool[idx]);
+      pool.splice(idx, 1);
+      weights.splice(idx, 1);
+      continue;
+    }
+
+    let threshold = Math.random() * totalWeight;
+    let chosenIndex = 0;
+    for (let j = 0; j < weights.length; j++) {
+      threshold -= Math.max(0, weights[j]);
+      if (threshold <= 0) {
+        chosenIndex = j;
+        break;
+      }
+    }
+
+    selected.push(pool[chosenIndex]);
+    pool.splice(chosenIndex, 1);
+    weights.splice(chosenIndex, 1);
+  }
+
+  return selected;
+}
+
 interface QuizSetupProps {
   onQuizComplete: (incorrectQuestions: Question[]) => void;
   hasActiveSubscription: boolean;
@@ -115,9 +194,8 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
     if (filteredQuestions.length === 0) return;
     
     const questionsToUse = Math.min(numberOfQuestions, filteredQuestions.length);
-    const shuffledQuestions = [...filteredQuestions]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, questionsToUse);
+    // Use weighted sampling to prioritize harder questions of decent length
+    const shuffledQuestions = selectWeightedRandom(filteredQuestions, questionsToUse);
 
     // Mark these questions as used in the session
     markQuestionsAsUsed(shuffledQuestions);
@@ -549,8 +627,8 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
                           alert('Not enough hard questions available.');
                           return;
                         }
-                        // Shuffle and pick 10
-                        const shuffled = [...hardQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
+                        // Weighted sample within hard questions by decent length
+                        const shuffled = selectWeightedRandom(hardQuestions, 10);
                         markQuestionsAsUsed(shuffled);
                         setQuizSession({
                           questions: shuffled,
