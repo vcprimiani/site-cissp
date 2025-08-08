@@ -39,25 +39,28 @@ interface QuizResults {
 export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete, onExit, onProgressChange, currentUser, isResumed = false }) => {
   const { persistedState, saveQuizState, clearPersistedState, hasPersistedQuiz } = useQuizPersistence();
   
-  // Initialize state from initialIndex, persistedState, or 0
+  // Only use persisted state when actually resuming
+  const resumeState = isResumed ? persistedState : null;
+  
+  // Initialize state from initialIndex, resumeState, or defaults
   const [currentIndex, setCurrentIndex] = useState(
-    typeof initialIndex === 'number' ? initialIndex : (persistedState?.currentIndex || 0)
+    typeof initialIndex === 'number' ? initialIndex : (resumeState?.currentIndex || 0)
   );
   const [userAnswers, setUserAnswers] = useState<(number | null)[]>(
-    persistedState?.userAnswers || new Array(questions.length).fill(null)
+    resumeState?.userAnswers || new Array(questions.length).fill(null)
   );
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(persistedState?.selectedAnswer || null);
-  const [showResult, setShowResult] = useState(persistedState?.showResult || false);
-  // Always restore startTime and questionStartTime from persistedState if available
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(resumeState?.selectedAnswer || null);
+  const [showResult, setShowResult] = useState(resumeState?.showResult || false);
+  // Always restore startTime and questionStartTime from resumeState if available
   const [startTime] = useState(
-    persistedState?.startTime ? persistedState.startTime : Date.now()
+    resumeState?.startTime ? resumeState.startTime : Date.now()
   );
   const [questionStartTime, setQuestionStartTime] = useState(
-    persistedState?.questionStartTime ? persistedState.questionStartTime : Date.now()
+    resumeState?.questionStartTime ? resumeState.questionStartTime : Date.now()
   );
-  const [questionTimes, setQuestionTimes] = useState<number[]>(persistedState?.questionTimes || []);
-  const [elapsedTime, setElapsedTime] = useState(persistedState?.elapsedTime || 0);
-  const [questionElapsedTime, setQuestionElapsedTime] = useState(persistedState?.questionElapsedTime || 0);
+  const [questionTimes, setQuestionTimes] = useState<number[]>(resumeState?.questionTimes || []);
+  const [elapsedTime, setElapsedTime] = useState(resumeState?.elapsedTime || 0);
+  const [questionElapsedTime, setQuestionElapsedTime] = useState(resumeState?.questionElapsedTime || 0);
   
   // Tally tracking for participant responses
   const [tallyCounts, setTallyCounts] = useState<number[]>(persistedState?.tallyCounts || [0, 0, 0, 0]);
@@ -242,11 +245,12 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
 
   // Error handling for missing/corrupted persisted state
   useEffect(() => {
+    if (!isResumed) return;
     if (hasPersistedQuiz() && !persistedState) {
       alert('Quiz session could not be restored. Returning to setup.');
       onExit();
     }
-  }, [hasPersistedQuiz, persistedState, onExit]);
+  }, [isResumed, hasPersistedQuiz, persistedState, onExit]);
 
   // Always generate manager perspective when question changes
   useEffect(() => {
@@ -429,14 +433,14 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
           timeSpent: finalTimes[index] || 0
         }))
       };
-      // Save quiz progress to quiz_sessions (session-level) guarded to prevent duplicates
+      // Save quiz progress to quiz_progress (session-level) guarded to prevent duplicates
       if (!hasSavedSession && currentUser && currentUser.id) {
         try {
           await saveQuizProgress({ user_id: currentUser.id, results });
           // best-effort streak update (non-blocking)
           updateStreakOnQuiz(currentUser.id).catch(() => {});
           setHasSavedSession(true);
-          console.log('Quiz progress saved to quiz_sessions');
+          console.log('Quiz progress saved to quiz_progress');
         } catch (err) {
           console.error('Failed to save quiz progress:', err);
         }
@@ -668,7 +672,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
                     </div>
                     <span className="font-bold text-gray-90 text-base">Quiz</span>
                   </div>
-                  {hasPersistedQuiz() && (
+                  {isResumed && (
                     <div className="text-[10] text-blue-60 bg-blue-50 px-2 py-0.5 rounded-full inline-block border border-blue-200">
                       ⏸️ Resumed
                     </div>

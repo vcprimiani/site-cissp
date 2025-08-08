@@ -18,29 +18,27 @@ export interface UserStudyGoals {
 
 // Save a quiz result to Supabase
 export async function saveQuizProgress({ user_id, results, dev_mode = false }: { user_id: string; results: any; dev_mode?: boolean }) {
-  // Primary table is session-level: quiz_sessions
+  // Persist to session-level progress table defined in migrations: public.quiz_progress
   const now = new Date().toISOString();
   const payload: any = { user_id, results, dev_mode, timestamp: now };
   try {
     const { data, error } = await supabase
-      .from('quiz_sessions')
+      .from('quiz_progress')
       .insert([payload])
       .select()
       .single();
     if (error) throw error;
     return data as QuizProgressResult;
   } catch (err: any) {
-    const message: string = err?.message || '';
-    // No sensible fallback to per-question table; bubble up
     throw err;
   }
 }
 
 // Fetch quiz results for the current user
 export async function fetchQuizProgress({ user_id, dev_mode = false }: { user_id: string; dev_mode?: boolean }) {
-  // Query session-level table; filter on dev_mode to exclude seeded data when desired
+  // Query session-level progress table; filter on dev_mode to exclude seeded data when desired
   const { data, error } = await supabase
-    .from('quiz_sessions')
+    .from('quiz_progress')
     .select('*')
     .eq('user_id', user_id)
     .eq('dev_mode', dev_mode)
