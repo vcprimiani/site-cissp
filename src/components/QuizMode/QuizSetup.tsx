@@ -366,6 +366,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
             onComplete={handleQuizComplete}
             onExit={() => window.location.reload()}
             currentUser={appState.currentUser}
+            isResumed={false}
           />
         </div>
       );
@@ -391,6 +392,7 @@ export const QuizSetup: React.FC<QuizSetupProps & { hasActiveSubscription: boole
               onExit={exitQuiz}
               onProgressChange={(current, total) => setQuizProgress({current, total})}
               currentUser={appState.currentUser}
+              isResumed={hasPersistedQuiz() === true && !!persistedState}
             />
           </div>
         </div>
