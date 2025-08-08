@@ -47,7 +47,7 @@ export const QuizResults: React.FC<QuizResultsProps> = ({ results, onRetakeQuiz,
     setSaveError(null);
     if (user && user.id) {
       try {
-        await saveQuizProgress({ user_id: user.id, results, dev_mode: true });
+        await saveQuizProgress({ user_id: user.id, results });
       } catch (err: any) {
         setSaveError('Failed to save progress to cloud.');
       }

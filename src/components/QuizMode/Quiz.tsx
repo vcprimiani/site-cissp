@@ -423,10 +423,10 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
           timeSpent: finalTimes[index] || 0
         }))
       };
-      // Save quiz progress to quiz_sessions
+      // Save quiz progress to quiz_progress (session-level)
       if (currentUser && currentUser.id) {
         try {
-          await saveQuizProgress({ user_id: currentUser.id, results, dev_mode: true });
+          await saveQuizProgress({ user_id: currentUser.id, results });
           console.log('Quiz progress saved to quiz_sessions');
         } catch (err) {
           console.error('Failed to save quiz progress:', err);
