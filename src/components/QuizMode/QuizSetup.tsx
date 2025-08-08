@@ -16,7 +16,7 @@ import { generateAIQuestion } from '../../services/openai';
 /**
  * Computes a selection weight for a question that prioritizes:
  * - Higher difficulty (Hard > Medium > Easy)
- * - "Decent" question length (not too short, not excessively long)
+ * - Longer question length (while softly capping extreme lengths)
  */
 function computeQuestionWeight(question: Question): number {
   const difficultyMultiplierMap: Record<Question['difficulty'], number> = {
@@ -30,15 +30,17 @@ function computeQuestionWeight(question: Question): number {
   const textLength = (question.question || '').length;
   let lengthMultiplier = 1;
   if (textLength < 80) {
-    lengthMultiplier = 0.6; // too short
-  } else if (textLength < 120) {
-    lengthMultiplier = 1.1; // okay
+    lengthMultiplier = 0.5; // very short
+  } else if (textLength < 150) {
+    lengthMultiplier = 0.9; // short
   } else if (textLength <= 300) {
-    lengthMultiplier = 1.5; // ideal range
-  } else if (textLength <= 420) {
-    lengthMultiplier = 1.1; // slightly long but fine
+    lengthMultiplier = 1.2; // moderate
+  } else if (textLength <= 500) {
+    lengthMultiplier = 1.6; // long (preferred)
+  } else if (textLength <= 800) {
+    lengthMultiplier = 1.8; // very long (more preferred)
   } else {
-    lengthMultiplier = 0.8; // very long
+    lengthMultiplier = 1.6; // extremely long (soft cap)
   }
 
   // Small jitter to break ties and add variability
@@ -57,11 +59,6 @@ function selectWeightedRandom(questions: Question[], count: number): Question[] 
   const pool: Question[] = [...questions];
   const weights: number[] = pool.map(computeQuestionWeight);
   const selected: Question[] = [];
-
-  const pickIndexByWeight = (ws: number): number => {
-    // This helper is unused; keeping function-local helpers minimal
-    return -1;
-  };
 
   for (let i = 0; i < count && pool.length > 0; i++) {
     const totalWeight = weights.reduce((sum, w) => sum + (w > 0 ? w : 0), 0);
