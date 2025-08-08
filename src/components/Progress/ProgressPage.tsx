@@ -72,7 +72,7 @@ const ProgressPage: React.FC = () => {
       setError(null);
       if (user && user.id) {
         try {
-          const cloudHistory = await fetchQuizProgress({ user_id: user.id });
+          const cloudHistory = await fetchQuizProgress({ user_id: user.id, dev_mode: false });
           // Map Supabase results to ProgressEntry[]
           setHistory(cloudHistory.map(entry => ({
             timestamp: new Date(entry.timestamp).getTime(),

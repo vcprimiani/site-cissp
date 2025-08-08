@@ -30,12 +30,13 @@ export async function saveQuizProgress({ user_id, results, dev_mode = false }: {
 
 // Fetch quiz results for the current user
 export async function fetchQuizProgress({ user_id, dev_mode = false }: { user_id: string; dev_mode?: boolean }) {
-  // Query session-level table; do not filter on dev_mode to avoid mismatch
+  // Query session-level table; filter on dev_mode to exclude seeded data when desired
   const { data, error } = await supabase
     .from('quiz_sessions')
     .select('*')
     .eq('user_id', user_id)
-    .order('timestamp', { ascending: true });
+    .eq('dev_mode', dev_mode)
+    .order('timestamp', { ascending: false });
   if (error) throw error;
   return data as QuizProgressResult[];
 }

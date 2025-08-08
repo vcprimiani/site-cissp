@@ -19,7 +19,7 @@ export const ProgressDashboard: React.FC<{ userId: string }> = ({ userId }) => {
       setLoading(true);
       setError(null);
       try {
-        const sessions = await fetchQuizProgress({ user_id: userId });
+        const sessions = await fetchQuizProgress({ user_id: userId, dev_mode: false });
 
         let totalAnswered = 0;
         let correct = 0;
