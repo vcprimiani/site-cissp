@@ -12,7 +12,6 @@ import { getQuestionRating, setQuestionRating, getQuestionRatingAggregate } from
 import { useRatings } from '../../hooks/useRatings';
 import { showToast } from '../../utils/toast';
 import { RatingButton } from '../UI/RatingButton';
-import { supabase } from '../../lib/supabase';
 import { saveQuizProgress } from '../../services/progress';
 
 interface QuizProps {
@@ -218,7 +217,14 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
             timeSpent: finalTimes[index] || 0
           }))
         };
-        
+        // Save progress when completing via resume path
+        if (currentUser && currentUser.id) {
+          try {
+            await saveQuizProgress({ user_id: currentUser.id, results, dev_mode: true });
+          } catch (err) {
+            console.error('Failed to save quiz progress on resume completion:', err);
+          }
+        }
         clearPersistedState();
         onComplete(results);
       };
@@ -381,20 +387,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
       return newTimes;
     });
 
-    // Save answer to batched progress
-    if (currentQuestion) {
-      setBatchedProgress(prev => [
-        ...prev,
-        {
-          user_id: currentUser.id,
-          question_id: currentQuestion.id,
-          user_answer: selectedAnswer,
-          is_correct: selectedAnswer === currentQuestion.correctAnswer,
-          answered_at: new Date().toISOString(),
-          time_spent: Math.floor((Date.now() - questionStartTime) / 1000),
-        }
-      ]);
-    }
+    // Persist selection in state
 
     // Save answer
     const newAnswers = [...userAnswers];
@@ -647,31 +640,7 @@ export const Quiz: React.FC<QuizProps> = ({ questions, initialIndex, onComplete,
     );
   }
 
-  const [batchedProgress, setBatchedProgress] = useState<any[]>([]);
-
-  const handleQuizComplete = async (results: QuizResults) => {
-    if (batchedProgress.length > 0) {
-      try {
-        console.log('[Progress] Attempting to upsert quiz progress:', batchedProgress);
-        showToast('info', 'Saving your progress...');
-        const { error } = await supabase.from('quiz_progress').upsert(batchedProgress, { onConflict: 'user_id,question_id' });
-        if (error) {
-          showToast('error', 'Failed to save your progress.');
-          console.error('[Progress] Quiz progress upsert error:', error);
-        } else {
-          showToast('success', 'Your progress has been saved!');
-          console.log('[Progress] Progress upserted successfully.');
-        }
-      } catch (err) {
-        showToast('error', 'Unexpected error saving progress.');
-        console.error('[Progress] Quiz progress upsert exception:', err);
-      }
-    } else {
-      console.log('[Progress] No progress to save (batchedProgress is empty).');
-    }
-    setBatchedProgress([]); // Clear after saving
-    onComplete(results);
-  };
+  // No per-question upsert; we save session-level results on completion
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">

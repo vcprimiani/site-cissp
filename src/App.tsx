@@ -4,6 +4,7 @@ import { Header } from './components/Layout/Header';
 import { QuestionBankMode } from './components/QuestionBankMode/QuestionBankMode';
 import { QuizMode } from './components/QuizMode/QuizMode';
 import { PricingPage } from './components/Pricing/PricingPage';
+import ProgressPage from './components/Progress/ProgressPage';
 import { SuccessPage } from './components/Success/SuccessPage';
 import { PaywallPage } from './components/Paywall/PaywallPage';
 import { AppState, AppMode, User } from './types';
@@ -218,6 +219,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/success" element={<SuccessPage />} />
         <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/progress" element={<ProgressPage />} />
         <Route path="/admin" element={
           <PageWrapper>
             <AdminAccess 

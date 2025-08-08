@@ -1,0 +1,4 @@
+---
+alwaysApply: false
+---
+Whenever we have to do something with SQL or a supabase I will run the queries for you and share the outputs. We never need to do anything locally with a database or starting up test server. this project is stored in Github and deployed automatically via Netlify

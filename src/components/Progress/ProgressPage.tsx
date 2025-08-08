@@ -148,12 +148,12 @@ const ProgressPage: React.FC = () => {
                 <span>Back</span>
               </button>
             </div>
-            {/* Local Storage Alert */}
+            {/* Cloud Sync Info */}
             <div className="mb-6">
-              <div className="flex items-center bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-sm animate-fade-in">
-                <svg className="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" /></svg>
-                <span className="text-yellow-800 text-sm font-medium">
-                  Your progress is stored only in your browser. It is <strong>not backed up or synced online yet</strong>. Please do not clear your browser data if you wish to keep your progress.
+              <div className="flex items-center bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg shadow-sm animate-fade-in">
+                <svg className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h10a4 4 0 100-8 5 5 0 10-9.9 1H7a3 3 0 000 6h10a3 3 0 100-6" /></svg>
+                <span className="text-blue-800 text-sm font-medium">
+                  Your quiz results are automatically saved to your account after each quiz. Recent sessions appear below.
                 </span>
               </div>
             </div>

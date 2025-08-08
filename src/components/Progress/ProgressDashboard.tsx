@@ -19,11 +19,12 @@ export const ProgressDashboard: React.FC<{ userId: string }> = ({ userId }) => {
       setLoading(true);
       setError(null);
       try {
+        // Fetch session-level quiz progress entries
         const { data, error } = await supabase
           .from('quiz_progress')
-          .select('question_id, is_correct, answered_at')
+          .select('timestamp, results')
           .eq('user_id', userId)
-          .order('answered_at', { ascending: false });
+          .order('timestamp', { ascending: false });
         if (error) {
           setError('Failed to fetch progress.');
           showToast('error', 'Failed to fetch progress.');
@@ -31,10 +32,34 @@ export const ProgressDashboard: React.FC<{ userId: string }> = ({ userId }) => {
           setLoading(false);
           return;
         }
-        const totalAnswered = data.length;
-        const correct = data.filter((d: any) => d.is_correct).length;
+
+        // Aggregate stats from results.questionResults
+        let totalAnswered = 0;
+        let correct = 0;
+        const recent: Array<{ question_id: string; answered_at: string; is_correct: boolean }> = [];
+
+        for (const session of data as any[]) {
+          const sessionTimestamp = session.timestamp;
+          const questionResults = session.results?.questionResults || [];
+          totalAnswered += Array.isArray(questionResults) ? questionResults.length : 0;
+          for (const qr of questionResults) {
+            if (qr?.isCorrect) correct += 1;
+          }
+        }
+
+        // Build recent items (up to 10) from latest sessions first
+        outer: for (const session of data as any[]) {
+          const sessionTimestamp = session.timestamp;
+          const questionResults = session.results?.questionResults || [];
+          for (const qr of questionResults) {
+            const questionId = qr?.question?.id || 'unknown';
+            const isCorrect = !!qr?.isCorrect;
+            recent.push({ question_id: questionId, answered_at: sessionTimestamp, is_correct: isCorrect });
+            if (recent.length >= 10) break outer;
+          }
+        }
+
         const accuracy = totalAnswered > 0 ? (correct / totalAnswered) * 100 : 0;
-        const recent = data.slice(0, 10);
         setStats({ totalAnswered, correct, accuracy, recent });
       } catch (err) {
         setError('Unexpected error fetching progress.');
@@ -78,4 +103,4 @@ export const ProgressDashboard: React.FC<{ userId: string }> = ({ userId }) => {
       )}
     </div>
   );
-}; 
+};
