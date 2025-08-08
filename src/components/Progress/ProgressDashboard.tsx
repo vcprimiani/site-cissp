@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabase';
 import { showToast } from '../../utils/toast';
+import { fetchQuizProgress } from '../../services/progress';
 
 interface ProgressStats {
   totalAnswered: number;
@@ -15,30 +15,17 @@ export const ProgressDashboard: React.FC<{ userId: string }> = ({ userId }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProgress = async () => {
+    const load = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Fetch session-level quiz progress entries
-        const { data, error } = await supabase
-          .from('quiz_progress')
-          .select('timestamp, results')
-          .eq('user_id', userId)
-          .order('timestamp', { ascending: false });
-        if (error) {
-          setError('Failed to fetch progress.');
-          showToast('error', 'Failed to fetch progress.');
-          console.error('Progress fetch error:', error);
-          setLoading(false);
-          return;
-        }
+        const sessions = await fetchQuizProgress({ user_id: userId });
 
-        // Aggregate stats from results.questionResults
         let totalAnswered = 0;
         let correct = 0;
         const recent: Array<{ question_id: string; answered_at: string; is_correct: boolean }> = [];
 
-        for (const session of data as any[]) {
+        for (const session of sessions as any[]) {
           const sessionTimestamp = session.timestamp;
           const questionResults = session.results?.questionResults || [];
           totalAnswered += Array.isArray(questionResults) ? questionResults.length : 0;
@@ -47,8 +34,7 @@ export const ProgressDashboard: React.FC<{ userId: string }> = ({ userId }) => {
           }
         }
 
-        // Build recent items (up to 10) from latest sessions first
-        outer: for (const session of data as any[]) {
+        outer: for (const session of sessions as any[]) {
           const sessionTimestamp = session.timestamp;
           const questionResults = session.results?.questionResults || [];
           for (const qr of questionResults) {
@@ -62,14 +48,14 @@ export const ProgressDashboard: React.FC<{ userId: string }> = ({ userId }) => {
         const accuracy = totalAnswered > 0 ? (correct / totalAnswered) * 100 : 0;
         setStats({ totalAnswered, correct, accuracy, recent });
       } catch (err) {
-        setError('Unexpected error fetching progress.');
-        showToast('error', 'Unexpected error fetching progress.');
-        console.error('Progress fetch exception:', err);
+        setError('Failed to fetch progress.');
+        showToast('error', 'Failed to fetch progress.');
+        console.error('Progress fetch error:', err);
       } finally {
         setLoading(false);
       }
     };
-    if (userId) fetchProgress();
+    if (userId) load();
   }, [userId]);
 
   return (
